@@ -518,11 +518,12 @@ span.p-tag i {
 @media (max-width: 768px) {
   .page-container {
     padding: 0.75rem 0.85rem !important;
+    overflow-x: hidden !important;
   }
 
   .page-header {
     flex-direction: column !important;
-    align-items: flex-start !important;
+    align-items: stretch !important;
     gap: 0.75rem !important;
     margin-bottom: 1rem !important;
   }
@@ -534,9 +535,9 @@ span.p-tag i {
   .header-actions {
     width: 100% !important;
     display: flex !important;
-    justify-content: flex-start !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
     gap: 0.5rem !important;
-    flex-wrap: wrap !important;
   }
 
   .header-actions button,
@@ -544,7 +545,9 @@ span.p-tag i {
   .btn-secondary {
     flex: 1 !important;
     justify-content: center !important;
-    padding: 0.5rem 0.75rem !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    padding: 0.5rem 0.5rem !important;
     font-size: 0.8rem !important;
   }
 

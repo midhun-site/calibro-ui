@@ -495,25 +495,34 @@
 
 @media (max-width: 768px) {
   .topbar, .topbar.collapsed {
-    margin-left: 0;
-    padding: 0 1rem;
+    margin-left: 0 !important;
+    padding: 0 0.75rem !important;
+    width: 100% !important;
   }
 
   .hamburger-btn {
-    display: flex;
+    display: flex !important;
   }
 
   .search-box {
-    display: none;
+    display: none !important;
   }
 
-  .notification-dropdown {
-    width: 300px;
-    right: -40px;
+  .topbar-actions {
+    gap: 0.4rem !important;
   }
 
+  /* Centered Fixed Dropdown Position on Mobile Phones */
+  .notification-dropdown,
   .profile-dropdown {
-    width: 280px;
-    right: 0;
+    position: fixed !important;
+    top: 72px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 92vw !important;
+    max-width: 360px !important;
+    right: auto !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+    z-index: 2000 !important;
   }
 }
