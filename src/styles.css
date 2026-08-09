@@ -1,1 +1,137 @@
-/* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* Dark Theme (Default) */
+:root, [data-theme="dark"] {
+  --bg-primary: #0a0f1d;
+  --bg-surface: #111827;
+  --bg-surface-elevated: #1e293b;
+  --sidebar-bg: #0d1322;
+  --topbar-bg: rgba(13, 19, 34, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --accent-cyan: #00f2fe;
+  --accent-blue: #4facfe;
+  --accent-gradient: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --card-bg: rgba(17, 24, 39, 0.7);
+  --input-bg: rgba(255, 255, 255, 0.04);
+  --table-header-bg: #182235;
+  --table-row-bg: rgba(17, 24, 39, 0.5);
+  --table-row-hover: rgba(30, 41, 59, 0.8);
+  --radius-lg: 16px;
+  --radius-md: 10px;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --bg-primary: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #e2e8f0;
+  --sidebar-bg: #ffffff;
+  --topbar-bg: rgba(255, 255, 255, 0.9);
+  --border-color: #cbd5e1;
+  --accent-cyan: #0284c7;
+  --accent-blue: #2563eb;
+  --accent-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --card-bg: #ffffff;
+  --input-bg: #f8fafc;
+  --table-header-bg: #f1f5f9;
+  --table-row-bg: #ffffff;
+  --table-row-hover: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 242, 254, 0.15);
+}
+
+/* Header & Typography */
+h1, h2, h3, h4 {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.gradient-text {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Data Table Styling */
+.p-datatable {
+  width: 100%;
+}
+
+.p-datatable .p-datatable-header,
+.p-datatable th {
+  background: var(--table-header-bg) !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 0.85rem 1rem !important;
+  text-align: left;
+}
+
+.p-datatable td {
+  padding: 0.85rem 1rem !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+
+.p-datatable tr {
+  background: var(--table-row-bg) !important;
+  color: var(--text-main) !important;
+}
+
+.p-datatable tr:hover {
+  background: var(--table-row-hover) !important;
+}
+
+.p-tag {
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  display: inline-block;
+}
+
+.p-tag-success { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+.p-tag-danger { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+.p-tag-info { background: rgba(0, 242, 254, 0.2); color: var(--accent-cyan); }
+.p-tag-warning { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+.p-button {
+  border-radius: 8px !important;
+}
+
+.text-cyan {
+  color: var(--accent-cyan) !important;
+}
