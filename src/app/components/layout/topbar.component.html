@@ -1,0 +1,125 @@
+<header class="topbar" [class.collapsed]="layoutService.isSidebarCollapsed()">
+  <div class="topbar-left">
+    <!-- Hamburger button for Mobile Menu toggle -->
+    <button class="hamburger-btn" (click)="layoutService.toggleMobileSidebar()" title="Open Navigation Menu">
+      <i class="pi pi-bars"></i>
+    </button>
+
+    <div class="search-box">
+      <i class="pi pi-search search-icon"></i>
+      <input type="text" placeholder="Search equipment, certificates..." class="search-input" />
+    </div>
+  </div>
+
+  <div class="topbar-actions">
+    <div class="status-indicator">
+      <span class="status-dot"></span>
+      <span class="status-text">ISO 17025 Compliant</span>
+    </div>
+
+    <!-- Theme Mode Switch Button -->
+    <button class="theme-switch-btn" (click)="themeService.toggleTheme()" title="Toggle Dark/Light Mode">
+      <i class="pi" [class.pi-sun]="themeService.isDarkMode()" [class.pi-moon]="!themeService.isDarkMode()"></i>
+      <span class="theme-label">{{ themeService.isDarkMode() ? 'Light' : 'Dark' }}</span>
+    </button>
+
+    <!-- Notification Button & Dropdown -->
+    <div class="notification-wrapper">
+      <button class="action-icon-btn" (click)="toggleNotifications()" title="Notifications">
+        <i class="pi pi-bell"></i>
+        @if (unreadCount() > 0) {
+          <span class="badge-count">{{ unreadCount() }}</span>
+        }
+      </button>
+
+      <!-- Dropdown Menu -->
+      @if (isNotificationOpen()) {
+        <div class="notification-dropdown glass-card">
+          <div class="dropdown-header">
+            <div class="header-title">
+              <h4>Notifications</h4>
+              <span class="unread-chip">{{ unreadCount() }} new</span>
+            </div>
+            <button class="btn-text-link" (click)="markAllAsRead()">Mark all read</button>
+          </div>
+
+          <div class="notification-list">
+            @for (item of notifications(); track item.id) {
+              <div class="notification-item" [class.unread]="item.unread" (click)="markAsRead(item.id)">
+                <div class="icon-avatar" [class]="item.severity">
+                  <i class="pi" [class]="item.icon"></i>
+                </div>
+                <div class="notif-content">
+                  <div class="notif-top">
+                    <span class="notif-title">{{ item.title }}</span>
+                    <span class="notif-time">{{ item.time }}</span>
+                  </div>
+                  <p class="notif-msg">{{ item.message }}</p>
+                </div>
+                @if (item.unread) {
+                  <span class="unread-dot"></span>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="dropdown-footer">
+            <span class="footer-link">View All Alerts & Logs</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Topbar Logged In User Profile Chip & Dropdown Menu -->
+    <div class="profile-wrapper">
+      <button class="profile-chip-btn" (click)="toggleProfileMenu()" title="User Profile & Settings">
+        <div class="user-avatar-chip">
+          <i class="pi pi-user text-cyan"></i>
+        </div>
+        <div class="user-details-chip">
+          <span class="user-chip-name">{{ authService.currentUser()?.fullName ?? 'Alex Rivera' }}</span>
+          <span class="user-chip-role">{{ authService.currentUser()?.role ?? 'Senior Metrologist' }}</span>
+        </div>
+        <i class="pi pi-chevron-down chevron-icon"></i>
+      </button>
+
+      <!-- User Profile Dropdown Menu -->
+      @if (isProfileMenuOpen()) {
+        <div class="profile-dropdown glass-card">
+          <div class="profile-dropdown-header">
+            <div class="profile-large-avatar">
+              <i class="pi pi-user text-cyan"></i>
+            </div>
+            <div class="profile-header-info">
+              <h4>{{ authService.currentUser()?.fullName ?? 'Alex Rivera' }}</h4>
+              <span class="profile-email">{{ authService.currentUser()?.email ?? 'alex.rivera@calibro.com' }}</span>
+              <span class="profile-badge">ISO 17025 Authorized</span>
+            </div>
+          </div>
+
+          <div class="menu-divider"></div>
+
+          <div class="profile-menu-list">
+            <button class="menu-item-btn" (click)="onProfileClick()">
+              <i class="pi pi-id-card text-cyan"></i>
+              <span>User Profile & Security</span>
+            </button>
+            <button class="menu-item-btn" (click)="onProfileClick()">
+              <i class="pi pi-shield text-cyan"></i>
+              <span>System Permissions</span>
+            </button>
+          </div>
+
+          <div class="menu-divider"></div>
+
+          <div class="profile-dropdown-footer">
+            <button class="logout-menu-btn" (click)="onLogout()">
+              <i class="pi pi-sign-out text-danger"></i>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</header>

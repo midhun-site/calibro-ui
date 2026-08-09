@@ -1,0 +1,89 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>User Directory & System Accounts</h2>
+      <p class="subtitle">Manage Laboratory Staff, Metrologists & Admin Access Accounts</p>
+    </div>
+    <button class="btn-primary" (click)="showCreateModal = true">
+      <i class="pi pi-user-plus"></i> Add New User
+    </button>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Full Name</th>
+          <th>Username / Email</th>
+          <th>Role</th>
+          <th>Assigned Department</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="code-badge">USR-001</span></td>
+          <td><strong style="color: var(--text-main);">Alex Rivera</strong></td>
+          <td>alex.rivera&#64;calibro.com</td>
+          <td>Senior Metrologist</td>
+          <td>Pressure & Vacuum Lab</td>
+          <td><span class="p-tag p-tag-success">ACTIVE</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">USR-002</span></td>
+          <td><strong style="color: var(--text-main);">Dr. Marcus Vance</strong></td>
+          <td>marcus.vance&#64;calibro.com</td>
+          <td>Quality Manager</td>
+          <td>ISO 17025 Quality Bureau</td>
+          <td><span class="p-tag p-tag-success">ACTIVE</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">USR-003</span></td>
+          <td><strong style="color: var(--text-main);">Sarah Jenkins</strong></td>
+          <td>sarah.jenkins&#64;calibro.com</td>
+          <td>Lab Technician</td>
+          <td>Electrical Standards Lab</td>
+          <td><span class="p-tag p-tag-success">ACTIVE</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  @if (showCreateModal) {
+    <div class="modal-overlay" (click)="showCreateModal = false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Create User Account</h3>
+          <button class="modal-close-btn" (click)="showCreateModal = false">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" pInputText [(ngModel)]="newUser.fullName" placeholder="e.g. Sarah Jenkins" />
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" pInputText [(ngModel)]="newUser.email" placeholder="sarah.jenkins@calibro.com" />
+            </div>
+            <div class="form-group">
+              <label>System Role</label>
+              <input type="text" pInputText [(ngModel)]="newUser.role" placeholder="Metrologist / Admin" />
+            </div>
+            <div class="form-group">
+              <label>Department</label>
+              <input type="text" pInputText [(ngModel)]="newUser.department" placeholder="Pressure / Quality" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
+          <button class="btn-primary" (click)="saveUser()">Create User</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

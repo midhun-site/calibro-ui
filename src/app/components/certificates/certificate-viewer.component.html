@@ -1,0 +1,120 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Calibration Certificate Viewer</h2>
+      <p class="subtitle">ISO/IEC 17025 Compliant Official Test Certificate</p>
+    </div>
+    <button class="btn-primary" (click)="printCert()">
+      <i class="pi pi-print"></i> Print / Download PDF
+    </button>
+  </div>
+
+  <!-- Certificate Document Mockup -->
+  <div class="glass-card cert-paper">
+    <div class="cert-header">
+      <div class="cert-brand">
+        <div class="cert-logo-icon"><i class="pi pi-compass text-cyan"></i></div>
+        <div>
+          <h2>CaliBro Calibration Services</h2>
+          <p>Accredited ISO/IEC 17025 Laboratory | Certificate No: <strong>CERT-2026-8891</strong></p>
+        </div>
+      </div>
+      <div class="cert-seal">
+        <p-tag value="PASSED" severity="success"></p-tag>
+      </div>
+    </div>
+
+    <hr class="cert-divider" />
+
+    <div class="cert-details-grid">
+      <div class="detail-box">
+        <span class="detail-label">Customer Name</span>
+        <span class="detail-val">AeroSpace Tech LLC</span>
+      </div>
+      <div class="detail-box">
+        <span class="detail-label">Instrument Name</span>
+        <span class="detail-val">Digital Pressure Gauge 0-1000 PSI</span>
+      </div>
+      <div class="detail-box">
+        <span class="detail-label">Manufacturer / Model</span>
+        <span class="detail-val">Fluke Calibration (700G08)</span>
+      </div>
+      <div class="detail-box">
+        <span class="detail-label">Serial Number / Asset Tag</span>
+        <span class="detail-val">FLK-98741 (EQ-PRES-001)</span>
+      </div>
+      <div class="detail-box">
+        <span class="detail-label">Calibration Date</span>
+        <span class="detail-val">August 8, 2026</span>
+      </div>
+      <div class="detail-box">
+        <span class="detail-label">Next Recalibration Due</span>
+        <span class="detail-val text-cyan">August 8, 2027</span>
+      </div>
+      <div class="detail-box">
+        <span class="detail-label">Ambient Conditions</span>
+        <span class="detail-val">22.5°C | 48.2% RH</span>
+      </div>
+      <div class="detail-box">
+        <span class="detail-label">Expanded Uncertainty</span>
+        <span class="detail-val">±0.025 PSI (k=2, 95% Conf.)</span>
+      </div>
+    </div>
+
+    <h3 class="mt-4 mb-2"><i class="pi pi-list-check text-cyan"></i> Calibration Measurement Results</h3>
+    <table class="test-table">
+      <thead>
+        <tr>
+          <th>Nominal Value (PSI)</th>
+          <th>As-Found Reading (PSI)</th>
+          <th>As-Left Reading (PSI)</th>
+          <th>Instrument Error (%)</th>
+          <th>Pass / Fail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0.00</td>
+          <td>0.00</td>
+          <td>0.00</td>
+          <td>0.00%</td>
+          <td><span class="badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td>250.00</td>
+          <td>250.05</td>
+          <td>250.01</td>
+          <td>+0.004%</td>
+          <td><span class="badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td>500.00</td>
+          <td>500.12</td>
+          <td>500.02</td>
+          <td>+0.004%</td>
+          <td><span class="badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td>1000.00</td>
+          <td>1000.25</td>
+          <td>1000.05</td>
+          <td>+0.005%</td>
+          <td><span class="badge-pass">PASS</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="cert-signatures">
+      <div class="sig-box">
+        <span class="sig-title">Performed By Metrologist</span>
+        <span class="sig-name">Alex Rivera</span>
+        <span class="sig-date">Aug 08, 2026</span>
+      </div>
+      <div class="sig-box">
+        <span class="sig-title">Quality Manager Approval</span>
+        <span class="sig-name">Dr. Marcus Vance</span>
+        <span class="sig-date">Aug 08, 2026</span>
+      </div>
+    </div>
+  </div>
+</div>

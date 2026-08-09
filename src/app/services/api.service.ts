@@ -5,6 +5,9 @@ import { Customer, CreateCustomerPayload } from '../models/customer.model';
 import { CustomerEquipment, CreateEquipmentPayload } from '../models/equipment.model';
 import { DashboardStats } from '../models/dashboard.model';
 
+export type { Customer, CreateCustomerPayload } from '../models/customer.model';
+export type { CustomerEquipment, CreateEquipmentPayload } from '../models/equipment.model';
+
 @Injectable({
   providedIn: 'root'
 })

@@ -1,0 +1,60 @@
+<div class="login-container">
+  <!-- Theme Toggle Floating Pill -->
+  <button class="theme-toggle-btn" (click)="themeService.toggleTheme()">
+    <i class="pi" [class.pi-sun]="themeService.isDarkMode()" [class.pi-moon]="!themeService.isDarkMode()"></i>
+    <span>{{ themeService.isDarkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
+  </button>
+
+  <div class="login-card glass-card">
+    <div class="brand-header">
+      <div class="logo-badge">
+        <i class="pi pi-compass text-cyan"></i>
+      </div>
+      <h2>Cali<span class="gradient-text">Bro</span></h2>
+      <p class="subtitle">Calibration Laboratory CRM Platform</p>
+    </div>
+
+    <form (ngSubmit)="onLogin()" class="login-form">
+      <div class="form-group">
+        <label for="username"><i class="pi pi-user"></i> Username</label>
+        <input 
+          id="username" 
+          type="text" 
+          pInputText 
+          [(ngModel)]="username" 
+          name="username" 
+          placeholder="Enter your username" 
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password"><i class="pi pi-lock"></i> Password</label>
+        <input 
+          id="password" 
+          type="password" 
+          pInputText 
+          [(ngModel)]="password" 
+          name="password" 
+          placeholder="Enter your password" 
+          required 
+        />
+      </div>
+
+      @if (errorMessage) {
+        <div class="error-banner">
+          <i class="pi pi-exclamation-triangle"></i> {{ errorMessage }}
+        </div>
+      }
+
+      <button type="submit" class="btn-login">
+        <span>Sign In to CaliBro</span>
+        <i class="pi pi-arrow-right"></i>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p><i class="pi pi-shield"></i> ISO/IEC 17025 Compliant Enterprise System</p>
+    </div>
+  </div>
+</div>

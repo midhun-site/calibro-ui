@@ -1,0 +1,89 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Master Laboratory List</h2>
+      <p class="subtitle">ISO 17025 Accredited Calibration Facilities & Discipline Labs</p>
+    </div>
+    <button class="btn-primary" (click)="showCreateModal = true">
+      <i class="pi pi-plus"></i> Add New Lab
+    </button>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Lab Code</th>
+          <th>Laboratory Name</th>
+          <th>Discipline</th>
+          <th>Lead Metrologist</th>
+          <th>Accreditation Scope</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="code-badge">LAB-PRES-01</span></td>
+          <td>Pressure & Vacuum Primary Lab</td>
+          <td>Pressure</td>
+          <td>Dr. Marcus Vance</td>
+          <td>0 - 10,000 PSI (0.01% FS)</td>
+          <td><span class="p-tag p-tag-success">ACTIVE</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">LAB-TEMP-02</span></td>
+          <td>Thermal Standards Lab</td>
+          <td>Temperature</td>
+          <td>Alex Rivera</td>
+          <td>-80°C to +1200°C</td>
+          <td><span class="p-tag p-tag-success">ACTIVE</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">LAB-ELEC-03</span></td>
+          <td>Electrical & RF Standards Lab</td>
+          <td>Electrical</td>
+          <td>Sarah Jenkins</td>
+          <td>DC/AC Voltage, Current, Resistance</td>
+          <td><span class="p-tag p-tag-success">ACTIVE</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  @if (showCreateModal) {
+    <div class="modal-overlay" (click)="showCreateModal = false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Register Master Laboratory</h3>
+          <button class="modal-close-btn" (click)="showCreateModal = false">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Lab Code</label>
+              <input type="text" pInputText [(ngModel)]="newLab.code" placeholder="e.g. LAB-TORQ-04" />
+            </div>
+            <div class="form-group">
+              <label>Laboratory Name</label>
+              <input type="text" pInputText [(ngModel)]="newLab.name" placeholder="e.g. Torque & Mass Lab" />
+            </div>
+            <div class="form-group">
+              <label>Discipline</label>
+              <input type="text" pInputText [(ngModel)]="newLab.discipline" placeholder="Pressure / Temp / Torque" />
+            </div>
+            <div class="form-group">
+              <label>Lead Metrologist</label>
+              <input type="text" pInputText [(ngModel)]="newLab.lead" placeholder="e.g. Dr. Marcus Vance" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
+          <button class="btn-primary" (click)="saveLab()">Save Laboratory</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

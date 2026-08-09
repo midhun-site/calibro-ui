@@ -4,6 +4,7 @@ export interface UserSession {
   username: string;
   role: string;
   fullName: string;
+  email: string;
 }
 
 @Injectable({
@@ -28,7 +29,8 @@ export class AuthService {
       const session: UserSession = {
         username: username,
         role: 'Senior Metrologist',
-        fullName: 'Alex Rivera'
+        fullName: 'Alex Rivera',
+        email: 'alex.rivera@calibro.com'
       };
       this.currentUser.set(session);
       localStorage.setItem('calibro-user', JSON.stringify(session));

@@ -1,0 +1,84 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Delivery Ticket / Dispatch Advice</h2>
+      <p class="subtitle">Dispatched Calibrated Instruments & Customer Return Documents</p>
+    </div>
+    <button class="btn-primary" (click)="showCreateModal = true">
+      <i class="pi pi-plus"></i> New Delivery Ticket
+    </button>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Ticket No.</th>
+          <th>Work Order Ref</th>
+          <th>Customer</th>
+          <th>Dispatch Date</th>
+          <th>Certificate Attached</th>
+          <th>Courier / Waybill</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="code-badge">DT-2026-441</span></td>
+          <td>WO-2026-001</td>
+          <td>AeroSpace Tech LLC</td>
+          <td>Aug 09, 2026</td>
+          <td><span class="p-tag p-tag-success">CERT-2026-8891</span></td>
+          <td>DHL Express (WB-991204)</td>
+          <td><span class="p-tag p-tag-info"><i class="pi pi-send"></i> DISPATCHED</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">DT-2026-442</span></td>
+          <td>WO-2026-002</td>
+          <td>BioPharm Solutions</td>
+          <td>Aug 08, 2026</td>
+          <td><span class="p-tag p-tag-success">CERT-2026-8892</span></td>
+          <td>Lab Hand Delivery</td>
+          <td><span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> DELIVERED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  @if (showCreateModal) {
+    <div class="modal-overlay" (click)="showCreateModal = false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Create Delivery Dispatch Ticket</h3>
+          <button class="modal-close-btn" (click)="showCreateModal = false">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Work Order Ref</label>
+              <input type="text" pInputText [(ngModel)]="newDt.woRef" placeholder="e.g. WO-2026-001" />
+            </div>
+            <div class="form-group">
+              <label>Customer Name</label>
+              <input type="text" pInputText [(ngModel)]="newDt.customer" placeholder="e.g. AeroSpace Tech LLC" />
+            </div>
+            <div class="form-group">
+              <label>Certificate No.</label>
+              <input type="text" pInputText [(ngModel)]="newDt.certNo" placeholder="e.g. CERT-2026-8891" />
+            </div>
+            <div class="form-group">
+              <label>Courier / Waybill</label>
+              <input type="text" pInputText [(ngModel)]="newDt.courier" placeholder="DHL Express / Hand Delivery" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
+          <button class="btn-primary" (click)="saveDt()">Generate Ticket</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

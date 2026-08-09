@@ -1,0 +1,89 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>QC Calibration Procedures List</h2>
+      <p class="subtitle">Standard Operating Procedures & ISO 17025 Work Instructions</p>
+    </div>
+    <button class="btn-primary" (click)="showCreateModal = true">
+      <i class="pi pi-plus"></i> New Procedure
+    </button>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>SOP Doc No.</th>
+          <th>Procedure Title</th>
+          <th>Discipline</th>
+          <th>Standard Ref</th>
+          <th>Revision</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="code-badge">SOP-PRES-001</span></td>
+          <td>Digital & Analog Pressure Gauge Calibration Procedure</td>
+          <td>Pressure</td>
+          <td>DKD-R 6-1 / EURAMET cg-17</td>
+          <td>Rev 4.0</td>
+          <td><span class="p-tag p-tag-success">APPROVED</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">SOP-TEMP-002</span></td>
+          <td>PRT & Thermocouple Comparison Calibration</td>
+          <td>Temperature</td>
+          <td>ASTM E220 / ITS-90</td>
+          <td>Rev 2.1</td>
+          <td><span class="p-tag p-tag-success">APPROVED</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">SOP-ELEC-003</span></td>
+          <td>Multimeter & Fluke Calibrator Verification Procedure</td>
+          <td>Electrical</td>
+          <td>IEEE 1212 / ISO 17025</td>
+          <td>Rev 3.2</td>
+          <td><span class="p-tag p-tag-success">APPROVED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  @if (showCreateModal) {
+    <div class="modal-overlay" (click)="showCreateModal = false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Create Calibration Procedure</h3>
+          <button class="modal-close-btn" (click)="showCreateModal = false">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>SOP Number</label>
+              <input type="text" pInputText [(ngModel)]="newProc.docNo" placeholder="e.g. SOP-TORQ-005" />
+            </div>
+            <div class="form-group">
+              <label>Procedure Title</label>
+              <input type="text" pInputText [(ngModel)]="newProc.title" placeholder="e.g. Torque Wrench Calibration" />
+            </div>
+            <div class="form-group">
+              <label>Discipline</label>
+              <input type="text" pInputText [(ngModel)]="newProc.discipline" placeholder="Pressure / Temp / Torque" />
+            </div>
+            <div class="form-group">
+              <label>Standard Reference</label>
+              <input type="text" pInputText [(ngModel)]="newProc.standardRef" placeholder="ISO 6789 / EURAMET" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
+          <button class="btn-primary" (click)="saveProc()">Save Procedure</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

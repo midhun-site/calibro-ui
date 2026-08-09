@@ -1,0 +1,194 @@
+@if (layoutService.isMobileSidebarOpen()) {
+  <div class="sidebar-overlay" (click)="layoutService.closeMobileSidebar()"></div>
+}
+
+<aside class="sidebar" [class.mobile-open]="layoutService.isMobileSidebarOpen()" [class.collapsed]="layoutService.isSidebarCollapsed()">
+  <!-- Sidebar Header Logo & Collapse Toggle Button -->
+  <div class="logo-container">
+    <div class="logo-badge" (click)="layoutService.toggleSidebarCollapse()" title="Toggle Sidebar Collapse">
+      <i class="pi pi-compass text-cyan"></i>
+    </div>
+    @if (!layoutService.isSidebarCollapsed()) {
+      <div class="logo-text">
+        <h2>Cali<span class="gradient-text">Bro</span></h2>
+        <span class="sub-logo">CALIBRATION CRM</span>
+      </div>
+      <button class="header-collapse-btn" (click)="layoutService.toggleSidebarCollapse()" title="Collapse Sidebar">
+        <i class="pi pi-chevron-left"></i>
+      </button>
+    } @else {
+      <button class="header-collapse-btn collapsed-btn" (click)="layoutService.toggleSidebarCollapse()" title="Expand Sidebar">
+        <i class="pi pi-chevron-right"></i>
+      </button>
+    }
+    <button class="mobile-close-btn" (click)="layoutService.closeMobileSidebar()">
+      <i class="pi pi-times"></i>
+    </button>
+  </div>
+
+  <!-- Navigation Menu Groups -->
+  <nav class="nav-menu">
+    <!-- Dashboard Link -->
+    <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="layoutService.closeMobileSidebar()" title="Dashboard">
+      <i class="pi pi-th-large"></i>
+      @if (!layoutService.isSidebarCollapsed()) { <span>Dashboard</span> }
+    </a>
+
+    <!-- Transactions Group (Default Open) -->
+    <div class="menu-group">
+      <button class="group-header" (click)="toggleGroup('transactions')" title="Transactions">
+        <div class="group-header-left">
+          <i class="pi pi-arrow-right-arrow-left text-cyan"></i>
+          @if (!layoutService.isSidebarCollapsed()) { <span>Transactions</span> }
+        </div>
+        @if (!layoutService.isSidebarCollapsed()) {
+          <i class="pi" [class.pi-chevron-down]="isOpen('transactions')" [class.pi-chevron-right]="!isOpen('transactions')"></i>
+        }
+      </button>
+      @if (isOpen('transactions') || layoutService.isSidebarCollapsed()) {
+        <div class="sub-menu">
+          <a routerLink="/transactions/enquiry" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Enquiry">
+            <i class="pi pi-question-circle"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Enquiry</span> }
+          </a>
+          <a routerLink="/transactions/review" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Review">
+            <i class="pi pi-check-square"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Review</span> }
+          </a>
+          <a routerLink="/transactions/quotation" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Quotation">
+            <i class="pi pi-file-edit"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Quotation</span> }
+          </a>
+          <a routerLink="/transactions/delivery-in" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Delivery In">
+            <i class="pi pi-box"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Delivery In</span> }
+          </a>
+          <a routerLink="/equipment" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Workorder">
+            <i class="pi pi-briefcase"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Workorder</span> }
+          </a>
+          <a routerLink="/transactions/job-register" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Job Register">
+            <i class="pi pi-book"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Job Register</span> }
+          </a>
+          <a routerLink="/transactions/delivery-ticket" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Delivery Ticket">
+            <i class="pi pi-send"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Delivery Ticket</span> }
+          </a>
+          <a routerLink="/reports/invoice-summary" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Invoice">
+            <i class="pi pi-receipt"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Invoice</span> }
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- Masters Group -->
+    <div class="menu-group">
+      <button class="group-header" (click)="toggleGroup('masters')" title="Masters">
+        <div class="group-header-left">
+          <i class="pi pi-database text-cyan"></i>
+          @if (!layoutService.isSidebarCollapsed()) { <span>Masters</span> }
+        </div>
+        @if (!layoutService.isSidebarCollapsed()) {
+          <i class="pi" [class.pi-chevron-down]="isOpen('masters')" [class.pi-chevron-right]="!isOpen('masters')"></i>
+        }
+      </button>
+      @if (isOpen('masters') || layoutService.isSidebarCollapsed()) {
+        <div class="sub-menu">
+          <a routerLink="/customers" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Customer">
+            <i class="pi pi-building"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Customer</span> }
+          </a>
+          <a routerLink="/equipment" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Item Master">
+            <i class="pi pi-cog"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Item Master</span> }
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- Reports Group -->
+    <div class="menu-group">
+      <button class="group-header" (click)="toggleGroup('reports')" title="Reports">
+        <div class="group-header-left">
+          <i class="pi pi-chart-bar text-cyan"></i>
+          @if (!layoutService.isSidebarCollapsed()) { <span>Reports</span> }
+        </div>
+        @if (!layoutService.isSidebarCollapsed()) {
+          <i class="pi" [class.pi-chevron-down]="isOpen('reports')" [class.pi-chevron-right]="!isOpen('reports')"></i>
+        }
+      </button>
+      @if (isOpen('reports') || layoutService.isSidebarCollapsed()) {
+        <div class="sub-menu">
+          <a routerLink="/certificates" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Calibration Report">
+            <i class="pi pi-verified"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Calibration Report</span> }
+          </a>
+          <a routerLink="/reports/invoice-summary" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Invoice Summary Report">
+            <i class="pi pi-dollar"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Invoice Summary</span> }
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- QC Group -->
+    <div class="menu-group">
+      <button class="group-header" (click)="toggleGroup('qc')" title="QC">
+        <div class="group-header-left">
+          <i class="pi pi-check-square text-cyan"></i>
+          @if (!layoutService.isSidebarCollapsed()) { <span>QC</span> }
+        </div>
+        @if (!layoutService.isSidebarCollapsed()) {
+          <i class="pi" [class.pi-chevron-down]="isOpen('qc')" [class.pi-chevron-right]="!isOpen('qc')"></i>
+        }
+      </button>
+      @if (isOpen('qc') || layoutService.isSidebarCollapsed()) {
+        <div class="sub-menu">
+          <a routerLink="/qc/master-lab-list" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Master Lab List">
+            <i class="pi pi-building"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Master Lab List</span> }
+          </a>
+          <a routerLink="/qc/procedures-list" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Procedures List">
+            <i class="pi pi-book"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Procedures List</span> }
+          </a>
+          <a routerLink="/qc/tech-proc-mapping" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Tech-Proc mapping">
+            <i class="pi pi-sitemap"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Tech-Proc mapping</span> }
+          </a>
+          <a routerLink="/qc/tech-lab-mapping" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Tech-Lab mapping">
+            <i class="pi pi-map"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Tech-Lab mapping</span> }
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- User Management Group -->
+    <div class="menu-group">
+      <button class="group-header" (click)="toggleGroup('user-mgmt')" title="User Management">
+        <div class="group-header-left">
+          <i class="pi pi-users text-cyan"></i>
+          @if (!layoutService.isSidebarCollapsed()) { <span>User Management</span> }
+        </div>
+        @if (!layoutService.isSidebarCollapsed()) {
+          <i class="pi" [class.pi-chevron-down]="isOpen('user-mgmt')" [class.pi-chevron-right]="!isOpen('user-mgmt')"></i>
+        }
+      </button>
+      @if (isOpen('user-mgmt') || layoutService.isSidebarCollapsed()) {
+        <div class="sub-menu">
+          <a routerLink="/user-management/user-list" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="User List">
+            <i class="pi pi-user"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>User List</span> }
+          </a>
+          <a routerLink="/user-management/user-permissions" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="User Permissions">
+            <i class="pi pi-shield"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>User Permissions</span> }
+          </a>
+        </div>
+      }
+    </div>
+  </nav>
+</aside>

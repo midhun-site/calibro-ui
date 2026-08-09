@@ -1,0 +1,60 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>User Access Permissions & RBAC Roles</h2>
+      <p class="subtitle">Configure Security Roles, Feature Privileges & ISO Compliance Sign-off Rights</p>
+    </div>
+    <button class="btn-primary" (click)="savePermissions()">
+      <i class="pi pi-shield"></i> Save Permission Matrix
+    </button>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Role Title</th>
+          <th>View Customers & Equipments</th>
+          <th>Create & Edit Work Orders</th>
+          <th>Approve ISO Certificates</th>
+          <th>Manage Master Labs & QC</th>
+          <th>System Admin Control</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color: var(--accent-cyan);">Lab Administrator</strong></td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Full Access</td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Full Access</td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Full Access</td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Full Access</td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Full Access</td>
+        </tr>
+        <tr>
+          <td><strong style="color: var(--text-main);">Senior Metrologist</strong></td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Full Access</td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Full Access</td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Sign-off Right</td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Read & Edit</td>
+          <td><i class="pi pi-minus-circle text-muted"></i> Restricted</td>
+        </tr>
+        <tr>
+          <td><strong style="color: var(--text-main);">Calibration Technician</strong></td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Read Only</td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Assigned Only</td>
+          <td><i class="pi pi-minus-circle text-muted"></i> Draft Only</td>
+          <td><i class="pi pi-minus-circle text-muted"></i> Restricted</td>
+          <td><i class="pi pi-minus-circle text-muted"></i> Restricted</td>
+        </tr>
+        <tr>
+          <td><strong style="color: var(--text-main);">Customer Portal User</strong></td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Own Assets Only</td>
+          <td><i class="pi pi-minus-circle text-muted"></i> View Status</td>
+          <td><i class="pi pi-check-circle text-cyan"></i> Download PDF</td>
+          <td><i class="pi pi-minus-circle text-muted"></i> No Access</td>
+          <td><i class="pi pi-minus-circle text-muted"></i> No Access</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

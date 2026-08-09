@@ -1,0 +1,168 @@
+<div class="dashboard-container">
+  <div class="header-banner">
+    <div>
+      <h1>Welcome to <span class="gradient-text">CaliBro CRM</span></h1>
+      <p class="subtitle">Calibration Laboratory Operations & Equipment Compliance Overview</p>
+    </div>
+    <button class="btn-primary" (click)="refreshData()">
+      <i class="pi pi-refresh"></i> Refresh Stats
+    </button>
+  </div>
+
+  <!-- KPI Metrics Grid -->
+  <div class="kpi-grid">
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon-wrap cyan">
+        <i class="pi pi-building"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-label">Active Customers</span>
+        <h2 class="kpi-value">{{ stats()?.totalCustomers ?? 2 }}</h2>
+        <span class="kpi-sub green"><i class="pi pi-arrow-up"></i> +12% this month</span>
+      </div>
+    </div>
+
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon-wrap blue">
+        <i class="pi pi-cog"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-label">Tracked Equipments</span>
+        <h2 class="kpi-value">{{ stats()?.totalEquipments ?? 3 }}</h2>
+        <span class="kpi-sub">ISO 17025 Registered</span>
+      </div>
+    </div>
+
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon-wrap danger">
+        <i class="pi pi-exclamation-triangle"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-label">Overdue Calibrations</span>
+        <h2 class="kpi-value text-danger">{{ stats()?.overdueCalibrations ?? 1 }}</h2>
+        <span class="kpi-sub red"><i class="pi pi-bell"></i> Immediate action required</span>
+      </div>
+    </div>
+
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon-wrap purple">
+        <i class="pi pi-dollar"></i>
+      </div>
+      <div class="kpi-details">
+        <span class="kpi-label">Monthly Revenue</span>
+        <h2 class="kpi-value text-cyan">${{ stats()?.totalRevenueThisMonth ?? 472.50 | number:'1.2-2' }}</h2>
+        <span class="kpi-sub green"><i class="pi pi-check-circle"></i> Invoices paid</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Highcharts Visualizations Section -->
+  <div class="charts-grid">
+    <!-- Chart Card 1: Monthly Calibration Work Orders & Revenue Trend -->
+    <div class="glass-card chart-card full-width-chart">
+      <div class="chart-header">
+        <div>
+          <h3><i class="pi pi-chart-line text-cyan"></i> Work Order & Revenue Analytics</h3>
+          <p class="chart-subtitle">Monthly calibration throughput vs. lab revenue</p>
+        </div>
+        <span class="chart-badge">YTD 2026</span>
+      </div>
+      <div class="chart-container">
+        <highcharts-chart
+          [options]="trendChartOptions"
+          style="width: 100%; height: 320px; display: block;">
+        </highcharts-chart>
+      </div>
+    </div>
+
+    <!-- Chart Card 2: Equipment Status Breakdown (Donut) -->
+    <div class="glass-card chart-card">
+      <div class="chart-header">
+        <div>
+          <h3><i class="pi pi-chart-pie text-cyan"></i> Equipment Status</h3>
+          <p class="chart-subtitle">ISO 17025 compliance breakdown</p>
+        </div>
+      </div>
+      <div class="chart-container">
+        <highcharts-chart
+          [options]="statusChartOptions"
+          style="width: 100%; height: 280px; display: block;">
+        </highcharts-chart>
+      </div>
+    </div>
+
+    <!-- Chart Card 3: Instrument Category Distribution (Bar/Column) -->
+    <div class="glass-card chart-card">
+      <div class="chart-header">
+        <div>
+          <h3><i class="pi pi-sliders-h text-cyan"></i> Category Distribution</h3>
+          <p class="chart-subtitle">Assets by calibration discipline</p>
+        </div>
+      </div>
+      <div class="chart-container">
+        <highcharts-chart
+          [options]="categoryChartOptions"
+          style="width: 100%; height: 280px; display: block;">
+        </highcharts-chart>
+      </div>
+    </div>
+  </div>
+
+  <!-- Work Orders & Certificates Section -->
+  <div class="dashboard-sections">
+    <!-- Calibration Work Orders in Progress -->
+    <div class="glass-card section-card">
+      <div class="section-header">
+        <h3><i class="pi pi-spin pi-cog text-cyan"></i> Active Work Orders</h3>
+        <span class="view-all">View All</span>
+      </div>
+
+      <div class="wo-list">
+        <div class="wo-item">
+          <div class="wo-info">
+            <span class="wo-number">WO-2026-001</span>
+            <span class="wo-customer">AeroSpace Tech LLC</span>
+          </div>
+          <div class="wo-meta">
+            <span class="wo-tech"><i class="pi pi-user"></i> Alex Rivera</span>
+            <p-tag value="In-Progress" severity="info"></p-tag>
+          </div>
+        </div>
+
+        <div class="wo-item">
+          <div class="wo-info">
+            <span class="wo-number">WO-2026-002</span>
+            <span class="wo-customer">BioPharm Solutions</span>
+          </div>
+          <div class="wo-meta">
+            <span class="wo-tech"><i class="pi pi-user"></i> Marcus Vance</span>
+            <p-tag value="Scheduled" severity="warning"></p-tag>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Certificates Issued -->
+    <div class="glass-card section-card">
+      <div class="section-header">
+        <h3><i class="pi pi-verified text-cyan"></i> Recent Certificates</h3>
+        <span class="view-all">View All</span>
+      </div>
+
+      <div class="cert-list">
+        <div class="cert-item">
+          <div class="cert-badge">
+            <i class="pi pi-file-pdf text-danger"></i>
+          </div>
+          <div class="cert-info">
+            <span class="cert-no">CERT-2026-8891</span>
+            <span class="cert-eq">Digital Pressure Gauge (0-1000 PSI)</span>
+          </div>
+          <div class="cert-status">
+            <p-tag value="PASSED" severity="success"></p-tag>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

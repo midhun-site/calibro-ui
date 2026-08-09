@@ -1,0 +1,218 @@
+<div class="page-container">
+  <!-- Top Bar / Action Header -->
+  <div class="transaction-header glass-card">
+    <div class="header-left">
+      <button class="icon-btn" (click)="goBack()" title="Back to Enquiries List">
+        <i class="pi pi-arrow-left"></i>
+      </button>
+      <div>
+        <h2 class="form-title">New Calibration Enquiry</h2>
+        <span class="subtitle">ISO 17025 Customer Inquiry & Technical Item Specification</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="goBack()">
+        <i class="pi pi-times"></i> Cancel
+      </button>
+      <button class="btn-primary" (click)="saveEnquiry()">
+        <i class="pi pi-check"></i> Save Enquiry
+      </button>
+    </div>
+  </div>
+
+  <!-- Form Fields Layout Card -->
+  <div class="glass-card form-card">
+    <div class="form-grid-3col">
+      <!-- Column 1: Core Client & Mode Details -->
+      <div class="form-col">
+        <div class="form-group-horizontal">
+          <label>ENQ No</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.enqNo" placeholder="Auto Generated" readonly class="code-input" />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Mode</label>
+          <select class="form-select" [(ngModel)]="enquiry.mode">
+            <option value="Mail">Mail</option>
+            <option value="Phone">Phone</option>
+            <option value="Portal">Customer Portal</option>
+            <option value="In-Person">In-Person Handover</option>
+          </select>
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Nature of Enquiry</label>
+          <select class="form-select" [(ngModel)]="enquiry.nature">
+            <option value="Calibration (CAL)">Calibration (CAL)</option>
+            <option value="Repair & Cal">Repair & Calibration</option>
+            <option value="Inspection">Site Inspection</option>
+            <option value="Testing">Material Testing</option>
+          </select>
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Client</label>
+          <div class="input-with-lookup">
+            <select class="form-select" [(ngModel)]="enquiry.client" (change)="onClientChange()">
+              <option value="" disabled selected>-- Select Client --</option>
+              <option value="EMARAT ALOULA CONTRACTING CO">EMARAT ALOULA CONTRACTING CO</option>
+              <option value="AeroSpace Tech LLC">AeroSpace Tech LLC</option>
+              <option value="BioPharm Solutions">BioPharm Solutions</option>
+              <option value="Global Energy Ltd">Global Energy Ltd</option>
+              <option value="Precision Eng Co">Precision Eng Co</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Address 1</label>
+          <textarea class="form-textarea" rows="2" [(ngModel)]="enquiry.address" placeholder="Enter client address..."></textarea>
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>P.O Box</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.poBox" placeholder="e.g. 26831" />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Client Contact</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.contactPerson" placeholder="Contact person name..." />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Email</label>
+          <input type="email" pInputText [(ngModel)]="enquiry.email" placeholder="contact@company.com" />
+        </div>
+      </div>
+
+      <!-- Column 2: Reference & Contact Numbers -->
+      <div class="form-col">
+        <div class="form-group-horizontal">
+          <label>ENQ Date</label>
+          <input type="date" pInputText [(ngModel)]="enquiry.enqDate" />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Reference</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.reference" placeholder="e.g. Ref / PO Number" />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Tel No.</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.telNo" placeholder="Phone number..." />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Fax</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.fax" placeholder="Fax number..." />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Designation</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.designation" placeholder="e.g. QA Manager" />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Department</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.department" placeholder="e.g. Quality Dept" />
+        </div>
+      </div>
+
+      <!-- Column 3: Revisions & Status -->
+      <div class="form-col">
+        <div class="form-group-horizontal">
+          <label>Rev. No</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.revNo" class="code-input" />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Status</label>
+          <select class="form-select" [(ngModel)]="enquiry.status">
+            <option value="Draft">Draft</option>
+            <option value="Quotation Preparation">Quotation Preparation</option>
+            <option value="Pending Review">Pending Technical Review</option>
+            <option value="Approved">Approved</option>
+          </select>
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Rev. Date</label>
+          <input type="date" pInputText [(ngModel)]="enquiry.revDate" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Items Grid Section -->
+  <div class="glass-card items-card">
+    <div class="items-toolbar">
+      <div class="toolbar-left">
+        <h3><i class="pi pi-list text-cyan"></i> ITEMS SPECIFICATION GRID</h3>
+        <span class="badge-count">{{ items.length }} item(s)</span>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn-sm-secondary">
+          <i class="pi pi-folder-open"></i> Browse...
+        </button>
+        <button class="btn-sm-secondary">
+          <i class="pi pi-upload"></i> Import
+        </button>
+        <button class="btn-sm-primary" (click)="addItemRow()">
+          <i class="pi pi-plus"></i> Add Item Row
+        </button>
+      </div>
+    </div>
+
+    <!-- Items Grid Data Table -->
+    <div class="table-responsive">
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th style="width: 50px;">SlNo</th>
+            <th style="width: 250px;">Item Name</th>
+            <th style="width: 140px;">Serial No</th>
+            <th style="width: 140px;">RO / Tag No</th>
+            <th style="width: 130px;">Make</th>
+            <th style="width: 130px;">Model</th>
+            <th style="width: 150px;">Range</th>
+            <th style="width: 80px;">Qty</th>
+            <th style="width: 60px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items; track item.slNo; let i = $index) {
+            <tr>
+              <td class="text-center font-bold">{{ i + 1 }}</td>
+              <td>
+                <input type="text" pInputText [(ngModel)]="item.itemName" placeholder="e.g. Gas Detector / Pressure Gauge" class="table-input" />
+              </td>
+              <td>
+                <input type="text" pInputText [(ngModel)]="item.serialNo" placeholder="e.g. SN-99120" class="table-input" />
+              </td>
+              <td>
+                <input type="text" pInputText [(ngModel)]="item.roTagNo" placeholder="e.g. TAG-101" class="table-input" />
+              </td>
+              <td>
+                <input type="text" pInputText [(ngModel)]="item.make" placeholder="e.g. Fluke / Honeywell" class="table-input" />
+              </td>
+              <td>
+                <input type="text" pInputText [(ngModel)]="item.model" placeholder="e.g. Model-X" class="table-input" />
+              </td>
+              <td>
+                <input type="text" pInputText [(ngModel)]="item.range" placeholder="e.g. 0 - 1000 PSI" class="table-input" />
+              </td>
+              <td>
+                <input type="number" pInputText [(ngModel)]="item.qty" min="1" class="table-input text-center font-bold" />
+              </td>
+              <td class="text-center">
+                <button class="btn-icon-danger" (click)="removeItemRow(i)" title="Remove Item">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

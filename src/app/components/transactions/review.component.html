@@ -1,0 +1,89 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Contract & Technical Review</h2>
+      <p class="subtitle">ISO 17025 Requirement Review & Capability Evaluation</p>
+    </div>
+    <button class="btn-primary" (click)="showCreateModal = true">
+      <i class="pi pi-plus"></i> Perform Review
+    </button>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Review No.</th>
+          <th>Enquiry Ref</th>
+          <th>Customer</th>
+          <th>Discipline Scope</th>
+          <th>Capability Assessment</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="code-badge">REV-2026-031</span></td>
+          <td>ENQ-2026-081</td>
+          <td>AeroSpace Tech LLC</td>
+          <td>High Pressure (10,000 PSI)</td>
+          <td>Approved within ISO Scope</td>
+          <td><span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> ACCEPTED</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">REV-2026-032</span></td>
+          <td>ENQ-2026-082</td>
+          <td>BioPharm Solutions</td>
+          <td>Ultra-low Temp (-80°C)</td>
+          <td>Approved - In-House Lab</td>
+          <td><span class="p-tag p-tag-warning"><i class="pi pi-hourglass"></i> PENDING</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">REV-2026-033</span></td>
+          <td>ENQ-2026-083</td>
+          <td>Global Energy Ltd</td>
+          <td>Nuclear Radiation Calibration</td>
+          <td>Exceeds Lab Capability</td>
+          <td><span class="p-tag p-tag-danger"><i class="pi pi-times-circle"></i> REJECTED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  @if (showCreateModal) {
+    <div class="modal-overlay" (click)="showCreateModal = false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Technical & Contract Review</h3>
+          <button class="modal-close-btn" (click)="showCreateModal = false">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Enquiry Reference</label>
+              <input type="text" pInputText [(ngModel)]="newReview.enquiryRef" placeholder="e.g. ENQ-2026-081" />
+            </div>
+            <div class="form-group">
+              <label>Customer Name</label>
+              <input type="text" pInputText [(ngModel)]="newReview.customer" placeholder="e.g. AeroSpace Tech LLC" />
+            </div>
+            <div class="form-group">
+              <label>Discipline Scope</label>
+              <input type="text" pInputText [(ngModel)]="newReview.scope" placeholder="Pressure / Temp / Torque" />
+            </div>
+            <div class="form-group">
+              <label>Capability Assessment</label>
+              <input type="text" pInputText [(ngModel)]="newReview.assessment" placeholder="ISO 17025 Capable" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
+          <button class="btn-primary" (click)="saveReview()">Submit Review</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,1 +1,15 @@
-<router-outlet></router-outlet>
+<app-toast></app-toast>
+
+@if (isLoginPage()) {
+  <router-outlet></router-outlet>
+} @else {
+  <div class="app-layout">
+    <app-sidebar></app-sidebar>
+    <div class="main-wrapper">
+      <app-topbar></app-topbar>
+      <main class="content-area" [class.collapsed]="layoutService.isSidebarCollapsed()">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+}

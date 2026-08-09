@@ -1,0 +1,77 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Technician - Laboratory Mapping</h2>
+      <p class="subtitle">Assign Calibration Technicians to Primary Discipline Labs</p>
+    </div>
+    <button class="btn-primary" (click)="showCreateModal = true">
+      <i class="pi pi-link"></i> Map to Lab
+    </button>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Technician Name</th>
+          <th>Role</th>
+          <th>Assigned Master Lab</th>
+          <th>Discipline</th>
+          <th>Access Clearance</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color: var(--text-main);">Alex Rivera</strong></td>
+          <td>Senior Metrologist</td>
+          <td><span class="code-badge">LAB-PRES-01</span> Pressure & Vacuum Primary Lab</td>
+          <td>Pressure</td>
+          <td>Primary Lead Metrologist</td>
+          <td><span class="p-tag p-tag-success">ASSIGNED</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color: var(--text-main);">Marcus Vance</strong></td>
+          <td>Lead Calibration Tech</td>
+          <td><span class="code-badge">LAB-TEMP-02</span> Thermal Standards Lab</td>
+          <td>Temperature</td>
+          <td>Lab Supervisor</td>
+          <td><span class="p-tag p-tag-success">ASSIGNED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  @if (showCreateModal) {
+    <div class="modal-overlay" (click)="showCreateModal = false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Assign Technician to Laboratory</h3>
+          <button class="modal-close-btn" (click)="showCreateModal = false">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Technician Name</label>
+              <input type="text" pInputText [(ngModel)]="newMap.techName" placeholder="e.g. Alex Rivera" />
+            </div>
+            <div class="form-group">
+              <label>Master Lab Code</label>
+              <input type="text" pInputText [(ngModel)]="newMap.labCode" placeholder="e.g. LAB-PRES-01" />
+            </div>
+            <div class="form-group">
+              <label>Access Clearance</label>
+              <input type="text" pInputText [(ngModel)]="newMap.clearance" placeholder="Primary Metrologist" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
+          <button class="btn-primary" (click)="saveMapping()">Save Assignment</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

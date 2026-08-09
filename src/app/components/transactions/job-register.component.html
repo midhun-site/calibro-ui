@@ -1,0 +1,93 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Master Job Register</h2>
+      <p class="subtitle">Laboratory Job Tracking & Calibration Log Records</p>
+    </div>
+    <button class="btn-primary" (click)="showCreateModal = true">
+      <i class="pi pi-plus"></i> New Job Register
+    </button>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Job No.</th>
+          <th>Work Order Ref</th>
+          <th>Asset Tag</th>
+          <th>Instrument Name</th>
+          <th>Assigned Metrologist</th>
+          <th>Target Completion</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="code-badge">JOB-2026-901</span></td>
+          <td>WO-2026-001</td>
+          <td>EQ-PRES-001</td>
+          <td>Digital Pressure Gauge 0-1000 PSI</td>
+          <td>Alex Rivera</td>
+          <td>Aug 10, 2026</td>
+          <td><span class="p-tag p-tag-info"><i class="pi pi-spin pi-spinner"></i> IN-CALIBRATION</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">JOB-2026-902</span></td>
+          <td>WO-2026-002</td>
+          <td>EQ-TEMP-002</td>
+          <td>Precision Temperature Calibrator</td>
+          <td>Marcus Vance</td>
+          <td>Aug 11, 2026</td>
+          <td><span class="p-tag p-tag-warning"><i class="pi pi-hourglass"></i> QUEUED</span></td>
+        </tr>
+        <tr>
+          <td><span class="code-badge">JOB-2026-903</span></td>
+          <td>WO-2026-003</td>
+          <td>EQ-ELEC-003</td>
+          <td>Multimeter Calibrator Unit</td>
+          <td>Sarah Jenkins</td>
+          <td>Aug 08, 2026</td>
+          <td><span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> COMPLETED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  @if (showCreateModal) {
+    <div class="modal-overlay" (click)="showCreateModal = false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Create Master Job Record</h3>
+          <button class="modal-close-btn" (click)="showCreateModal = false">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Work Order Ref</label>
+              <input type="text" pInputText [(ngModel)]="newJob.woRef" placeholder="e.g. WO-2026-001" />
+            </div>
+            <div class="form-group">
+              <label>Asset Tag</label>
+              <input type="text" pInputText [(ngModel)]="newJob.assetTag" placeholder="e.g. EQ-PRES-001" />
+            </div>
+            <div class="form-group">
+              <label>Instrument Name</label>
+              <input type="text" pInputText [(ngModel)]="newJob.instrument" placeholder="Digital Pressure Gauge" />
+            </div>
+            <div class="form-group">
+              <label>Assigned Metrologist</label>
+              <input type="text" pInputText [(ngModel)]="newJob.tech" placeholder="Alex Rivera" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
+          <button class="btn-primary" (click)="saveJob()">Register Job</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

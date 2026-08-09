@@ -1,0 +1,25 @@
+<div class="toast-container">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="toast-card" [class]="toast.type">
+      <div class="toast-icon">
+        @switch (toast.type) {
+          @case ('success') { <i class="pi pi-check-circle"></i> }
+          @case ('warning') { <i class="pi pi-exclamation-triangle"></i> }
+          @case ('error') { <i class="pi pi-times-circle"></i> }
+          @case ('info') { <i class="pi pi-info-circle"></i> }
+        }
+      </div>
+
+      <div class="toast-body">
+        <h5 class="toast-title">{{ toast.title }}</h5>
+        <p class="toast-msg">{{ toast.message }}</p>
+      </div>
+
+      <button class="toast-close-btn" (click)="toastService.remove(toast.id)">
+        <i class="pi pi-times"></i>
+      </button>
+
+      <div class="toast-progress"></div>
+    </div>
+  }
+</div>

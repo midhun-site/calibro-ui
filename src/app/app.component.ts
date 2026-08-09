@@ -1,40 +1,25 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './components/layout/sidebar.component';
 import { TopbarComponent } from './components/layout/topbar.component';
+import { ToastComponent } from './components/toast/toast.component';
+import { ThemeService } from './services/theme.service';
+import { LayoutService } from './services/layout.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, TopbarComponent],
-  template: `
-    <div class="app-layout">
-      <app-sidebar></app-sidebar>
-      <div class="main-wrapper">
-        <app-topbar></app-topbar>
-        <main class="content-area">
-          <router-outlet></router-outlet>
-        </main>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .app-layout {
-      display: flex;
-      min-height: 100vh;
-    }
-    .main-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .content-area {
-      margin-left: 260px;
-      flex: 1;
-      background: #0a0f1d;
-    }
-  `]
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent, ToastComponent],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
 export class AppComponent {
   title = 'calibro-ui';
+  public themeService = inject(ThemeService);
+  public layoutService = inject(LayoutService);
+  private router = inject(Router);
+
+  isLoginPage(): boolean {
+    return this.router.url.includes('/login');
+  }
 }
