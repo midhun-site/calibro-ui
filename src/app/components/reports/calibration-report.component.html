@@ -1,36 +1,123 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h2>Calibration Reports</h2>
-      <p class="subtitle">ISO/IEC 17025 Certified Test & Recall Performance Summary</p>
+      <h2>Calibration Reports & Certificates</h2>
+      <p class="subtitle">ISO/IEC 17025 Certified Test Results & Recall Performance Summary</p>
     </div>
-    <button class="btn-primary">
-      <i class="pi pi-download"></i> Export PDF Report
-    </button>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
+        <i class="pi pi-download text-cyan"></i> Export CSV
+      </button>
+    </div>
   </div>
 
   <div class="glass-card table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Certificate No.</th>
-          <th>Asset Tag</th>
-          <th>Instrument</th>
-          <th>Customer</th>
-          <th>Cal. Date</th>
-          <th>Result</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="code-badge">CERT-2026-8891</span></td>
-          <td>EQ-PRES-001</td>
-          <td>Digital Pressure Gauge 0-1000 PSI</td>
-          <td>AeroSpace Tech LLC</td>
-          <td>Aug 08, 2026</td>
-          <td><span class="p-tag p-tag-success">PASSED</span></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th (click)="toggleSort('certNo')" class="sortable-header">
+              Certificate No. <i class="pi" [ngClass]="getSortIcon('certNo')"></i>
+            </th>
+            <th (click)="toggleSort('assetTag')" class="sortable-header">
+              Asset Tag <i class="pi" [ngClass]="getSortIcon('assetTag')"></i>
+            </th>
+            <th (click)="toggleSort('instrument')" class="sortable-header">
+              Instrument <i class="pi" [ngClass]="getSortIcon('instrument')"></i>
+            </th>
+            <th (click)="toggleSort('customer')" class="sortable-header">
+              Customer <i class="pi" [ngClass]="getSortIcon('customer')"></i>
+            </th>
+            <th (click)="toggleSort('calDate')" class="sortable-header">
+              Cal Date <i class="pi" [ngClass]="getSortIcon('calDate')"></i>
+            </th>
+            <th (click)="toggleSort('nextDueDate')" class="sortable-header">
+              Next Due Date <i class="pi" [ngClass]="getSortIcon('nextDueDate')"></i>
+            </th>
+            <th (click)="toggleSort('result')" class="sortable-header">
+              Result <i class="pi" [ngClass]="getSortIcon('result')"></i>
+            </th>
+          </tr>
+          <tr class="filter-row">
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['certNo']" (ngModelChange)="updateFilter('certNo', $event)" placeholder="Search Cert..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['assetTag']" (ngModelChange)="updateFilter('assetTag', $event)" placeholder="Filter Tag..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['instrument']" (ngModelChange)="updateFilter('instrument', $event)" placeholder="Filter Instrument..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['customer']" (ngModelChange)="updateFilter('customer', $event)" placeholder="Filter Customer..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['calDate']" (ngModelChange)="updateFilter('calDate', $event)" placeholder="Filter Date..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['nextDueDate']" (ngModelChange)="updateFilter('nextDueDate', $event)" placeholder="Filter Due..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['result']" (ngModelChange)="updateFilter('result', $event)" placeholder="Filter Result..." class="filter-input" />
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedData(); track item.certNo) {
+            <tr>
+              <td><span class="code-badge" style="color: var(--accent-cyan);">{{ item.certNo }}</span></td>
+              <td><strong style="color: var(--text-main);">{{ item.assetTag }}</strong></td>
+              <td>{{ item.instrument }}</td>
+              <td>{{ item.customer }}</td>
+              <td>{{ item.calDate }}</td>
+              <td>{{ item.nextDueDate }}</td>
+              <td>
+                @if (item.result === 'PASSED') {
+                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> PASSED</span>
+                } @else if (item.result === 'ADJUSTED') {
+                  <span class="p-tag p-tag-warning"><i class="pi pi-sliders-h"></i> ADJUSTED</span>
+                } @else if (item.result === 'FAILED') {
+                  <span class="p-tag p-tag-danger"><i class="pi pi-times-circle"></i> FAILED</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-4" style="color: var(--text-muted);">
+                No calibration certificate records match the current filters.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Numbered Pagination Footer Controls Bar (1, 2, 3... 100) -->
+    <div class="table-paginator">
+      <div class="paginator-info">
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+      </div>
+      <div class="paginator-controls">
+        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+
+        <div class="page-numbers">
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="ellipsis">...</span>
+            } @else {
+              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 </div>

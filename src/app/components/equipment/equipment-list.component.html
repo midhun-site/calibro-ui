@@ -1,99 +1,180 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h2>Equipment & Asset Registry</h2>
-      <p class="subtitle">ISO/IEC 17025 Traceable Instruments & Recall Schedules</p>
+      <h2>Customer Equipments & Master Assets</h2>
+      <p class="subtitle">Track Equipment Inventory & ISO 17025 Calibration Schedules</p>
     </div>
-    <button class="btn-primary" (click)="showCreateModal = true">
-      <i class="pi pi-plus"></i> Register New Equipment
-    </button>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
+        <i class="pi pi-download text-cyan"></i> Export CSV
+      </button>
+      <button class="btn-primary" (click)="showCreateModal = true">
+        <i class="pi pi-plus"></i> Register Instrument
+      </button>
+    </div>
   </div>
 
   <div class="glass-card table-card">
-    <p-table [value]="equipments()" [responsive]="true" [paginator]="true" [rows]="6" styleClass="p-datatable-sm">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Asset Tag</th>
-          <th>Instrument Name</th>
-          <th>Category</th>
-          <th>Manufacturer & Model</th>
-          <th>Serial No.</th>
-          <th>Accuracy / Range</th>
-          <th>Next Calibration Due</th>
-          <th>Status</th>
-        </tr>
-      </ng-template>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th (click)="toggleSort('assetTag')" class="sortable-header">
+              Asset Tag <i class="pi" [ngClass]="getSortIcon('assetTag')"></i>
+            </th>
+            <th (click)="toggleSort('name')" class="sortable-header">
+              Instrument Name <i class="pi" [ngClass]="getSortIcon('name')"></i>
+            </th>
+            <th (click)="toggleSort('customerName')" class="sortable-header">
+              Customer <i class="pi" [ngClass]="getSortIcon('customerName')"></i>
+            </th>
+            <th (click)="toggleSort('category')" class="sortable-header">
+              Category <i class="pi" [ngClass]="getSortIcon('category')"></i>
+            </th>
+            <th (click)="toggleSort('manufacturer')" class="sortable-header">
+              Make / Model <i class="pi" [ngClass]="getSortIcon('manufacturer')"></i>
+            </th>
+            <th (click)="toggleSort('serialNumber')" class="sortable-header">
+              Serial No <i class="pi" [ngClass]="getSortIcon('serialNumber')"></i>
+            </th>
+            <th (click)="toggleSort('calibrationIntervalMonths')" class="sortable-header">
+              Interval <i class="pi" [ngClass]="getSortIcon('calibrationIntervalMonths')"></i>
+            </th>
+            <th (click)="toggleSort('status')" class="sortable-header">
+              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            </th>
+          </tr>
+          <tr class="filter-row">
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['assetTag']" (ngModelChange)="updateFilter('assetTag', $event)" placeholder="Search Tag..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['name']" (ngModelChange)="updateFilter('name', $event)" placeholder="Filter Name..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['customerName']" (ngModelChange)="updateFilter('customerName', $event)" placeholder="Filter Customer..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['category']" (ngModelChange)="updateFilter('category', $event)" placeholder="Filter Category..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['makeModel']" (ngModelChange)="updateFilter('makeModel', $event)" placeholder="Filter Make/Model..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['serialNumber']" (ngModelChange)="updateFilter('serialNumber', $event)" placeholder="Filter Serial..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['interval']" (ngModelChange)="updateFilter('interval', $event)" placeholder="Filter Months..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedData(); track item.assetTag) {
+            <tr>
+              <td><span class="code-badge">{{ item.assetTag }}</span></td>
+              <td><strong style="color: var(--text-main);">{{ item.name }}</strong></td>
+              <td>{{ item.customerName }}</td>
+              <td><span class="code-badge" style="color: var(--accent-cyan);">{{ item.category }}</span></td>
+              <td>{{ item.manufacturer }} {{ item.model }}</td>
+              <td>{{ item.serialNumber }}</td>
+              <td>{{ item.calibrationIntervalMonths }} Months</td>
+              <td>
+                @if (item.isOverdue) {
+                  <span class="p-tag p-tag-danger"><i class="pi pi-exclamation-triangle"></i> OVERDUE</span>
+                } @else if (item.status === 1) {
+                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> ACTIVE</span>
+                } @else {
+                  <span class="p-tag p-tag-warning"><i class="pi pi-spin pi-cog"></i> IN CALIBRATION</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="text-center py-4" style="color: var(--text-muted);">
+                No equipment records match the current filters.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
-      <ng-template pTemplate="body" let-eq>
-        <tr>
-          <td><span class="tag-badge">{{ eq.assetTag }}</span></td>
-          <td><strong style="color: var(--text-main);">{{ eq.name }}</strong></td>
-          <td><span class="category-chip">{{ eq.category }}</span></td>
-          <td>{{ eq.manufacturer }} ({{ eq.model }})</td>
-          <td><code>{{ eq.serialNumber }}</code></td>
-          <td><small class="text-muted">{{ eq.accuracySpec }} | {{ eq.measurementRange }}</small></td>
-          <td>
-            <div class="due-cell" [class.overdue]="eq.isOverdue">
-              <i class="pi" [class.pi-calendar]="!eq.isOverdue" [class.pi-exclamation-circle]="eq.isOverdue"></i>
-              <span>{{ eq.nextDueDate ? (eq.nextDueDate | date:'mediumDate') : 'N/A' }}</span>
-            </div>
-          </td>
-          <td>
-            <p-tag [value]="eq.isOverdue ? 'OVERDUE' : 'ACTIVE'" [severity]="eq.isOverdue ? 'danger' : 'success'"></p-tag>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
+    <!-- Numbered Pagination Footer -->
+    <div class="table-paginator">
+      <div class="paginator-info">
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+      </div>
+      <div class="paginator-controls">
+        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+
+        <div class="page-numbers">
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="ellipsis">...</span>
+            } @else {
+              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- Add Equipment Modal Overlay Popup -->
   @if (showCreateModal) {
     <div class="modal-overlay" (click)="showCreateModal = false">
       <div class="modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Register Calibration Instrument</h3>
+          <h3>Register New Customer Equipment</h3>
           <button class="modal-close-btn" (click)="showCreateModal = false">
             <i class="pi pi-times"></i>
           </button>
         </div>
-
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group">
               <label>Asset Tag</label>
-              <input type="text" pInputText [(ngModel)]="newEq.assetTag" placeholder="e.g. EQ-PRES-009" />
+              <input type="text" pInputText [(ngModel)]="newEq.assetTag" placeholder="e.g. EQ-TEMP-009" />
             </div>
             <div class="form-group">
               <label>Instrument Name</label>
-              <input type="text" pInputText [(ngModel)]="newEq.name" placeholder="e.g. Torque Wrench 0-100 Nm" />
+              <input type="text" pInputText [(ngModel)]="newEq.name" placeholder="e.g. Precision Temp Calibrator" />
             </div>
             <div class="form-group">
               <label>Category</label>
-              <input type="text" pInputText [(ngModel)]="newEq.category" placeholder="Pressure / Temp / Torque" />
+              <select class="form-select" [(ngModel)]="newEq.category">
+                <option value="Pressure">Pressure</option>
+                <option value="Temperature">Temperature</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Dimensional">Dimensional</option>
+                <option value="Torque">Torque</option>
+                <option value="Mass">Mass</option>
+              </select>
             </div>
             <div class="form-group">
               <label>Manufacturer</label>
-              <input type="text" pInputText [(ngModel)]="newEq.manufacturer" placeholder="Fluke / Mitutoyo" />
+              <input type="text" pInputText [(ngModel)]="newEq.manufacturer" placeholder="e.g. Fluke Calibration" />
             </div>
             <div class="form-group">
-              <label>Model</label>
-              <input type="text" pInputText [(ngModel)]="newEq.model" placeholder="Model 2000" />
+              <label>Model Number</label>
+              <input type="text" pInputText [(ngModel)]="newEq.model" placeholder="e.g. Model-9142" />
             </div>
             <div class="form-group">
               <label>Serial Number</label>
-              <input type="text" pInputText [(ngModel)]="newEq.serialNumber" placeholder="SN-998811" />
-            </div>
-            <div class="form-group">
-              <label>Accuracy Spec</label>
-              <input type="text" pInputText [(ngModel)]="newEq.accuracySpec" placeholder="±0.05% FS" />
-            </div>
-            <div class="form-group">
-              <label>Measurement Range</label>
-              <input type="text" pInputText [(ngModel)]="newEq.measurementRange" placeholder="0 - 1000 PSI" />
+              <input type="text" pInputText [(ngModel)]="newEq.serialNumber" placeholder="SN-994012" />
             </div>
           </div>
         </div>
-
         <div class="modal-footer">
           <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
           <button class="btn-primary" (click)="saveEquipment()">Save Instrument</button>

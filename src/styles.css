@@ -130,6 +130,32 @@ input[pInputText],
   transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
+/* Native Select Dropdown Option Styling (Dark & Light Themes) */
+select option,
+.form-select option,
+.form-group select option {
+  background-color: #111827 !important;
+  color: #f8fafc !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+[data-theme="light"] select option,
+[data-theme="light"] .form-select option,
+[data-theme="light"] .form-group select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+select option:hover,
+select option:focus,
+select option:active,
+select option:checked,
+.form-select option:checked,
+.form-group select option:checked {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
 .form-group input::placeholder,
 .p-inputtext::placeholder {
   color: var(--text-muted) !important;
@@ -146,10 +172,10 @@ input[pInputText]:focus,
 }
 
 /* Primary & Action Buttons */
-.btn-primary {
+.btn-primary, .btn-sm-primary {
   background: var(--accent-gradient);
   border: none;
-  color: #000;
+  color: #0a0f1d !important;
   font-weight: 700;
   padding: 0.5rem 1rem !important;
   border-radius: 8px;
@@ -158,14 +184,25 @@ input[pInputText]:focus,
   align-items: center;
   gap: 0.4rem;
   font-size: 0.82rem !important;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 242, 254, 0.25);
 }
 
-.btn-primary:hover {
+.btn-sm-primary {
+  padding: 0.35rem 0.75rem !important;
+  border-radius: 6px !important;
+  font-size: 0.78rem !important;
+}
+
+.btn-primary i, .btn-sm-primary i {
+  color: #0a0f1d !important;
+}
+
+.btn-primary:hover, .btn-sm-primary:hover {
   transform: translateY(-1px);
 }
 
-.btn-secondary {
+.btn-secondary, .btn-sm-secondary {
   background: var(--input-bg);
   border: 1px solid var(--border-color);
   color: var(--text-main);
@@ -180,8 +217,46 @@ input[pInputText]:focus,
   transition: all 0.2s ease;
 }
 
-.btn-secondary:hover {
-  border-color: var(--text-muted);
+.btn-sm-secondary {
+  padding: 0.35rem 0.75rem !important;
+  border-radius: 6px !important;
+  font-size: 0.78rem !important;
+}
+
+.btn-secondary:hover, .btn-sm-secondary:hover {
+  border-color: var(--accent-cyan);
+}
+
+/* Light Theme Crisp High-Contrast Button Overrides */
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .btn-sm-primary {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
+}
+
+[data-theme="light"] .btn-primary i,
+[data-theme="light"] .btn-sm-primary i {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .btn-secondary,
+[data-theme="light"] .btn-sm-secondary {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .btn-secondary:hover,
+[data-theme="light"] .btn-sm-secondary:hover {
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+}
+
+[data-theme="light"] .btn-secondary i,
+[data-theme="light"] .btn-sm-secondary i {
+  color: #0284c7 !important;
 }
 
 /* Glassmorphism Cards */
@@ -375,6 +450,10 @@ h1, h2, h3, h4 {
   font-weight: 700;
 }
 
+[data-theme="light"] .page-number-btn.active {
+  color: #ffffff !important;
+}
+
 .ellipsis {
   color: var(--text-muted);
   font-size: 0.8rem;
@@ -435,6 +514,10 @@ span.p-tag i {
   color: #00f2fe !important;
   border: 1px solid rgba(0, 242, 254, 0.4) !important;
   box-shadow: 0 0 12px rgba(0, 242, 254, 0.15) !important;
+}
+
+[data-theme="light"] .p-tag-info {
+  color: #0284c7 !important;
 }
 
 .p-tag-warning {

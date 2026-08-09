@@ -1,64 +1,136 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h2>Master Job Register</h2>
-      <p class="subtitle">Laboratory Job Tracking & Calibration Log Records</p>
+      <h2>Calibration Work Orders</h2>
+      <p class="subtitle">Manage Calibration Bench Assignments & Execution Schedules</p>
     </div>
-    <button class="btn-primary" (click)="showCreateModal = true">
-      <i class="pi pi-plus"></i> New Job Register
-    </button>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV / Excel">
+        <i class="pi pi-download text-cyan"></i> Export CSV
+      </button>
+      <button class="btn-primary" (click)="showCreateModal = true">
+        <i class="pi pi-plus"></i> New Work Order
+      </button>
+    </div>
   </div>
 
   <div class="glass-card table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Job No.</th>
-          <th>Work Order Ref</th>
-          <th>Asset Tag</th>
-          <th>Instrument Name</th>
-          <th>Assigned Metrologist</th>
-          <th>Target Completion</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="code-badge">JOB-2026-901</span></td>
-          <td>WO-2026-001</td>
-          <td>EQ-PRES-001</td>
-          <td>Digital Pressure Gauge 0-1000 PSI</td>
-          <td>Alex Rivera</td>
-          <td>Aug 10, 2026</td>
-          <td><span class="p-tag p-tag-info"><i class="pi pi-spin pi-spinner"></i> IN-CALIBRATION</span></td>
-        </tr>
-        <tr>
-          <td><span class="code-badge">JOB-2026-902</span></td>
-          <td>WO-2026-002</td>
-          <td>EQ-TEMP-002</td>
-          <td>Precision Temperature Calibrator</td>
-          <td>Marcus Vance</td>
-          <td>Aug 11, 2026</td>
-          <td><span class="p-tag p-tag-warning"><i class="pi pi-hourglass"></i> QUEUED</span></td>
-        </tr>
-        <tr>
-          <td><span class="code-badge">JOB-2026-903</span></td>
-          <td>WO-2026-003</td>
-          <td>EQ-ELEC-003</td>
-          <td>Multimeter Calibrator Unit</td>
-          <td>Sarah Jenkins</td>
-          <td>Aug 08, 2026</td>
-          <td><span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> COMPLETED</span></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th (click)="toggleSort('woNo')" class="sortable-header">
+              WO No. <i class="pi" [ngClass]="getSortIcon('woNo')"></i>
+            </th>
+            <th (click)="toggleSort('customer')" class="sortable-header">
+              Customer <i class="pi" [ngClass]="getSortIcon('customer')"></i>
+            </th>
+            <th (click)="toggleSort('assetTag')" class="sortable-header">
+              Asset Tag <i class="pi" [ngClass]="getSortIcon('assetTag')"></i>
+            </th>
+            <th (click)="toggleSort('instrument')" class="sortable-header">
+              Instrument Description <i class="pi" [ngClass]="getSortIcon('instrument')"></i>
+            </th>
+            <th (click)="toggleSort('assignedTech')" class="sortable-header">
+              Assigned Metrologist <i class="pi" [ngClass]="getSortIcon('assignedTech')"></i>
+            </th>
+            <th (click)="toggleSort('dueDate')" class="sortable-header">
+              Due Date <i class="pi" [ngClass]="getSortIcon('dueDate')"></i>
+            </th>
+            <th (click)="toggleSort('status')" class="sortable-header">
+              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            </th>
+          </tr>
+          <tr class="filter-row">
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['woNo']" (ngModelChange)="updateFilter('woNo', $event)" placeholder="Search WO..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['customer']" (ngModelChange)="updateFilter('customer', $event)" placeholder="Filter Customer..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['assetTag']" (ngModelChange)="updateFilter('assetTag', $event)" placeholder="Filter Tag..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['instrument']" (ngModelChange)="updateFilter('instrument', $event)" placeholder="Filter Description..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['assignedTech']" (ngModelChange)="updateFilter('assignedTech', $event)" placeholder="Filter Tech..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['dueDate']" (ngModelChange)="updateFilter('dueDate', $event)" placeholder="Filter Date..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedData(); track item.woNo) {
+            <tr>
+              <td><span class="code-badge">{{ item.woNo }}</span></td>
+              <td><strong style="color: var(--text-main);">{{ item.customer }}</strong></td>
+              <td><span style="color: var(--accent-cyan); font-weight: 600;">{{ item.assetTag }}</span></td>
+              <td>{{ item.instrument }}</td>
+              <td>{{ item.assignedTech }}</td>
+              <td>{{ item.dueDate }}</td>
+              <td>
+                @if (item.status === 'CALIBRATED') {
+                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> CALIBRATED</span>
+                } @else if (item.status === 'IN_PROGRESS') {
+                  <span class="p-tag p-tag-warning"><i class="pi pi-spin pi-cog"></i> IN PROGRESS</span>
+                } @else if (item.status === 'PENDING') {
+                  <span class="p-tag p-tag-info"><i class="pi pi-clock"></i> PENDING</span>
+                } @else if (item.status === 'OVERDUE') {
+                  <span class="p-tag p-tag-danger"><i class="pi pi-exclamation-triangle"></i> OVERDUE</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-4" style="color: var(--text-muted);">
+                No work orders match the current column filters.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Numbered Pagination Footer Controls Bar (1, 2, 3... 100) -->
+    <div class="table-paginator">
+      <div class="paginator-info">
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+      </div>
+      <div class="paginator-controls">
+        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+
+        <div class="page-numbers">
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="ellipsis">...</span>
+            } @else {
+              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
   @if (showCreateModal) {
     <div class="modal-overlay" (click)="showCreateModal = false">
       <div class="modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Create Master Job Record</h3>
+          <h3>Create New Work Order</h3>
           <button class="modal-close-btn" (click)="showCreateModal = false">
             <i class="pi pi-times"></i>
           </button>
@@ -66,16 +138,16 @@
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group">
-              <label>Work Order Ref</label>
-              <input type="text" pInputText [(ngModel)]="newJob.woRef" placeholder="e.g. WO-2026-001" />
+              <label>Work Order Reference</label>
+              <input type="text" pInputText [(ngModel)]="newJob.woRef" placeholder="e.g. WO-2026-016" />
             </div>
             <div class="form-group">
               <label>Asset Tag</label>
-              <input type="text" pInputText [(ngModel)]="newJob.assetTag" placeholder="e.g. EQ-PRES-001" />
+              <input type="text" pInputText [(ngModel)]="newJob.assetTag" placeholder="e.g. EQ-TEMP-002" />
             </div>
             <div class="form-group">
-              <label>Instrument Name</label>
-              <input type="text" pInputText [(ngModel)]="newJob.instrument" placeholder="Digital Pressure Gauge" />
+              <label>Instrument Description</label>
+              <input type="text" pInputText [(ngModel)]="newJob.instrument" placeholder="e.g. Precision Temp Calibrator" />
             </div>
             <div class="form-group">
               <label>Assigned Metrologist</label>
@@ -85,7 +157,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
-          <button class="btn-primary" (click)="saveJob()">Register Job</button>
+          <button class="btn-primary" (click)="saveJob()">Create Work Order</button>
         </div>
       </div>
     </div>

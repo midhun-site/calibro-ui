@@ -4,50 +4,119 @@
       <h2>Quotations & Estimates</h2>
       <p class="subtitle">Calibration Service Proposals & Price Estimates</p>
     </div>
-    <button class="btn-primary" (click)="showCreateModal = true">
-      <i class="pi pi-plus"></i> New Quotation
-    </button>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
+        <i class="pi pi-download text-cyan"></i> Export CSV
+      </button>
+      <button class="btn-primary" (click)="showCreateModal = true">
+        <i class="pi pi-plus"></i> New Quotation
+      </button>
+    </div>
   </div>
 
   <div class="glass-card table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Quotation No.</th>
-          <th>Customer</th>
-          <th>Quote Date</th>
-          <th>Total Amount</th>
-          <th>Valid Until</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="code-badge">QT-2026-049</span></td>
-          <td>AeroSpace Tech LLC</td>
-          <td>Aug 09, 2026</td>
-          <td>$4,850.00</td>
-          <td>Sep 09, 2026</td>
-          <td><span class="p-tag p-tag-info"><i class="pi pi-send"></i> SENT</span></td>
-        </tr>
-        <tr>
-          <td><span class="code-badge">QT-2026-050</span></td>
-          <td>BioPharm Solutions</td>
-          <td>Aug 08, 2026</td>
-          <td>$12,400.00</td>
-          <td>Sep 08, 2026</td>
-          <td><span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> APPROVED</span></td>
-        </tr>
-        <tr>
-          <td><span class="code-badge">QT-2026-051</span></td>
-          <td>Precision Eng Co</td>
-          <td>Aug 07, 2026</td>
-          <td>$2,100.00</td>
-          <td>Sep 07, 2026</td>
-          <td><span class="p-tag p-tag-warning"><i class="pi pi-hourglass"></i> PENDING</span></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th (click)="toggleSort('quoteNo')" class="sortable-header">
+              Quotation No. <i class="pi" [ngClass]="getSortIcon('quoteNo')"></i>
+            </th>
+            <th (click)="toggleSort('customer')" class="sortable-header">
+              Customer <i class="pi" [ngClass]="getSortIcon('customer')"></i>
+            </th>
+            <th (click)="toggleSort('quoteDate')" class="sortable-header">
+              Quote Date <i class="pi" [ngClass]="getSortIcon('quoteDate')"></i>
+            </th>
+            <th (click)="toggleSort('totalAmount')" class="sortable-header">
+              Total Amount <i class="pi" [ngClass]="getSortIcon('totalAmount')"></i>
+            </th>
+            <th (click)="toggleSort('validUntil')" class="sortable-header">
+              Valid Until <i class="pi" [ngClass]="getSortIcon('validUntil')"></i>
+            </th>
+            <th (click)="toggleSort('status')" class="sortable-header">
+              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            </th>
+          </tr>
+          <tr class="filter-row">
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['quoteNo']" (ngModelChange)="updateFilter('quoteNo', $event)" placeholder="Search No..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['customer']" (ngModelChange)="updateFilter('customer', $event)" placeholder="Filter Customer..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['quoteDate']" (ngModelChange)="updateFilter('quoteDate', $event)" placeholder="Filter Date..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['totalAmount']" (ngModelChange)="updateFilter('totalAmount', $event)" placeholder="Filter Amount..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['validUntil']" (ngModelChange)="updateFilter('validUntil', $event)" placeholder="Filter Valid..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedData(); track item.quoteNo) {
+            <tr>
+              <td><span class="code-badge">{{ item.quoteNo }}</span></td>
+              <td><strong style="color: var(--text-main);">{{ item.customer }}</strong></td>
+              <td>{{ item.quoteDate }}</td>
+              <td style="font-weight: 700; color: var(--accent-cyan);">{{ item.totalAmount }}</td>
+              <td>{{ item.validUntil }}</td>
+              <td>
+                @if (item.status === 'APPROVED') {
+                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> APPROVED</span>
+                } @else if (item.status === 'SENT') {
+                  <span class="p-tag p-tag-info"><i class="pi pi-send"></i> SENT</span>
+                } @else if (item.status === 'PENDING') {
+                  <span class="p-tag p-tag-warning"><i class="pi pi-hourglass"></i> PENDING</span>
+                } @else if (item.status === 'REJECTED') {
+                  <span class="p-tag p-tag-danger"><i class="pi pi-times-circle"></i> REJECTED</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center py-4" style="color: var(--text-muted);">
+                No quotation records match the current filters.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Numbered Pagination Footer -->
+    <div class="table-paginator">
+      <div class="paginator-info">
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+      </div>
+      <div class="paginator-controls">
+        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+
+        <div class="page-numbers">
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="ellipsis">...</span>
+            } @else {
+              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
   @if (showCreateModal) {

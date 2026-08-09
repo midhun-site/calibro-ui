@@ -1,60 +1,121 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h2>QC Calibration Procedures List</h2>
-      <p class="subtitle">Standard Operating Procedures & ISO 17025 Work Instructions</p>
+      <h2>Calibration Procedures & SOP Registry</h2>
+      <p class="subtitle">ISO/IEC 17025 Standard Operating Procedures & Technical Guidelines</p>
     </div>
-    <button class="btn-primary" (click)="showCreateModal = true">
-      <i class="pi pi-plus"></i> New Procedure
-    </button>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
+        <i class="pi pi-download text-cyan"></i> Export CSV
+      </button>
+      <button class="btn-primary" (click)="showCreateModal = true">
+        <i class="pi pi-plus"></i> Register SOP
+      </button>
+    </div>
   </div>
 
   <div class="glass-card table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>SOP Doc No.</th>
-          <th>Procedure Title</th>
-          <th>Discipline</th>
-          <th>Standard Ref</th>
-          <th>Revision</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="code-badge">SOP-PRES-001</span></td>
-          <td>Digital & Analog Pressure Gauge Calibration Procedure</td>
-          <td>Pressure</td>
-          <td>DKD-R 6-1 / EURAMET cg-17</td>
-          <td>Rev 4.0</td>
-          <td><span class="p-tag p-tag-success">APPROVED</span></td>
-        </tr>
-        <tr>
-          <td><span class="code-badge">SOP-TEMP-002</span></td>
-          <td>PRT & Thermocouple Comparison Calibration</td>
-          <td>Temperature</td>
-          <td>ASTM E220 / ITS-90</td>
-          <td>Rev 2.1</td>
-          <td><span class="p-tag p-tag-success">APPROVED</span></td>
-        </tr>
-        <tr>
-          <td><span class="code-badge">SOP-ELEC-003</span></td>
-          <td>Multimeter & Fluke Calibrator Verification Procedure</td>
-          <td>Electrical</td>
-          <td>IEEE 1212 / ISO 17025</td>
-          <td>Rev 3.2</td>
-          <td><span class="p-tag p-tag-success">APPROVED</span></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th (click)="toggleSort('docNo')" class="sortable-header">
+              SOP Doc No. <i class="pi" [ngClass]="getSortIcon('docNo')"></i>
+            </th>
+            <th (click)="toggleSort('title')" class="sortable-header">
+              Procedure Title <i class="pi" [ngClass]="getSortIcon('title')"></i>
+            </th>
+            <th (click)="toggleSort('discipline')" class="sortable-header">
+              Discipline <i class="pi" [ngClass]="getSortIcon('discipline')"></i>
+            </th>
+            <th (click)="toggleSort('standardRef')" class="sortable-header">
+              Standard Reference <i class="pi" [ngClass]="getSortIcon('standardRef')"></i>
+            </th>
+            <th (click)="toggleSort('revNo')" class="sortable-header">
+              Revision <i class="pi" [ngClass]="getSortIcon('revNo')"></i>
+            </th>
+            <th (click)="toggleSort('status')" class="sortable-header">
+              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            </th>
+          </tr>
+          <tr class="filter-row">
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['docNo']" (ngModelChange)="updateFilter('docNo', $event)" placeholder="Search SOP..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['title']" (ngModelChange)="updateFilter('title', $event)" placeholder="Filter Title..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['discipline']" (ngModelChange)="updateFilter('discipline', $event)" placeholder="Filter Discipline..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['standardRef']" (ngModelChange)="updateFilter('standardRef', $event)" placeholder="Filter Standard..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['revNo']" (ngModelChange)="updateFilter('revNo', $event)" placeholder="Filter Rev..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedData(); track item.docNo) {
+            <tr>
+              <td><span class="code-badge">{{ item.docNo }}</span></td>
+              <td><strong style="color: var(--text-main);">{{ item.title }}</strong></td>
+              <td><span class="code-badge" style="color: var(--accent-cyan);">{{ item.discipline }}</span></td>
+              <td>{{ item.standardRef }}</td>
+              <td>{{ item.revNo }}</td>
+              <td>
+                <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> ACTIVE</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center py-4" style="color: var(--text-muted);">
+                No procedure records match the current filters.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Numbered Pagination Footer Controls Bar (1, 2, 3... 100) -->
+    <div class="table-paginator">
+      <div class="paginator-info">
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+      </div>
+      <div class="paginator-controls">
+        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+
+        <div class="page-numbers">
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="ellipsis">...</span>
+            } @else {
+              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
   @if (showCreateModal) {
     <div class="modal-overlay" (click)="showCreateModal = false">
       <div class="modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Create Calibration Procedure</h3>
+          <h3>Register SOP Calibration Procedure</h3>
           <button class="modal-close-btn" (click)="showCreateModal = false">
             <i class="pi pi-times"></i>
           </button>
@@ -62,20 +123,20 @@
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group">
-              <label>SOP Number</label>
-              <input type="text" pInputText [(ngModel)]="newProc.docNo" placeholder="e.g. SOP-TORQ-005" />
+              <label>SOP Document Number</label>
+              <input type="text" pInputText [(ngModel)]="newProc.docNo" placeholder="e.g. SOP-CAL-P09" />
             </div>
             <div class="form-group">
               <label>Procedure Title</label>
-              <input type="text" pInputText [(ngModel)]="newProc.title" placeholder="e.g. Torque Wrench Calibration" />
+              <input type="text" pInputText [(ngModel)]="newProc.title" placeholder="e.g. Calibration of Digital Pressure Transmitters" />
             </div>
             <div class="form-group">
               <label>Discipline</label>
-              <input type="text" pInputText [(ngModel)]="newProc.discipline" placeholder="Pressure / Temp / Torque" />
+              <input type="text" pInputText [(ngModel)]="newProc.discipline" placeholder="Pressure / Temp / Electrical" />
             </div>
             <div class="form-group">
               <label>Standard Reference</label>
-              <input type="text" pInputText [(ngModel)]="newProc.standardRef" placeholder="ISO 6789 / EURAMET" />
+              <input type="text" pInputText [(ngModel)]="newProc.standardRef" placeholder="e.g. EURAMET cg-17" />
             </div>
           </div>
         </div>

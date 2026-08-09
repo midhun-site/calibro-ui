@@ -1,60 +1,121 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h2>User Directory & System Accounts</h2>
-      <p class="subtitle">Manage Laboratory Staff, Metrologists & Admin Access Accounts</p>
+      <h2>System Users & Metrology Staff</h2>
+      <p class="subtitle">User Accounts, Access Roles & Departmental Signatories</p>
     </div>
-    <button class="btn-primary" (click)="showCreateModal = true">
-      <i class="pi pi-user-plus"></i> Add New User
-    </button>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
+        <i class="pi pi-download text-cyan"></i> Export CSV
+      </button>
+      <button class="btn-primary" (click)="showCreateModal = true">
+        <i class="pi pi-plus"></i> Add New User
+      </button>
+    </div>
   </div>
 
   <div class="glass-card table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>User ID</th>
-          <th>Full Name</th>
-          <th>Username / Email</th>
-          <th>Role</th>
-          <th>Assigned Department</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="code-badge">USR-001</span></td>
-          <td><strong style="color: var(--text-main);">Alex Rivera</strong></td>
-          <td>alex.rivera&#64;calibro.com</td>
-          <td>Senior Metrologist</td>
-          <td>Pressure & Vacuum Lab</td>
-          <td><span class="p-tag p-tag-success">ACTIVE</span></td>
-        </tr>
-        <tr>
-          <td><span class="code-badge">USR-002</span></td>
-          <td><strong style="color: var(--text-main);">Dr. Marcus Vance</strong></td>
-          <td>marcus.vance&#64;calibro.com</td>
-          <td>Quality Manager</td>
-          <td>ISO 17025 Quality Bureau</td>
-          <td><span class="p-tag p-tag-success">ACTIVE</span></td>
-        </tr>
-        <tr>
-          <td><span class="code-badge">USR-003</span></td>
-          <td><strong style="color: var(--text-main);">Sarah Jenkins</strong></td>
-          <td>sarah.jenkins&#64;calibro.com</td>
-          <td>Lab Technician</td>
-          <td>Electrical Standards Lab</td>
-          <td><span class="p-tag p-tag-success">ACTIVE</span></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th (click)="toggleSort('userId')" class="sortable-header">
+              User ID <i class="pi" [ngClass]="getSortIcon('userId')"></i>
+            </th>
+            <th (click)="toggleSort('fullName')" class="sortable-header">
+              Full Name <i class="pi" [ngClass]="getSortIcon('fullName')"></i>
+            </th>
+            <th (click)="toggleSort('email')" class="sortable-header">
+              Email Address <i class="pi" [ngClass]="getSortIcon('email')"></i>
+            </th>
+            <th (click)="toggleSort('role')" class="sortable-header">
+              System Role <i class="pi" [ngClass]="getSortIcon('role')"></i>
+            </th>
+            <th (click)="toggleSort('department')" class="sortable-header">
+              Department <i class="pi" [ngClass]="getSortIcon('department')"></i>
+            </th>
+            <th (click)="toggleSort('status')" class="sortable-header">
+              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            </th>
+          </tr>
+          <tr class="filter-row">
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['userId']" (ngModelChange)="updateFilter('userId', $event)" placeholder="Search ID..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['fullName']" (ngModelChange)="updateFilter('fullName', $event)" placeholder="Filter Name..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['email']" (ngModelChange)="updateFilter('email', $event)" placeholder="Filter Email..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['role']" (ngModelChange)="updateFilter('role', $event)" placeholder="Filter Role..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['department']" (ngModelChange)="updateFilter('department', $event)" placeholder="Filter Dept..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedData(); track item.userId) {
+            <tr>
+              <td><span class="code-badge">{{ item.userId }}</span></td>
+              <td><strong style="color: var(--text-main);">{{ item.fullName }}</strong></td>
+              <td>{{ item.email }}</td>
+              <td><span class="code-badge" style="color: var(--accent-cyan);">{{ item.role }}</span></td>
+              <td>{{ item.department }}</td>
+              <td>
+                <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> ACTIVE</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center py-4" style="color: var(--text-muted);">
+                No user records match the current filters.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Numbered Pagination Footer Controls Bar (1, 2, 3... 100) -->
+    <div class="table-paginator">
+      <div class="paginator-info">
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+      </div>
+      <div class="paginator-controls">
+        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+
+        <div class="page-numbers">
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="ellipsis">...</span>
+            } @else {
+              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
   @if (showCreateModal) {
     <div class="modal-overlay" (click)="showCreateModal = false">
       <div class="modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Create User Account</h3>
+          <h3>Register System User</h3>
           <button class="modal-close-btn" (click)="showCreateModal = false">
             <i class="pi pi-times"></i>
           </button>
@@ -63,25 +124,25 @@
           <div class="form-grid">
             <div class="form-group">
               <label>Full Name</label>
-              <input type="text" pInputText [(ngModel)]="newUser.fullName" placeholder="e.g. Sarah Jenkins" />
+              <input type="text" pInputText [(ngModel)]="newUser.fullName" placeholder="e.g. Alex Rivera" />
             </div>
             <div class="form-group">
               <label>Email Address</label>
-              <input type="email" pInputText [(ngModel)]="newUser.email" placeholder="sarah.jenkins@calibro.com" />
+              <input type="email" pInputText [(ngModel)]="newUser.email" placeholder="alex.rivera@calibro.com" />
             </div>
             <div class="form-group">
               <label>System Role</label>
-              <input type="text" pInputText [(ngModel)]="newUser.role" placeholder="Metrologist / Admin" />
+              <input type="text" pInputText [(ngModel)]="newUser.role" placeholder="Metrologist / Technical Signatory" />
             </div>
             <div class="form-group">
               <label>Department</label>
-              <input type="text" pInputText [(ngModel)]="newUser.department" placeholder="Pressure / Quality" />
+              <input type="text" pInputText [(ngModel)]="newUser.department" placeholder="Lab Operations" />
             </div>
           </div>
         </div>
         <div class="modal-footer">
           <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
-          <button class="btn-primary" (click)="saveUser()">Create User</button>
+          <button class="btn-primary" (click)="saveUser()">Save User</button>
         </div>
       </div>
     </div>

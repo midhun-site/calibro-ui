@@ -4,50 +4,118 @@
       <h2>Customer Directory</h2>
       <p class="subtitle">Manage Calibration Accounts & Site Locations</p>
     </div>
-    <button class="btn-primary" (click)="showCreateModal = true">
-      <i class="pi pi-plus"></i> Add New Customer
-    </button>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
+        <i class="pi pi-download text-cyan"></i> Export CSV
+      </button>
+      <button class="btn-primary" (click)="showCreateModal = true">
+        <i class="pi pi-plus"></i> Add New Customer
+      </button>
+    </div>
   </div>
 
   <div class="glass-card table-card">
-    <p-table [value]="customers()" [responsive]="true" [paginator]="true" [rows]="5" styleClass="p-datatable-sm">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Code</th>
-          <th>Company Name</th>
-          <th>Contact Email</th>
-          <th>Phone</th>
-          <th>City / Country</th>
-          <th>Equipments</th>
-          <th>Active Work Orders</th>
-          <th>Actions</th>
-        </tr>
-      </ng-template>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th (click)="toggleSort('code')" class="sortable-header">
+              Code <i class="pi" [ngClass]="getSortIcon('code')"></i>
+            </th>
+            <th (click)="toggleSort('companyName')" class="sortable-header">
+              Company Name <i class="pi" [ngClass]="getSortIcon('companyName')"></i>
+            </th>
+            <th (click)="toggleSort('email')" class="sortable-header">
+              Contact Email <i class="pi" [ngClass]="getSortIcon('email')"></i>
+            </th>
+            <th (click)="toggleSort('phone')" class="sortable-header">
+              Phone <i class="pi" [ngClass]="getSortIcon('phone')"></i>
+            </th>
+            <th (click)="toggleSort('city')" class="sortable-header">
+              City / Country <i class="pi" [ngClass]="getSortIcon('city')"></i>
+            </th>
+            <th (click)="toggleSort('totalEquipments')" class="sortable-header">
+              Equipments <i class="pi" [ngClass]="getSortIcon('totalEquipments')"></i>
+            </th>
+            <th (click)="toggleSort('activeWorkOrders')" class="sortable-header">
+              Active Work Orders <i class="pi" [ngClass]="getSortIcon('activeWorkOrders')"></i>
+            </th>
+          </tr>
+          <tr class="filter-row">
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['code']" (ngModelChange)="updateFilter('code', $event)" placeholder="Search Code..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['companyName']" (ngModelChange)="updateFilter('companyName', $event)" placeholder="Filter Company..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['email']" (ngModelChange)="updateFilter('email', $event)" placeholder="Filter Email..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['phone']" (ngModelChange)="updateFilter('phone', $event)" placeholder="Filter Phone..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['city']" (ngModelChange)="updateFilter('city', $event)" placeholder="Filter City..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['totalEquipments']" (ngModelChange)="updateFilter('totalEquipments', $event)" placeholder="Filter Equip..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['activeWorkOrders']" (ngModelChange)="updateFilter('activeWorkOrders', $event)" placeholder="Filter Orders..." class="filter-input" />
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedData(); track item.code) {
+            <tr>
+              <td><span class="code-badge">{{ item.code }}</span></td>
+              <td><strong style="color: var(--text-main);">{{ item.companyName }}</strong></td>
+              <td>{{ item.email }}</td>
+              <td>{{ item.phone }}</td>
+              <td>{{ item.city }}, {{ item.country }}</td>
+              <td><span class="code-badge" style="color: var(--accent-cyan);">{{ item.totalEquipments }} Assets</span></td>
+              <td><span class="p-tag p-tag-info">{{ item.activeWorkOrders }} Active</span></td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-4" style="color: var(--text-muted);">
+                No customer records match the current filters.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
-      <ng-template pTemplate="body" let-cust>
-        <tr>
-          <td><span class="code-badge">{{ cust.code }}</span></td>
-          <td><strong style="color: var(--text-main);">{{ cust.companyName }}</strong></td>
-          <td>{{ cust.email }}</td>
-          <td>{{ cust.phone }}</td>
-          <td>{{ cust.city }}, {{ cust.country }}</td>
-          <td><span class="count-pill cyan">{{ cust.totalEquipments }}</span></td>
-          <td><span class="count-pill blue">{{ cust.activeWorkOrders }}</span></td>
-          <td>
-            <button class="icon-btn"><i class="pi pi-eye"></i></button>
-          </td>
-        </tr>
-      </ng-template>
+    <!-- Numbered Pagination Footer -->
+    <div class="table-paginator">
+      <div class="paginator-info">
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+      </div>
+      <div class="paginator-controls">
+        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+          <i class="pi pi-chevron-left"></i>
+        </button>
 
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="8" class="text-center p-4">No customers registered yet. Click Add New Customer above.</td>
-        </tr>
-      </ng-template>
-    </p-table>
+        <div class="page-numbers">
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="ellipsis">...</span>
+            } @else {
+              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- Add Customer Modal Overlay Popup -->
   @if (showCreateModal) {
     <div class="modal-overlay" (click)="showCreateModal = false">
       <div class="modal-card" (click)="$event.stopPropagation()">
@@ -57,12 +125,11 @@
             <i class="pi pi-times"></i>
           </button>
         </div>
-
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group">
               <label>Customer Code</label>
-              <input type="text" pInputText [(ngModel)]="newCust.code" placeholder="e.g. CUST-1003" />
+              <input type="text" pInputText [(ngModel)]="newCust.code" placeholder="e.g. CUST-1011" />
             </div>
             <div class="form-group">
               <label>Company Name</label>
@@ -74,7 +141,7 @@
             </div>
             <div class="form-group">
               <label>Phone</label>
-              <input type="text" pInputText [(ngModel)]="newCust.phone" placeholder="+1 555-0199" />
+              <input type="text" pInputText [(ngModel)]="newCust.phone" placeholder="+971 4 555-0199" />
             </div>
             <div class="form-group">
               <label>Address</label>
@@ -82,11 +149,10 @@
             </div>
             <div class="form-group">
               <label>City / Country</label>
-              <input type="text" pInputText [(ngModel)]="newCust.city" placeholder="Austin, USA" />
+              <input type="text" pInputText [(ngModel)]="newCust.city" placeholder="Dubai, UAE" />
             </div>
           </div>
         </div>
-
         <div class="modal-footer">
           <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
           <button class="btn-primary" (click)="saveCustomer()">Save Customer</button>

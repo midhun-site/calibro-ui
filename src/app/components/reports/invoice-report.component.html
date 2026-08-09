@@ -1,38 +1,159 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h2>Invoice Summary Report</h2>
-      <p class="subtitle">Billing Ledger & Revenue Performance Breakdown</p>
+      <h2>Invoice & Billing Ledger</h2>
+      <p class="subtitle">Laboratory Service Invoicing & Revenue Ledger Tracking</p>
     </div>
-    <button class="btn-primary">
-      <i class="pi pi-file-excel"></i> Export Excel
-    </button>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV / Excel">
+        <i class="pi pi-download text-cyan"></i> Export CSV
+      </button>
+      <button class="btn-primary" (click)="showCreateModal = true">
+        <i class="pi pi-plus"></i> Create Invoice
+      </button>
+    </div>
   </div>
 
   <div class="glass-card table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Invoice No.</th>
-          <th>Customer</th>
-          <th>Issue Date</th>
-          <th>Due Date</th>
-          <th>Tax (5%)</th>
-          <th>Total Amount</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="code-badge">INV-2026-0042</span></td>
-          <td>AeroSpace Tech LLC</td>
-          <td>Aug 08, 2026</td>
-          <td>Sep 07, 2026</td>
-          <td>$22.50</td>
-          <td><strong>$472.50</strong></td>
-          <td><span class="p-tag p-tag-success">PAID</span></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th (click)="toggleSort('invoiceNo')" class="sortable-header">
+              Invoice No. <i class="pi" [ngClass]="getSortIcon('invoiceNo')"></i>
+            </th>
+            <th (click)="toggleSort('customer')" class="sortable-header">
+              Customer <i class="pi" [ngClass]="getSortIcon('customer')"></i>
+            </th>
+            <th (click)="toggleSort('issueDate')" class="sortable-header">
+              Issue Date <i class="pi" [ngClass]="getSortIcon('issueDate')"></i>
+            </th>
+            <th (click)="toggleSort('dueDate')" class="sortable-header">
+              Due Date <i class="pi" [ngClass]="getSortIcon('dueDate')"></i>
+            </th>
+            <th (click)="toggleSort('taxAmount')" class="sortable-header">
+              Tax (5%) <i class="pi" [ngClass]="getSortIcon('taxAmount')"></i>
+            </th>
+            <th (click)="toggleSort('totalAmount')" class="sortable-header">
+              Total Amount <i class="pi" [ngClass]="getSortIcon('totalAmount')"></i>
+            </th>
+            <th (click)="toggleSort('status')" class="sortable-header">
+              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            </th>
+          </tr>
+          <tr class="filter-row">
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['invoiceNo']" (ngModelChange)="updateFilter('invoiceNo', $event)" placeholder="Search INV..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['customer']" (ngModelChange)="updateFilter('customer', $event)" placeholder="Filter Customer..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['issueDate']" (ngModelChange)="updateFilter('issueDate', $event)" placeholder="Filter Issue..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['dueDate']" (ngModelChange)="updateFilter('dueDate', $event)" placeholder="Filter Due..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['taxAmount']" (ngModelChange)="updateFilter('taxAmount', $event)" placeholder="Filter Tax..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['totalAmount']" (ngModelChange)="updateFilter('totalAmount', $event)" placeholder="Filter Amount..." class="filter-input" />
+            </td>
+            <td>
+              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedData(); track item.invoiceNo) {
+            <tr>
+              <td><span class="code-badge">{{ item.invoiceNo }}</span></td>
+              <td><strong style="color: var(--text-main);">{{ item.customer }}</strong></td>
+              <td>{{ item.issueDate }}</td>
+              <td>{{ item.dueDate }}</td>
+              <td>{{ item.taxAmount }}</td>
+              <td style="font-weight: 700; color: var(--accent-cyan);">{{ item.totalAmount }}</td>
+              <td>
+                @if (item.status === 'PAID') {
+                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> PAID</span>
+                } @else if (item.status === 'PENDING') {
+                  <span class="p-tag p-tag-warning"><i class="pi pi-clock"></i> PENDING</span>
+                } @else if (item.status === 'OVERDUE') {
+                  <span class="p-tag p-tag-danger"><i class="pi pi-exclamation-triangle"></i> OVERDUE</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-4" style="color: var(--text-muted);">
+                No invoices match the current column filters.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Numbered Pagination Footer Controls Bar (1, 2, 3... 100) -->
+    <div class="table-paginator">
+      <div class="paginator-info">
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+      </div>
+      <div class="paginator-controls">
+        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+
+        <div class="page-numbers">
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="ellipsis">...</span>
+            } @else {
+              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
+
+  @if (showCreateModal) {
+    <div class="modal-overlay" (click)="showCreateModal = false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Create New Service Invoice</h3>
+          <button class="modal-close-btn" (click)="showCreateModal = false">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Customer Name</label>
+              <input type="text" pInputText [(ngModel)]="newInvoice.customerName" placeholder="e.g. AeroSpace Tech LLC" />
+            </div>
+            <div class="form-group">
+              <label>Subtotal Amount ($)</label>
+              <input type="number" pInputText [(ngModel)]="newInvoice.amount" placeholder="450.00" />
+            </div>
+            <div class="form-group">
+              <label>Tax Rate (%)</label>
+              <input type="number" pInputText [(ngModel)]="newInvoice.tax" placeholder="5" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
+          <button class="btn-primary" (click)="saveInvoice()">Generate Invoice</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>
