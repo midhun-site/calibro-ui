@@ -1,4 +1,4 @@
-<div class="page-container">
+<div class="page-container" (click)="closeActionMenu()">
   <div class="page-header">
     <div>
       <h2>Calibration Enquiries</h2>
@@ -37,6 +37,7 @@
             <th (click)="toggleSort('status')" class="sortable-header">
               Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
             </th>
+            <th class="text-center">Actions</th>
           </tr>
           <!-- Per-Column Search Filter Inputs Row -->
           <tr class="filter-row">
@@ -58,6 +59,7 @@
             <td>
               <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
             </td>
+            <td></td>
           </tr>
         </thead>
         <tbody>
@@ -77,10 +79,35 @@
                   <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> APPROVED</span>
                 }
               </td>
+              <td class="text-center action-col-cell">
+                <div class="actions-dropdown-wrapper">
+                  <button class="action-dropdown-btn" (click)="toggleActionMenu(item.enquiryNo, $event)" title="Click for options">
+                    <i class="pi pi-ellipsis-v"></i> Actions <i class="pi pi-chevron-down text-xs"></i>
+                  </button>
+
+                  @if (activeActionMenu() === item.enquiryNo) {
+                    <div class="action-popover-menu" (click)="$event.stopPropagation()">
+                      <button class="action-menu-item" (click)="viewEnquiry(item)">
+                        <i class="pi pi-eye text-blue"></i> View Details
+                      </button>
+                      <button class="action-menu-item" (click)="editEnquiry(item)">
+                        <i class="pi pi-pencil text-amber"></i> Edit Enquiry
+                      </button>
+                      <button class="action-menu-item" (click)="openHistory(item)">
+                        <i class="pi pi-history text-cyan"></i> History & Audit
+                      </button>
+                      <div class="menu-divider"></div>
+                      <button class="action-menu-item danger" (click)="deleteEnquiry(item)">
+                        <i class="pi pi-trash"></i> Delete Enquiry
+                      </button>
+                    </div>
+                  }
+                </div>
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="text-center py-4" style="color: var(--text-muted);">
+              <td colspan="7" class="text-center py-4" style="color: var(--text-muted);">
                 No enquiries match the current column filters.
               </td>
             </tr>
@@ -117,4 +144,202 @@
       </div>
     </div>
   </div>
+
+  <!-- VIEW ENQUIRY DETAILS MODAL -->
+  @if (showViewModal()) {
+    <div class="modal-overlay" (click)="showViewModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Enquiry Details — {{ selectedViewEnquiry()?.enquiryNo }}</h3>
+          <button class="modal-close-btn" (click)="showViewModal.set(false)">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Enquiry Reference</span>
+              <span class="detail-value code-badge">{{ selectedViewEnquiry()?.enquiryNo }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Customer Company</span>
+              <span class="detail-value bold">{{ selectedViewEnquiry()?.customer }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Intake Date</span>
+              <span class="detail-value">{{ selectedViewEnquiry()?.receivedDate }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Instruments Scope</span>
+              <span class="detail-value">{{ selectedViewEnquiry()?.instrumentsCount }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Service Type</span>
+              <span class="detail-value">{{ selectedViewEnquiry()?.serviceType }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Current Status</span>
+              <span class="detail-value">{{ selectedViewEnquiry()?.status }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" (click)="showViewModal.set(false)">Close View</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- EDIT ENQUIRY MODAL -->
+  @if (showEditModal()) {
+    <div class="modal-overlay" (click)="showEditModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Edit Enquiry — {{ editEnquiryData().enquiryNo }}</h3>
+          <button class="modal-close-btn" (click)="showEditModal.set(false)">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Customer Name</label>
+              <input type="text" pInputText [(ngModel)]="editEnquiryData().customer" />
+            </div>
+            <div class="form-group">
+              <label>Instruments Count</label>
+              <input type="text" pInputText [(ngModel)]="editEnquiryData().instrumentsCount" />
+            </div>
+            <div class="form-group">
+              <label>Service Type</label>
+              <select class="form-select" [(ngModel)]="editEnquiryData().serviceType">
+                <option value="Calibration (CAL)">Calibration (CAL)</option>
+                <option value="In-House Lab">In-House Lab</option>
+                <option value="On-Site Calibration">On-Site Calibration</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select class="form-select" [(ngModel)]="editEnquiryData().status">
+                <option value="OPEN">OPEN</option>
+                <option value="QUOTED">QUOTED</option>
+                <option value="APPROVED">APPROVED</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showEditModal.set(false)">Cancel</button>
+          <button class="btn-primary" (click)="saveEditEnquiry()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Bottom History Drawer Overlay Panel (Slides Up to Middle of Screen) -->
+  @if (showHistoryDrawer()) {
+    <div class="history-drawer-overlay" (click)="closeHistory()"></div>
+
+    <div class="history-drawer" [class.open]="showHistoryDrawer()">
+      <div class="drawer-drag-handle"></div>
+
+      <!-- Drawer Header Bar -->
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <span class="code-badge lg">{{ selectedEnquiry()?.enquiryNo }}</span>
+          <div>
+            <h3>{{ selectedEnquiry()?.customer }}</h3>
+            <span class="drawer-subtitle">Intake Date: {{ selectedEnquiry()?.receivedDate }} &bull; {{ selectedEnquiry()?.instrumentsCount }}</span>
+          </div>
+          @if (selectedEnquiry()?.status === 'OPEN') {
+            <span class="p-tag p-tag-info"><i class="pi pi-clock"></i> OPEN</span>
+          } @else if (selectedEnquiry()?.status === 'QUOTED') {
+            <span class="p-tag p-tag-warning"><i class="pi pi-file-edit"></i> QUOTED</span>
+          } @else if (selectedEnquiry()?.status === 'APPROVED') {
+            <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> APPROVED</span>
+          }
+        </div>
+
+        <!-- Drawer Navigation Tabs -->
+        <div class="drawer-tabs">
+          <button class="drawer-tab-btn" [class.active]="activeTab() === 'audit'" (click)="setTab('audit')">
+            <i class="pi pi-history"></i> Audit Trail & User Actions
+          </button>
+          <button class="drawer-tab-btn" [class.active]="activeTab() === 'timeline'" (click)="setTab('timeline')">
+            <i class="pi pi-sitemap"></i> Pipeline Stage Timeline (Enquiry ➔ Invoice)
+          </button>
+        </div>
+
+        <button class="drawer-close-btn" (click)="closeHistory()" title="Close Panel">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Content Body -->
+      <div class="drawer-body">
+        <!-- TAB 1: Audit Log (User Info, Action, Timestamp) -->
+        @if (activeTab() === 'audit') {
+          <div class="audit-log-container">
+            @for (log of auditLogs(); track log.id) {
+              <div class="audit-log-card">
+                <div class="user-avatar-badge">{{ log.userAvatar }}</div>
+                <div class="audit-info">
+                  <div class="audit-top">
+                    <div class="user-meta">
+                      <span class="user-name">{{ log.userName }}</span>
+                      <span class="user-role-chip">{{ log.userRole }}</span>
+                    </div>
+                    <div class="timestamp-meta">
+                      <i class="pi pi-clock"></i>
+                      <span>{{ log.timestamp }}</span>
+                      <span class="relative-time">({{ log.relativeTime }})</span>
+                    </div>
+                  </div>
+                  <h4 class="action-title">{{ log.action }}</h4>
+                  <p class="action-details">{{ log.details }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- TAB 2: Pipeline Stage Timeline (Enquiry to Invoice) -->
+        @if (activeTab() === 'timeline') {
+          <div class="pipeline-timeline-container">
+            <div class="pipeline-horizontal-track">
+              @for (stage of pipelineTimeline(); track stage.stageName; let i = $index) {
+                <div class="pipeline-stage-item" [class.completed]="stage.status === 'completed'" [class.active]="stage.status === 'active'" [class.pending]="stage.status === 'pending'">
+                  <div class="stage-icon-circle">
+                    @if (stage.status === 'completed') {
+                      <i class="pi pi-check"></i>
+                    } @else {
+                      <i class="pi" [ngClass]="stage.icon"></i>
+                    }
+                  </div>
+                  <div class="stage-content">
+                    <div class="stage-name">{{ stage.stageName }}</div>
+                    @if (stage.refNo) {
+                      <span class="stage-ref">{{ stage.refNo }}</span>
+                    }
+                    @if (stage.timestamp) {
+                      <span class="stage-time">{{ stage.timestamp }}</span>
+                    }
+                    @if (stage.performedBy) {
+                      <span class="stage-user">{{ stage.performedBy }}</span>
+                    }
+                    @if (stage.status === 'pending') {
+                      <span class="stage-pending-badge">Pending Step</span>
+                    }
+                  </div>
+                  @if (i < pipelineTimeline().length - 1) {
+                    <div class="connector-line"></div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </div>
