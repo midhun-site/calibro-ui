@@ -1,0 +1,137 @@
+<div class="print-page-wrapper">
+  <!-- Top Non-Printable Action Toolbar Header Bar -->
+  <div class="no-print print-header-toolbar">
+    <div class="toolbar-left">
+      <span class="preview-badge"><i class="pi pi-eye"></i> ENQUIRY PRINT PREVIEW</span>
+      <span class="doc-id">{{ enquiryDetails().enqNo }}</span>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn-tool btn-print" (click)="printDocument()" title="Print Document">
+        <i class="pi pi-print"></i> Print Document
+      </button>
+      <button class="btn-tool btn-pdf" (click)="exportPdf()" title="Export PDF">
+        <i class="pi pi-file-pdf"></i> Export PDF
+      </button>
+      <button class="btn-tool btn-excel" (click)="exportXlsx()" title="Export XLSX / CSV">
+        <i class="pi pi-file-excel"></i> Export Excel (CSV)
+      </button>
+      <button class="btn-tool btn-close" (click)="closeTab()" title="Close Tab">
+        <i class="pi pi-times"></i> Close Window
+      </button>
+    </div>
+  </div>
+
+  <!-- Official CaliBro White Printable Document Sheet -->
+  <div class="cert-document-sheet">
+    <!-- Header Section: Logo & Accredited Laboratory Details -->
+    <div class="sheet-header">
+      <div class="brand-block">
+        <div class="brand-logo">
+          <i class="pi pi-compass"></i>
+        </div>
+        <div class="brand-text">
+          <h1>CaliBro</h1>
+          <span class="sub-brand">CALIBRATION LABORATORIES</span>
+        </div>
+      </div>
+      <div class="lab-meta-block">
+        <h2>ISO/IEC 17025:2017 ACCREDITED LABORATORY</h2>
+        <p>Plot 412, Industrial Area 4, P.O. Box 45210, Sharjah, UAE</p>
+        <p>Tel: +971 6 5345678 &bull; Email: enquiry&#64;calibro.ae &bull; Web: www.calibro.ae</p>
+      </div>
+    </div>
+
+    <div class="sheet-divider-line"></div>
+
+    <!-- Document Title Banner Bar -->
+    <div class="sheet-title-banner">
+      <h3>CUSTOMER ENQUIRY & TECHNICAL FEASIBILITY SPECIFICATION</h3>
+    </div>
+
+    <!-- Client & Enquiry Metadata Summary Grid -->
+    <div class="sheet-meta-grid">
+      <div class="meta-col">
+        <div class="meta-row"><strong>Enquiry No:</strong> <span>{{ enquiryDetails().enqNo }}</span></div>
+        <div class="meta-row"><strong>Client Name:</strong> <span>{{ enquiryDetails().client }}</span></div>
+        <div class="meta-row"><strong>Client Address:</strong> <span>{{ enquiryDetails().address }}</span></div>
+        <div class="meta-row"><strong>P.O. Box:</strong> <span>{{ enquiryDetails().poBox }}</span></div>
+        <div class="meta-row"><strong>Contact Person:</strong> <span>{{ enquiryDetails().contactPerson }}</span></div>
+        <div class="meta-row"><strong>Designation / Dept:</strong> <span>{{ enquiryDetails().designation }} ({{ enquiryDetails().department }})</span></div>
+      </div>
+
+      <div class="meta-col">
+        <div class="meta-row"><strong>Enquiry Date:</strong> <span>{{ enquiryDetails().enqDate }}</span></div>
+        <div class="meta-row"><strong>Revision No:</strong> <span>{{ enquiryDetails().revNo }} (Date: {{ enquiryDetails().revDate }})</span></div>
+        <div class="meta-row"><strong>Mode of Intake:</strong> <span>{{ enquiryDetails().mode }}</span></div>
+        <div class="meta-row"><strong>Nature of Service:</strong> <span>{{ enquiryDetails().nature }}</span></div>
+        <div class="meta-row"><strong>Client Reference:</strong> <span>{{ enquiryDetails().reference }}</span></div>
+        <div class="meta-row"><strong>Telephone / Fax:</strong> <span>{{ enquiryDetails().telNo }} / {{ enquiryDetails().fax }}</span></div>
+      </div>
+    </div>
+
+    <!-- Technical Items Specification Grid Table -->
+    <div class="sheet-table-section">
+      <h4 class="section-subtitle"><i class="pi pi-list"></i> SPECIFIED CALIBRATION ITEMS ({{ items().length }})</h4>
+      <table class="master-table">
+        <thead>
+          <tr>
+            <th style="width: 45px;">SlNo</th>
+            <th>Item Description / Name</th>
+            <th style="width: 120px;">Serial No</th>
+            <th style="width: 120px;">RO / Tag No</th>
+            <th style="width: 110px;">Make</th>
+            <th style="width: 110px;">Model</th>
+            <th style="width: 140px;">Range / Capacity</th>
+            <th style="width: 50px;">Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.slNo; let i = $index) {
+            <tr>
+              <td class="text-center font-bold">{{ i + 1 }}</td>
+              <td><strong>{{ item.itemName }}</strong></td>
+              <td class="code-font">{{ item.serialNo }}</td>
+              <td class="code-font">{{ item.roTagNo }}</td>
+              <td>{{ item.make }}</td>
+              <td>{{ item.model }}</td>
+              <td>{{ item.range }}</td>
+              <td class="text-center font-bold">{{ item.qty }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Feasibility & Contract Review Notes Bar -->
+    <div class="sheet-notes-box">
+      <h4>TECHNICAL FEASIBILITY & CONTRACT REVIEW NOTES</h4>
+      <ul>
+        <li>1. Laboratory possesses adequate accredited scope and technical capability for all requested instruments.</li>
+        <li>2. Environmental conditions during calibration: Temperature (23°C ± 2°C), Relative Humidity (50% ± 10% RH).</li>
+        <li>3. Calibration results will be traceable to SI Units via international measurement standards (NPL/EMI/NIST).</li>
+      </ul>
+    </div>
+
+    <!-- Official Signatures Footer Block -->
+    <div class="sheet-signatures-grid">
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <span class="sig-title">Customer Representative Signature</span>
+        <span class="sig-name">{{ enquiryDetails().contactPerson }}</span>
+        <span class="sig-date">Date: {{ enquiryDetails().enqDate }}</span>
+      </div>
+
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <span class="sig-title">Received By Laboratory Metrologist</span>
+        <span class="sig-name">Alex Rivera (Senior Metrologist)</span>
+        <span class="sig-date">CaliBro Calibration Laboratories</span>
+      </div>
+    </div>
+
+    <!-- Footer Page Stamp -->
+    <div class="sheet-footer-stamp">
+      <span>CaliBro CRM ISO/IEC 17025 System Generated Document &bull; Document ID: {{ enquiryDetails().enqNo }}</span>
+    </div>
+  </div>
+</div>

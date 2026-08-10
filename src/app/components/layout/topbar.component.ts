@@ -1,9 +1,12 @@
 import { Component, computed, inject, signal, HostListener, ElementRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { LayoutService } from '../../services/layout.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { AiChatComponent } from './ai-chat.component';
 
 export interface NotificationItem {
   id: number;
@@ -15,9 +18,18 @@ export interface NotificationItem {
   unread: boolean;
 }
 
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  time: string;
+  quickAction?: { label: string; route: string };
+}
+
 @Component({
   selector: 'app-topbar',
   standalone: true,
+  imports: [CommonModule, FormsModule, AiChatComponent],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.css'
 })
@@ -31,6 +43,7 @@ export class TopbarComponent {
 
   public isNotificationOpen = signal<boolean>(false);
   public isProfileMenuOpen = signal<boolean>(false);
+  public isAiChatOpen = signal<boolean>(false);
 
   public notifications = signal<NotificationItem[]>([
     {
@@ -86,16 +99,29 @@ export class TopbarComponent {
     if (this.isProfileMenuOpen() && !this.elementRef.nativeElement.querySelector('.profile-wrapper')?.contains(target)) {
       this.isProfileMenuOpen.set(false);
     }
+
+    // Close AI Chat drawer if clicked outside
+    if (this.isAiChatOpen() && !this.elementRef.nativeElement.querySelector('.ai-chat-wrapper')?.contains(target)) {
+      this.isAiChatOpen.set(false);
+    }
   }
 
   toggleNotifications() {
     this.isProfileMenuOpen.set(false);
+    this.isAiChatOpen.set(false);
     this.isNotificationOpen.set(!this.isNotificationOpen());
   }
 
   toggleProfileMenu() {
     this.isNotificationOpen.set(false);
+    this.isAiChatOpen.set(false);
     this.isProfileMenuOpen.set(!this.isProfileMenuOpen());
+  }
+
+  toggleAiChat() {
+    this.isNotificationOpen.set(false);
+    this.isProfileMenuOpen.set(false);
+    this.isAiChatOpen.set(!this.isAiChatOpen());
   }
 
   markAsRead(id: number) {

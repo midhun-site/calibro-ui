@@ -19,7 +19,8 @@ export class AppComponent {
   public layoutService = inject(LayoutService);
   private router = inject(Router);
 
-  isLoginPage(): boolean {
-    return this.router.url.includes('/login');
+  isStandalonePage(): boolean {
+    const url = this.router.url;
+    return url.includes('/login') || url.includes('print-preview') || url.includes('/print');
   }
 }

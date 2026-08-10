@@ -1,0 +1,136 @@
+<div class="print-page-wrapper">
+  <!-- Top Non-Printable Action Toolbar Header Bar -->
+  <div class="no-print print-header-toolbar">
+    <div class="toolbar-left">
+      <span class="preview-badge"><i class="pi pi-eye"></i> {{ badgeText() }}</span>
+      <span class="doc-id">{{ docId() }}</span>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn-tool btn-print" (click)="printDocument()" title="Print Document">
+        <i class="pi pi-print"></i> Print Document
+      </button>
+      <button class="btn-tool btn-pdf" (click)="exportPdf()" title="Export PDF">
+        <i class="pi pi-file-pdf"></i> Export PDF
+      </button>
+      <button class="btn-tool btn-excel" (click)="exportXlsx()" title="Export XLSX / CSV">
+        <i class="pi pi-file-excel"></i> Export Excel (CSV)
+      </button>
+      <button class="btn-tool btn-close" (click)="closeTab()" title="Close Tab">
+        <i class="pi pi-times"></i> Close Window
+      </button>
+    </div>
+  </div>
+
+  <!-- Official CaliBro White Printable Document Sheet -->
+  <div class="cert-document-sheet">
+    <!-- Header Section: Logo & Accredited Laboratory Details -->
+    <div class="sheet-header">
+      <div class="brand-block">
+        <div class="brand-logo">
+          <i class="pi pi-compass"></i>
+        </div>
+        <div class="brand-text">
+          <h1>CaliBro</h1>
+          <span class="sub-brand">CALIBRATION LABORATORIES</span>
+        </div>
+      </div>
+      <div class="lab-meta-block">
+        <h2>ISO/IEC 17025:2017 ACCREDITED LABORATORY</h2>
+        <p>Plot 412, Industrial Area 4, P.O. Box 45210, Sharjah, UAE</p>
+        <p>Tel: +971 6 5345678 &bull; Email: enquiry&#64;calibro.ae &bull; Web: www.calibro.ae</p>
+      </div>
+    </div>
+
+    <div class="sheet-divider-line"></div>
+
+    <!-- Document Title Banner Bar -->
+    <div class="sheet-title-banner">
+      <h3>{{ documentTitle() }}</h3>
+    </div>
+
+    <!-- Metadata Grid -->
+    <div class="sheet-meta-grid">
+      <div class="meta-col">
+        @for (m of metadataLeft(); track m.label) {
+          <div class="meta-row"><strong>{{ m.label }}</strong> <span>{{ m.value }}</span></div>
+        }
+      </div>
+
+      <div class="meta-col">
+        @for (m of metadataRight(); track m.label) {
+          <div class="meta-row"><strong>{{ m.label }}</strong> <span>{{ m.value }}</span></div>
+        }
+      </div>
+    </div>
+
+    <!-- Items Specification Grid Table -->
+    <div class="sheet-table-section">
+      <h4 class="section-subtitle"><i class="pi pi-list"></i> SPECIFIED ITEMS ({{ items().length }})</h4>
+      <table class="master-table">
+        <thead>
+          <tr>
+            <th style="width: 45px;">SlNo</th>
+            <th>Item Description / Name</th>
+            <th style="width: 120px;">Serial No</th>
+            <th style="width: 120px;">RO / Tag No</th>
+            <th style="width: 110px;">Make</th>
+            <th style="width: 110px;">Model</th>
+            <th style="width: 140px;">Range / Capacity</th>
+            <th style="width: 50px;">Qty</th>
+            @if (items()[0]?.unitPrice) {
+              <th style="width: 90px;" class="text-right">Unit Price</th>
+              <th style="width: 90px;" class="text-right">Total Price</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.slNo; let i = $index) {
+            <tr>
+              <td class="text-center font-bold">{{ i + 1 }}</td>
+              <td><strong>{{ item.itemName }}</strong></td>
+              <td class="code-font">{{ item.serialNo }}</td>
+              <td class="code-font">{{ item.roTagNo }}</td>
+              <td>{{ item.make }}</td>
+              <td>{{ item.model }}</td>
+              <td>{{ item.range }}</td>
+              <td class="text-center font-bold">{{ item.qty }}</td>
+              @if (item.unitPrice) {
+                <td class="text-right font-bold">{{ item.unitPrice }}</td>
+                <td class="text-right font-bold text-cyan">{{ item.totalPrice }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Notes & Feasibility Box -->
+    <div class="sheet-notes-box">
+      <h4>TECHNICAL & REGULATORY SPECIFICATIONS</h4>
+      <ul>
+        @for (note of notes(); track note) {
+          <li>{{ note }}</li>
+        }
+      </ul>
+    </div>
+
+    <!-- Signatures Footer Block -->
+    <div class="sheet-signatures-grid">
+      @for (sig of footerSignatures(); track sig.title) {
+        <div class="sig-block">
+          <div class="sig-line"></div>
+          <span class="sig-title">{{ sig.title }}</span>
+          <span class="sig-name">{{ sig.name }}</span>
+          @if (sig.subtitle) {
+            <span class="sig-date">{{ sig.subtitle }}</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Footer Page Stamp -->
+    <div class="sheet-footer-stamp">
+      <span>CaliBro CRM ISO/IEC 17025 System Generated Document &bull; Document ID: {{ docId() }}</span>
+    </div>
+  </div>
+</div>

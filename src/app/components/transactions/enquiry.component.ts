@@ -323,8 +323,12 @@ export class EnquiryComponent {
 
   editEnquiry(row: EnquiryRow) {
     this.closeActionMenu();
-    this.editEnquiryData.set({ ...row });
-    this.showEditModal.set(true);
+    this.router.navigate(['/transactions/enquiry/add', row.enquiryNo]);
+  }
+
+  printEnquiry(row: EnquiryRow) {
+    this.closeActionMenu();
+    window.open('/transactions/enquiry/print/' + row.enquiryNo, '_blank');
   }
 
   saveEditEnquiry() {

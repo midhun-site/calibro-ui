@@ -6,16 +6,19 @@
         <i class="pi pi-arrow-left"></i>
       </button>
       <div>
-        <h2 class="form-title">New Calibration Enquiry</h2>
+        <h2 class="form-title">{{ isEditMode ? 'Edit Calibration Enquiry — ' + enquiry.enqNo : 'New Calibration Enquiry' }}</h2>
         <span class="subtitle">ISO 17025 Customer Inquiry & Technical Item Specification</span>
       </div>
     </div>
     <div class="header-actions">
+      <button class="btn-secondary" (click)="printEnquiry()" title="Open Print Preview in New Tab">
+        <i class="pi pi-print text-cyan"></i> Print Preview
+      </button>
       <button class="btn-secondary" (click)="goBack()">
         <i class="pi pi-times"></i> Cancel
       </button>
       <button class="btn-primary" (click)="saveEnquiry()">
-        <i class="pi pi-check"></i> Save Enquiry
+        <i class="pi pi-check"></i> {{ isEditMode ? 'Save Changes' : 'Save Enquiry' }}
       </button>
     </div>
   </div>

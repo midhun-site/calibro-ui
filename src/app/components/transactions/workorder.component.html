@@ -1,0 +1,156 @@
+<div class="page-container fade-in">
+  <!-- Page Header Bar -->
+  <div class="page-header">
+    <div>
+      <h2><i class="pi pi-briefcase text-cyan"></i> Workorder Register</h2>
+      <span class="subtitle">Manage laboratory calibration workorders, technician assignments, and due dates</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export CSV">
+        <i class="pi pi-download"></i> Export CSV
+      </button>
+      <button class="btn-primary" (click)="showCreateModal = true" title="New Workorder">
+        <i class="pi pi-plus"></i> + New Workorder
+      </button>
+    </div>
+  </div>
+
+  <!-- Data Grid Card -->
+  <div class="glass-card table-card">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="sortable-header" (click)="toggleSort('woNo')">
+              Work Order No <i class="pi" [ngClass]="getSortIcon('woNo')"></i>
+            </th>
+            <th class="sortable-header" (click)="toggleSort('customer')">
+              Customer <i class="pi" [ngClass]="getSortIcon('customer')"></i>
+            </th>
+            <th class="sortable-header" (click)="toggleSort('assetTag')">
+              Asset Tag <i class="pi" [ngClass]="getSortIcon('assetTag')"></i>
+            </th>
+            <th class="sortable-header" (click)="toggleSort('instrument')">
+              Instrument Description <i class="pi" [ngClass]="getSortIcon('instrument')"></i>
+            </th>
+            <th class="sortable-header" (click)="toggleSort('assignedTech')">
+              Assigned Tech <i class="pi" [ngClass]="getSortIcon('assignedTech')"></i>
+            </th>
+            <th class="sortable-header" (click)="toggleSort('dueDate')">
+              Due Date <i class="pi" [ngClass]="getSortIcon('dueDate')"></i>
+            </th>
+            <th class="sortable-header" (click)="toggleSort('status')">
+              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            </th>
+          </tr>
+          <!-- Per-Column Search Filter Row -->
+          <tr class="filter-row">
+            <td><input type="text" placeholder="Filter..." [ngModel]="filters()['woNo']" (ngModelChange)="updateFilter('woNo', $event)" class="filter-input" /></td>
+            <td><input type="text" placeholder="Filter..." [ngModel]="filters()['customer']" (ngModelChange)="updateFilter('customer', $event)" class="filter-input" /></td>
+            <td><input type="text" placeholder="Filter..." [ngModel]="filters()['assetTag']" (ngModelChange)="updateFilter('assetTag', $event)" class="filter-input" /></td>
+            <td><input type="text" placeholder="Filter..." [ngModel]="filters()['instrument']" (ngModelChange)="updateFilter('instrument', $event)" class="filter-input" /></td>
+            <td><input type="text" placeholder="Filter..." [ngModel]="filters()['assignedTech']" (ngModelChange)="updateFilter('assignedTech', $event)" class="filter-input" /></td>
+            <td><input type="text" placeholder="Filter..." [ngModel]="filters()['dueDate']" (ngModelChange)="updateFilter('dueDate', $event)" class="filter-input" /></td>
+            <td><input type="text" placeholder="Filter..." [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" class="filter-input" /></td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paginatedData(); track item.woNo) {
+            <tr>
+              <td class="code-font font-bold text-cyan">{{ item.woNo }}</td>
+              <td class="font-bold">{{ item.customer }}</td>
+              <td><span class="code-badge">{{ item.assetTag }}</span></td>
+              <td>{{ item.instrument }}</td>
+              <td><i class="pi pi-user text-muted mr-1"></i> {{ item.assignedTech }}</td>
+              <td>{{ item.dueDate }}</td>
+              <td>
+                <span class="p-tag" [ngClass]="{
+                  'p-tag-success': item.status === 'CALIBRATED',
+                  'p-tag-warning': item.status === 'IN_PROGRESS',
+                  'p-tag-info': item.status === 'PENDING',
+                  'p-tag-danger': item.status === 'OVERDUE'
+                }">
+                  <i class="pi" [ngClass]="{
+                    'pi-check-circle': item.status === 'CALIBRATED',
+                    'pi-spin pi-spinner': item.status === 'IN_PROGRESS',
+                    'pi-clock': item.status === 'PENDING',
+                    'pi-exclamation-triangle': item.status === 'OVERDUE'
+                  }"></i>
+                  {{ item.status }}
+                </span>
+              </td>
+            </tr>
+          }
+          @if (paginatedData().length === 0) {
+            <tr>
+              <td colspan="7" class="text-center p-4 text-muted">No workorders matching filter criteria.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Pagination Footer Bar -->
+    <div class="table-paginator">
+      <div class="paginator-info">
+        Showing {{ sortedData().length > 0 ? (currentPage() - 1) * pageSize() + 1 : 0 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+      </div>
+
+      <div class="paginator-controls">
+        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+
+        <div class="page-numbers">
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="ellipsis">...</span>
+            } @else {
+              <button class="page-number-btn" [class.active]="currentPage() === p" (click)="goToPage(+p)">
+                {{ p }}
+              </button>
+            }
+          }
+        </div>
+
+        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create New Workorder Popup Modal -->
+  @if (showCreateModal) {
+    <div class="modal-overlay" (click)="showCreateModal = false">
+      <div class="modal-card glass-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3><i class="pi pi-plus-circle text-cyan"></i> New Workorder</h3>
+          <button class="icon-btn" (click)="showCreateModal = false"><i class="pi pi-times"></i></button>
+        </div>
+        <div class="modal-body form-grid">
+          <div class="form-group">
+            <label>Work Order Ref</label>
+            <input type="text" [(ngModel)]="newJob.woRef" placeholder="e.g. WO-REF-902" class="p-inputtext" />
+          </div>
+          <div class="form-group">
+            <label>Asset Tag</label>
+            <input type="text" [(ngModel)]="newJob.assetTag" placeholder="e.g. EQ-ELEC-099" class="p-inputtext" />
+          </div>
+          <div class="form-group">
+            <label>Instrument Description</label>
+            <input type="text" [(ngModel)]="newJob.instrument" placeholder="e.g. Fluke Multimeter" class="p-inputtext" />
+          </div>
+          <div class="form-group">
+            <label>Assigned Technician</label>
+            <input type="text" [(ngModel)]="newJob.tech" placeholder="e.g. Alex Rivera" class="p-inputtext" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
+          <button class="btn-primary" (click)="saveJob()"><i class="pi pi-check"></i> Create Workorder</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

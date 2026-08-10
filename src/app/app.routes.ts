@@ -7,10 +7,12 @@ import { CertificateViewerComponent } from './components/certificates/certificat
 import { CertificateGenerateComponent } from './components/certificates/certificate-generate.component';
 import { EnquiryComponent } from './components/transactions/enquiry.component';
 import { EnquiryAddComponent } from './components/transactions/enquiry-add.component';
+import { EnquiryPrintComponent } from './components/transactions/enquiry-print.component';
 import { ReviewComponent } from './components/transactions/review.component';
 import { QuotationComponent } from './components/transactions/quotation.component';
 import { DeliveryInComponent } from './components/transactions/delivery-in.component';
 import { JobRegisterComponent } from './components/transactions/job-register.component';
+import { WorkorderComponent } from './components/transactions/workorder.component';
 import { DeliveryTicketComponent } from './components/transactions/delivery-ticket.component';
 import { CalibrationReportComponent } from './components/reports/calibration-report.component';
 import { InvoiceReportComponent } from './components/reports/invoice-report.component';
@@ -20,6 +22,7 @@ import { TechProcMappingComponent } from './components/qc/tech-proc-mapping.comp
 import { TechLabMappingComponent } from './components/qc/tech-lab-mapping.component';
 import { UserListComponent } from './components/user-management/user-list.component';
 import { UserPermissionsComponent } from './components/user-management/user-permissions.component';
+import { PrintPreviewComponent } from './components/common/print-preview.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -27,12 +30,19 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   
+  // Generic Print Preview Route (supports /print-preview/:type/:id & /transactions/:type/print/:id)
+  { path: 'print-preview/:type/:id', component: PrintPreviewComponent, canActivate: [authGuard] },
+  { path: 'transactions/:type/print/:id', component: PrintPreviewComponent, canActivate: [authGuard] },
+  
   // Transactions Group Sequence & Add Pages
   { path: 'transactions/enquiry', component: EnquiryComponent, canActivate: [authGuard] },
   { path: 'transactions/enquiry/add', component: EnquiryAddComponent, canActivate: [authGuard] },
+  { path: 'transactions/enquiry/add/:id', component: EnquiryAddComponent, canActivate: [authGuard] },
+  { path: 'transactions/enquiry/print/:id', component: PrintPreviewComponent, canActivate: [authGuard] },
   { path: 'transactions/review', component: ReviewComponent, canActivate: [authGuard] },
   { path: 'transactions/quotation', component: QuotationComponent, canActivate: [authGuard] },
   { path: 'transactions/delivery-in', component: DeliveryInComponent, canActivate: [authGuard] },
+  { path: 'transactions/workorder', component: WorkorderComponent, canActivate: [authGuard] },
   { path: 'transactions/job-register', component: JobRegisterComponent, canActivate: [authGuard] },
   { path: 'transactions/certificate-generate', component: CertificateGenerateComponent, canActivate: [authGuard] },
   { path: 'transactions/delivery-ticket', component: DeliveryTicketComponent, canActivate: [authGuard] },

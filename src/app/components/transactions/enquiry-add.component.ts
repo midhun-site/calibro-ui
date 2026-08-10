@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastService } from '../../services/toast.service';
 
@@ -25,7 +25,10 @@ export interface EnquiryItemRow {
 })
 export class EnquiryAddComponent implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private toastService = inject(ToastService);
+
+  public isEditMode = false;
 
   public enquiry = {
     enqNo: '',
@@ -51,26 +54,38 @@ export class EnquiryAddComponent implements OnInit {
   public items: EnquiryItemRow[] = [];
 
   ngOnInit() {
-    // Generate clean dynamic Enquiry Number and set today's date
     const today = new Date().toISOString().split('T')[0];
-    const randomNum = Math.floor(100 + Math.random() * 900);
-    this.enquiry.enqNo = `ENQ-${new Date().getFullYear()}-${randomNum}`;
-    this.enquiry.enqDate = today;
-    this.enquiry.revDate = today;
+    const id = this.route.snapshot.paramMap.get('id');
 
-    // Initialize with 1 clean empty item row
-    this.items = [
-      {
-        slNo: 1,
-        itemName: '',
-        serialNo: '',
-        roTagNo: '',
-        make: '',
-        model: '',
-        range: '',
-        qty: 1
-      }
-    ];
+    if (id) {
+      this.isEditMode = true;
+      this.enquiry.enqNo = id;
+      this.enquiry.enqDate = today;
+      this.enquiry.revDate = today;
+      this.enquiry.client = 'EMARAT ALOULA CONTRACTING CO';
+      this.onClientChange();
+      this.items = [
+        { slNo: 1, itemName: '4-Gas Personal Monitor (H2S/CO/O2/LEL)', serialNo: 'SN-99120', roTagNo: 'TAG-GAS-01', make: 'Honeywell', model: 'BW MAX XT II', range: '0-100 PPM / 0-25% VOL', qty: 2 },
+        { slNo: 2, itemName: 'Digital Pressure Indicator Gauge', serialNo: 'SN-78041', roTagNo: 'TAG-PRESS-04', make: 'Fluke Calibration', model: '700G31', range: '0 - 10,000 PSI', qty: 1 }
+      ];
+    } else {
+      const randomNum = Math.floor(100 + Math.random() * 900);
+      this.enquiry.enqNo = `ENQ-${new Date().getFullYear()}-${randomNum}`;
+      this.enquiry.enqDate = today;
+      this.enquiry.revDate = today;
+      this.items = [
+        {
+          slNo: 1,
+          itemName: '',
+          serialNo: '',
+          roTagNo: '',
+          make: '',
+          model: '',
+          range: '',
+          qty: 1
+        }
+      ];
+    }
   }
 
   onClientChange() {
@@ -143,6 +158,10 @@ export class EnquiryAddComponent implements OnInit {
     }
     this.toastService.showSuccess('Enquiry Created', `Calibration Enquiry ${this.enquiry.enqNo} saved successfully with ${this.items.length} item(s).`);
     this.router.navigate(['/transactions/enquiry']);
+  }
+
+  printEnquiry() {
+    window.open('/transactions/enquiry/print/' + this.enquiry.enqNo, '_blank');
   }
 
   goBack() {

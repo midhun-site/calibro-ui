@@ -1,0 +1,64 @@
+@if (isOpen()) {
+  <div class="ai-chat-drawer glass-card fade-in">
+    <!-- Chat Header -->
+    <div class="ai-chat-header">
+      <div class="ai-header-info">
+        <div class="ai-avatar">
+          <i class="pi pi-sparkles text-cyan"></i>
+        </div>
+        <div>
+          <h4>CaliBro Assistant AI</h4>
+          <span class="ai-status"><span class="online-dot"></span> ISO 17025 Calibration Intelligence</span>
+        </div>
+      </div>
+      <button class="icon-btn-sm" (click)="onClose()" title="Close Assistant"><i class="pi pi-times"></i></button>
+    </div>
+
+    <!-- Quick Suggested Question Chips Bar -->
+    <div class="quick-questions-bar">
+      <span class="quick-title"><i class="pi pi-bolt text-cyan"></i> Suggested Questions:</span>
+      <div class="chips-scroll">
+        @for (q of defaultQuestions(); track q) {
+          <button class="question-chip" (click)="askQuestion(q)">
+            {{ q }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Chat Conversation Log -->
+    <div class="chat-log-body">
+      @for (msg of chatMessages(); track msg.id) {
+        <div class="chat-msg-row" [class.user-row]="msg.sender === 'user'" [class.asst-row]="msg.sender === 'assistant'">
+          @if (msg.sender === 'assistant') {
+            <div class="msg-avatar">
+              <i class="pi pi-sparkles text-cyan"></i>
+            </div>
+          }
+          <div class="msg-bubble">
+            <div class="msg-text" [innerHTML]="formatText(msg.text)"></div>
+            @if (msg.quickAction) {
+              <button class="msg-action-btn" (click)="navigateToRoute(msg.quickAction.route)">
+                <i class="pi pi-arrow-right"></i> {{ msg.quickAction.label }}
+              </button>
+            }
+            <span class="msg-time">{{ msg.time }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Chat Input Bar -->
+    <div class="chat-input-footer">
+      <input type="text"
+             placeholder="Ask calibration AI (e.g. Workorders pending...)"
+             [ngModel]="userQuestionInput()"
+             (ngModelChange)="userQuestionInput.set($event)"
+             (keyup.enter)="askQuestion(userQuestionInput())"
+             class="chat-input" />
+      <button class="send-btn" (click)="askQuestion(userQuestionInput())" [disabled]="!userQuestionInput().trim()">
+        <i class="pi pi-send"></i>
+      </button>
+    </div>
+  </div>
+}

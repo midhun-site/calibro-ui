@@ -1,0 +1,366 @@
+/* Generic Print Preview Page Styling */
+.print-page-wrapper {
+  background: var(--bg-dark);
+  min-height: 100vh;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Non-Printable Header Toolbar */
+.print-header-toolbar {
+  width: 100%;
+  max-width: 900px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.preview-badge {
+  background: rgba(0, 242, 254, 0.15);
+  color: var(--accent-cyan);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.doc-id {
+  font-family: 'Consolas', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-tool {
+  border: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.btn-print {
+  background: var(--accent-cyan);
+  color: #000000;
+}
+
+.btn-print:hover {
+  background: #00d9e5;
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+}
+
+.btn-pdf {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.btn-pdf:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.btn-excel {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.btn-excel:hover {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.btn-close {
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.btn-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Document Sheet Container */
+.cert-document-sheet {
+  width: 100%;
+  max-width: 900px;
+  background: #ffffff !important;
+  color: #1e293b !important;
+  padding: 2.5rem;
+  border-radius: 4px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #0284c7;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+
+.brand-text h1 {
+  font-size: 1.8rem;
+  margin: 0;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+}
+
+.sub-brand {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0284c7;
+  letter-spacing: 1.5px;
+}
+
+.lab-meta-block {
+  text-align: right;
+}
+
+.lab-meta-block h2 {
+  font-size: 0.85rem;
+  margin: 0 0 0.2rem 0;
+  color: #0284c7;
+}
+
+.lab-meta-block p {
+  font-size: 0.75rem;
+  margin: 0;
+  color: #64748b;
+}
+
+.sheet-divider-line {
+  height: 2px;
+  background: #0284c7;
+  margin-bottom: 1.25rem;
+}
+
+.sheet-title-banner {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 0.6rem;
+  text-align: center;
+  margin-bottom: 1.25rem;
+  border-radius: 4px;
+}
+
+.sheet-title-banner h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+}
+
+/* Metadata Grid */
+.sheet-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 1rem 1.25rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.meta-row {
+  font-size: 0.82rem;
+  margin-bottom: 0.4rem;
+  display: flex;
+}
+
+.meta-row strong {
+  width: 140px;
+  color: #334155;
+  flex-shrink: 0;
+}
+
+.meta-row span {
+  color: #0f172a;
+}
+
+.section-subtitle {
+  font-size: 0.9rem;
+  color: #0f172a;
+  margin: 0 0 0.6rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Items Table */
+.master-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.master-table th {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.78rem;
+  text-align: left;
+}
+
+.master-table td {
+  border: 1px solid #cbd5e1;
+  padding: 0.55rem 0.5rem;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.code-font {
+  font-family: 'Consolas', monospace;
+  font-weight: 600;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Feasibility Notes Box */
+.sheet-notes-box {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 2rem;
+}
+
+.sheet-notes-box h4 {
+  margin: 0 0 0.4rem 0;
+  font-size: 0.82rem;
+  color: #0284c7;
+}
+
+.sheet-notes-box ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.sheet-notes-box li {
+  font-size: 0.78rem;
+  color: #475569;
+  margin-bottom: 0.2rem;
+}
+
+/* Signatures Block */
+.sheet-signatures-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.sig-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.sig-line {
+  width: 80%;
+  height: 1px;
+  background: #94a3b8;
+  margin-bottom: 0.4rem;
+}
+
+.sig-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.sig-name {
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.sig-date {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.sheet-footer-stamp {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.6rem;
+  text-align: center;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+/* Print CSS Media Query */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-page-wrapper {
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+  .cert-document-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

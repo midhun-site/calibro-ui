@@ -63,7 +63,7 @@
             <i class="pi pi-box"></i>
             @if (!layoutService.isSidebarCollapsed()) { <span>Delivery In</span> }
           </a>
-          <a routerLink="/equipment" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Workorder">
+          <a routerLink="/transactions/workorder" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Workorder">
             <i class="pi pi-briefcase"></i>
             @if (!layoutService.isSidebarCollapsed()) { <span>Workorder</span> }
           </a>

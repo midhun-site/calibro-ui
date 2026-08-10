@@ -5,13 +5,25 @@
       <i class="pi pi-bars"></i>
     </button>
 
-    <div class="search-box">
+    <div class="topbar-search-box">
       <i class="pi pi-search search-icon"></i>
       <input type="text" placeholder="Search equipment, certificates..." class="search-input" />
     </div>
   </div>
 
   <div class="topbar-actions">
+    <!-- AI (Beta) Assistant Button & Standalone Component Drawer -->
+    <div class="ai-chat-wrapper">
+      <button class="ai-beta-btn" (click)="toggleAiChat()" title="CaliBro AI Calibration Assistant">
+        <i class="pi pi-sparkles icon-sparkle"></i>
+        <span>AI</span>
+        <span class="beta-pill">Beta</span>
+      </button>
+
+      <!-- Separate Standalone AI Chat Drawer Component -->
+      <app-ai-chat [isOpen]="isAiChatOpen()" (closeChat)="isAiChatOpen.set(false)"></app-ai-chat>
+    </div>
+
     <div class="status-indicator">
       <span class="status-dot"></span>
       <span class="status-text">ISO 17025 Compliant</span>
