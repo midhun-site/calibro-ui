@@ -71,6 +71,10 @@
             <i class="pi pi-book"></i>
             @if (!layoutService.isSidebarCollapsed()) { <span>Job Register</span> }
           </a>
+          <a routerLink="/certificates/generate" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Certificate Generation">
+            <i class="pi pi-verified"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Generate Certificate</span> }
+          </a>
           <a routerLink="/transactions/delivery-ticket" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Delivery Ticket">
             <i class="pi pi-send"></i>
             @if (!layoutService.isSidebarCollapsed()) { <span>Delivery Ticket</span> }
@@ -122,7 +126,7 @@
       @if (isOpen('reports') || layoutService.isSidebarCollapsed()) {
         <div class="sub-menu">
           <a routerLink="/certificates" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Calibration Report">
-            <i class="pi pi-verified"></i>
+            <i class="pi pi-file-pdf"></i>
             @if (!layoutService.isSidebarCollapsed()) { <span>Calibration Report</span> }
           </a>
           <a routerLink="/reports/invoice-summary" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Invoice Summary Report">

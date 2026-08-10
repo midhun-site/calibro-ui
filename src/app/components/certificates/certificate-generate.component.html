@@ -1,0 +1,796 @@
+<div class="page-container fade-in">
+  <!-- Top Bar & Header Actions -->
+  <div class="page-header">
+    <div class="header-left-group">
+      <a routerLink="/certificates" class="back-link-btn" title="Back to Certificates">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+      <div>
+        <h2>Certificate Generation Form</h2>
+        <span class="subtitle">ISO/IEC 17025 Compliant Calibration Certificate Wizard</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="saveDraft()">
+        <i class="pi pi-save"></i> Save Draft
+      </button>
+      <button class="btn-secondary" (click)="goToStep(5)">
+        <i class="pi pi-eye"></i> Preview Draft
+      </button>
+    </div>
+  </div>
+
+  <!-- Wizard Progress Stepper Bar -->
+  <div class="glass-card stepper-card">
+    <div class="stepper-track">
+      <!-- Step 1 Indicator -->
+      <div class="step-item" [class.active]="currentStep() === 1" [class.completed]="currentStep() > 1" (click)="goToStep(1)">
+        <div class="step-circle">
+          @if (currentStep() > 1) { <i class="pi pi-check"></i> } @else { <span>1</span> }
+        </div>
+        <div class="step-label">
+          <span class="step-title">General & Customer</span>
+          <span class="step-desc">Header & Customer Info</span>
+        </div>
+      </div>
+      <div class="step-connector" [class.completed]="currentStep() > 1"></div>
+
+      <!-- Step 2 Indicator -->
+      <div class="step-item" [class.active]="currentStep() === 2" [class.completed]="currentStep() > 2" (click)="goToStep(2)">
+        <div class="step-circle">
+          @if (currentStep() > 2) { <i class="pi pi-check"></i> } @else { <span>2</span> }
+        </div>
+        <div class="step-label">
+          <span class="step-title">Instrument Specs</span>
+          <span class="step-desc">Equipment & Sticker ID</span>
+        </div>
+      </div>
+      <div class="step-connector" [class.completed]="currentStep() > 2"></div>
+
+      <!-- Step 3 Indicator -->
+      <div class="step-item" [class.active]="currentStep() === 3" [class.completed]="currentStep() > 3" (click)="goToStep(3)">
+        <div class="step-circle">
+          @if (currentStep() > 3) { <i class="pi pi-check"></i> } @else { <span>3</span> }
+        </div>
+        <div class="step-label">
+          <span class="step-title">Environmental & QC</span>
+          <span class="step-desc">Conditions & Conformity</span>
+        </div>
+      </div>
+      <div class="step-connector" [class.completed]="currentStep() > 3"></div>
+
+      <!-- Step 4 Indicator -->
+      <div class="step-item" [class.active]="currentStep() === 4" [class.completed]="currentStep() > 4" (click)="goToStep(4)">
+        <div class="step-circle">
+          @if (currentStep() > 4) { <i class="pi pi-check"></i> } @else { <span>4</span> }
+        </div>
+        <div class="step-label">
+          <span class="step-title">Master Standards</span>
+          <span class="step-desc">SOPs & Master List</span>
+        </div>
+      </div>
+      <div class="step-connector" [class.completed]="currentStep() > 4"></div>
+
+      <!-- Step 5 Indicator (Review & Submit) -->
+      <div class="step-item" [class.active]="currentStep() === 5" [class.completed]="currentStep() === 5">
+        <div class="step-circle">
+          <i class="pi pi-verified"></i>
+        </div>
+        <div class="step-label">
+          <span class="step-title">Review & Submit</span>
+          <span class="step-desc">Final Inspection</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIZARD STEP CONTENT AREA -->
+  <div class="wizard-body-content">
+    
+    <!-- STEP 1: General & Customer Details -->
+    @if (currentStep() === 1) {
+      <div class="glass-card form-step-card fade-in">
+        <div class="section-title-bar">
+          <div class="title-left">
+            <i class="pi pi-building text-cyan"></i>
+            <h3>Step 1: Service Mode, General Details & Customer Information</h3>
+          </div>
+          <span class="badge-step">Step 1 of 5</span>
+        </div>
+
+        <!-- Mode Selection Radios -->
+        <div class="service-mode-panel">
+          <label class="mode-label-title"><i class="pi pi-map-marker"></i> Service Location Mode:</label>
+          <div class="radio-group">
+            <label class="radio-card" [class.selected]="serviceLocation() === 'Onsite'">
+              <input type="radio" name="serviceLocation" value="Onsite" [checked]="serviceLocation() === 'Onsite'" (change)="serviceLocation.set('Onsite')">
+              <i class="pi pi-compass"></i>
+              <span>Onsite</span>
+            </label>
+            <label class="radio-card" [class.selected]="serviceLocation() === 'Faulty'">
+              <input type="radio" name="serviceLocation" value="Faulty" [checked]="serviceLocation() === 'Faulty'" (change)="serviceLocation.set('Faulty')">
+              <i class="pi pi-exclamation-triangle"></i>
+              <span>Faulty</span>
+            </label>
+            <label class="radio-card" [class.selected]="serviceLocation() === 'In-House Lab'">
+              <input type="radio" name="serviceLocation" value="In-House Lab" [checked]="serviceLocation() === 'In-House Lab'" (change)="serviceLocation.set('In-House Lab')">
+              <i class="pi pi-building"></i>
+              <span>In-House Lab</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- General Certificate Parameters Grid -->
+        <div class="form-grid-3col">
+          <div class="form-group">
+            <label for="lab">Lab Category</label>
+            <p-select [options]="labOptions" [(ngModel)]="lab" styleClass="w-full" id="lab"></p-select>
+          </div>
+          <div class="form-group">
+            <label for="procType">Procedure Type</label>
+            <p-select [options]="procedureTypeOptions" [(ngModel)]="procedureType" styleClass="w-full" id="procType"></p-select>
+          </div>
+          <div class="form-group">
+            <label for="certNo">Cert No</label>
+            <input pInputText id="certNo" [(ngModel)]="certNo" class="p-inputtext w-full code-font" />
+          </div>
+
+          <div class="form-group">
+            <label for="issueDate">Issue Date</label>
+            <input type="date" id="issueDate" pInputText [(ngModel)]="issueDate" class="p-inputtext w-full" />
+          </div>
+          <div class="form-group">
+            <label for="calibDate">Calib Date</label>
+            <input type="date" id="calibDate" pInputText [(ngModel)]="calibDate" class="p-inputtext w-full" />
+          </div>
+          <div class="form-group">
+            <label for="duration">Duration</label>
+            <div class="input-unit-group">
+              <input type="number" id="duration" pInputText [(ngModel)]="durationVal" class="p-inputtext" style="width: 90px;" />
+              <p-select [options]="durationUnitOptions" [(ngModel)]="durationUnit" styleClass="unit-select"></p-select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="dueDate">Due Date</label>
+            <input type="date" id="dueDate" pInputText [(ngModel)]="dueDate" class="p-inputtext w-full" />
+            <label class="checkbox-inline">
+              <input type="checkbox" [(ngModel)]="hideDueDateInCert" />
+              <span>Hide due date in certificate</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="woNo">WoNo (Work Order)</label>
+            <input pInputText id="woNo" [(ngModel)]="woNo" class="p-inputtext w-full code-font" />
+          </div>
+          <div class="form-group">
+            <label for="totalPages">Total No of Pages</label>
+            <input type="number" id="totalPages" pInputText [(ngModel)]="totalPages" class="p-inputtext w-full" />
+          </div>
+
+          <div class="form-group">
+            <label for="asReceived">As Received Condition</label>
+            <p-select [options]="conditionOptions" [(ngModel)]="asReceivedCondition" styleClass="w-full" id="asReceived"></p-select>
+          </div>
+          <div class="form-group col-span-2">
+            <label for="asLeft">As Left Condition</label>
+            <p-select [options]="leftConditionOptions" [(ngModel)]="asLeftCondition" styleClass="w-full" id="asLeft"></p-select>
+            <label class="checkbox-inline">
+              <input type="checkbox" [(ngModel)]="hideCustomerRequestText" />
+              <span>Hide 'as per customer request' text from Certificate Due Date</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <!-- Customer Details Section -->
+        <h4 class="sub-section-title"><i class="pi pi-id-card text-cyan"></i> Customer Details</h4>
+        <div class="form-grid-3col">
+          <div class="form-group col-span-2">
+            <label for="custName">Customer Name</label>
+            <input pInputText id="custName" [(ngModel)]="customerName" class="p-inputtext w-full" />
+          </div>
+          <div class="form-group">
+            <label for="mName">M.Name (Company Alias)</label>
+            <input pInputText id="mName" [(ngModel)]="mName" class="p-inputtext w-full" />
+          </div>
+
+          <div class="form-group col-span-2">
+            <label for="custAddress">Customer Address</label>
+            <input pInputText id="custAddress" [(ngModel)]="customerAddress" class="p-inputtext w-full" />
+          </div>
+          <div class="form-group">
+            <label for="mAddress">M.Address (Site Location)</label>
+            <input pInputText id="mAddress" [(ngModel)]="mAddress" class="p-inputtext w-full" />
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 2: Instrument Specs & Certificate Sticker -->
+    @if (currentStep() === 2) {
+      <div class="glass-card form-step-card fade-in">
+        <div class="section-title-bar">
+          <div class="title-left">
+            <i class="pi pi-cog text-cyan"></i>
+            <h3>Step 2: Instrument Specifications & Certificate Sticker Labeling</h3>
+          </div>
+          <span class="badge-step">Step 2 of 5</span>
+        </div>
+
+        <h4 class="sub-section-title"><i class="pi pi-sliders-h text-cyan"></i> Instrument Details</h4>
+        <div class="form-grid-3col">
+          <div class="form-group col-span-2">
+            <label for="description">Description (Equipment Name)</label>
+            <input pInputText id="description" [(ngModel)]="instrumentDescription" class="p-inputtext w-full" />
+          </div>
+          <div class="form-group">
+            <label for="manufacturer">Manufacturer</label>
+            <input pInputText id="manufacturer" [(ngModel)]="manufacturer" class="p-inputtext w-full" />
+          </div>
+
+          <div class="form-group">
+            <label for="model">Model</label>
+            <input pInputText id="model" [(ngModel)]="model" class="p-inputtext w-full" />
+          </div>
+          <div class="form-group">
+            <label for="programma">Programma / Mode</label>
+            <input pInputText id="programma" [(ngModel)]="programma" class="p-inputtext w-full" />
+          </div>
+          <div class="form-group">
+            <label for="serialNo">Serial No</label>
+            <input pInputText id="serialNo" [(ngModel)]="serialNo" class="p-inputtext w-full code-font" />
+          </div>
+
+          <div class="form-group">
+            <label for="range">Range</label>
+            <input pInputText id="range" [(ngModel)]="range" class="p-inputtext w-full" />
+          </div>
+          <div class="form-group">
+            <label for="accuracy">Accuracy</label>
+            <input pInputText id="accuracy" [(ngModel)]="accuracy" class="p-inputtext w-full" />
+            <label class="checkbox-inline mt-1">
+              <input type="checkbox" [(ngModel)]="hidePlusMinusAccuracy" />
+              <span>Hide ± in accuracy field</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="resolution">Resolution</label>
+            <input pInputText id="resolution" [(ngModel)]="resolution" class="p-inputtext w-full" />
+          </div>
+
+          <div class="form-group">
+            <label for="partNo">Part No</label>
+            <input pInputText id="partNo" [(ngModel)]="partNo" class="p-inputtext w-full" />
+          </div>
+          <div class="form-group">
+            <label for="roTagNo">RO / Tag No</label>
+            <input pInputText id="roTagNo" [(ngModel)]="roTagNo" class="p-inputtext w-full" />
+          </div>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <!-- Certificate Sticker Card -->
+        <h4 class="sub-section-title"><i class="pi pi-tag text-cyan"></i> Certificate Sticker Configuration</h4>
+        <div class="form-grid-3col">
+          <div class="form-group">
+            <label for="stickerLabel">Instr ID Label</label>
+            <p-select [options]="instrIdLabelOptions" [(ngModel)]="instrIdLabel" styleClass="w-full" id="stickerLabel"></p-select>
+          </div>
+          <div class="form-group">
+            <label for="stickerValue">Instr ID Value</label>
+            <p-select [options]="instrIdValueOptions" [(ngModel)]="instrIdValue" styleClass="w-full" id="stickerValue"></p-select>
+          </div>
+          <div class="sticker-preview-card">
+            <div class="sticker-header">CALIBRATED STICKER</div>
+            <div class="sticker-row"><span>Cert No:</span> <strong>{{ certNo() }}</strong></div>
+            <div class="sticker-row"><span>ID Value:</span> <strong>{{ serialNo() }}</strong></div>
+            <div class="sticker-row"><span>Cal Date:</span> <strong>{{ calibDate() }}</strong></div>
+            <div class="sticker-row"><span>Due Date:</span> <strong>{{ dueDate() }}</strong></div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 3: Environmental & QC Standards -->
+    @if (currentStep() === 3) {
+      <div class="glass-card form-step-card fade-in">
+        <div class="section-title-bar">
+          <div class="title-left">
+            <i class="pi pi-shield text-cyan"></i>
+            <h3>Step 3: Environmental Details, Observations & Compliance Statement</h3>
+          </div>
+          <span class="badge-step">Step 3 of 5</span>
+        </div>
+
+        <!-- Environmental Inputs -->
+        <h4 class="sub-section-title"><i class="pi pi-sun text-cyan"></i> Environmental Details (Measured value ± Measurement Uncertainty)</h4>
+        <div class="form-grid-3col">
+          <div class="form-group">
+            <label>Temp (°C)</label>
+            <div class="unc-input-group">
+              <input type="number" pInputText [(ngModel)]="tempVal" class="p-inputtext" style="width: 90px;" />
+              <span class="pm-symbol">±</span>
+              <input type="number" pInputText [(ngModel)]="tempUnc" class="p-inputtext" style="width: 70px;" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Atm. Pressure (mbar)</label>
+            <div class="unc-input-group">
+              <input type="number" pInputText [(ngModel)]="pressVal" class="p-inputtext" style="width: 100px;" />
+              <span class="pm-symbol">±</span>
+              <input type="number" pInputText [(ngModel)]="pressUnc" class="p-inputtext" style="width: 70px;" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Relative Humidity (%rh)</label>
+            <div class="unc-input-group">
+              <input type="number" pInputText [(ngModel)]="humidityVal" class="p-inputtext" style="width: 90px;" />
+              <span class="pm-symbol">±</span>
+              <input type="number" pInputText [(ngModel)]="humidityUnc" class="p-inputtext" style="width: 70px;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Text Areas for Fault, Observation, Recommendation -->
+        <div class="form-grid-3col mt-3">
+          <div class="form-group">
+            <label for="fault">Fault / Initial Condition Notes</label>
+            <textarea id="fault" pInputText [(ngModel)]="faultText" class="p-inputtext w-full textarea-box" rows="3" placeholder="Enter fault details if any..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="obs">Observation</label>
+            <textarea id="obs" pInputText [(ngModel)]="observationText" class="p-inputtext w-full textarea-box" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="rec">Recommendation</label>
+            <textarea id="rec" pInputText [(ngModel)]="recommendationText" class="p-inputtext w-full textarea-box" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <!-- ISO 17025 Header Text Box -->
+        <div class="iso-statement-box">
+          <h5><i class="pi pi-info-circle text-cyan"></i> Header Statement (ISO/IEC 17025:2017 Standard):</h5>
+          <p>
+            Calibration of the above mentioned equipment has been carried out in accordance with the requirements specified in ISO/IEC 17025:2017 standard. It provides traceability of measurement to the SI system of units and/or to units of measurement realized at the Emirates Metrology Institute or other recognized national metrology institutes (NPL, NIST etc.).
+          </p>
+        </div>
+
+        <!-- Compliant Statement & Decision Rule -->
+        <h4 class="sub-section-title mt-3"><i class="pi pi-check-circle text-cyan"></i> Compliant Statement & Decision Rule</h4>
+        <div class="form-grid-3col">
+          <div class="form-group col-span-2">
+            <label for="statement">Statement of conformity is based on</label>
+            <p-select [options]="statementOptions" [(ngModel)]="statementConformityBasedOn" styleClass="w-full" id="statement"></p-select>
+            <span class="sub-hint">Issuance of this certificate indicates successful calibration (Result of calibration: PASS)</span>
+          </div>
+          <div class="form-group">
+            <label for="decision">Decision Rule</label>
+            <p-select [options]="decisionRuleOptions" [(ngModel)]="decisionRule" styleClass="w-full" id="decision"></p-select>
+          </div>
+        </div>
+
+        <div class="form-group mt-2">
+          <label for="comments">Comments & Uncertainty Notes</label>
+          <textarea id="comments" pInputText [(ngModel)]="commentsText" class="p-inputtext w-full textarea-box" rows="2"></textarea>
+        </div>
+
+        <!-- CTR Upload File Grid -->
+        <div class="ctr-upload-box mt-3">
+          <div class="ctr-header">
+            <span class="ctr-title"><i class="pi pi-paperclip text-cyan"></i> CTR Upload Attachments</span>
+            <label class="btn-secondary upload-btn">
+              <i class="pi pi-upload"></i> Browse Files...
+              <input type="file" (change)="onFileUpload($event)" hidden />
+            </label>
+          </div>
+          <div class="table-responsive mt-2">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>FileName</th>
+                  <th>Upload Date</th>
+                  <th>Uploaded By</th>
+                  <th style="width: 60px; text-align: center;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (file of ctrFiles(); track file.id) {
+                  <tr>
+                    <td><i class="pi pi-file-word text-cyan"></i> {{ file.fileName }}</td>
+                    <td>{{ file.uploadDate }}</td>
+                    <td>{{ file.uploadedBy }}</td>
+                    <td style="text-align: center;">
+                      <button class="action-btn icon-only delete" (click)="deleteCtrFile(file.id)" title="Remove File">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 4: Master Calibration Standards & Procedures Selection -->
+    @if (currentStep() === 4) {
+      <div class="glass-card form-step-card fade-in">
+        <div class="section-title-bar">
+          <div class="title-left">
+            <i class="pi pi-book text-cyan"></i>
+            <h3>Step 4: Sub Lab Selection & Master Traceability Standards</h3>
+          </div>
+          <span class="badge-step">Step 4 of 5</span>
+        </div>
+
+        <!-- Sub Lab Selectors -->
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Sub Lab 1</label>
+            <p-select [options]="labOptions" [(ngModel)]="subLab1" styleClass="w-full"></p-select>
+          </div>
+          <div class="form-group">
+            <label>Sub Lab 2</label>
+            <p-select [options]="labOptions" [(ngModel)]="subLab2" styleClass="w-full"></p-select>
+          </div>
+        </div>
+
+        <div class="dual-tables-grid mt-3">
+          <!-- Left Table: Procedure Number Selection -->
+          <div class="table-card-inner">
+            <div class="inner-table-header">
+              <h4><i class="pi pi-file-edit text-cyan"></i> Procedure Number Selection</h4>
+              <span class="count-badge">{{ selectedProceduresCount() }} Selected</span>
+            </div>
+            <div class="search-box mb-2">
+              <i class="pi pi-search search-icon"></i>
+              <input type="text" placeholder="Filter procedures..." [ngModel]="procedureSearch()" (ngModelChange)="procedureSearch.set($event)" class="search-input" />
+            </div>
+            <div class="table-responsive max-h-260">
+              <table class="data-table selectable-table">
+                <thead>
+                  <tr>
+                    <th style="width: 36px; text-align: center;">Select</th>
+                    <th>Procedure Number</th>
+                    <th>Calibration Procedure</th>
+                    <th style="width: 95px;">Lab</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (proc of filteredProcedures(); track proc.procedureNumber) {
+                    <tr [class.selected-row]="proc.selected" (click)="toggleProcedure(proc)">
+                      <td style="text-align: center;" (click)="$event.stopPropagation()">
+                        <label class="custom-table-checkbox">
+                          <input type="checkbox" [checked]="proc.selected" (change)="toggleProcedure(proc)" />
+                          <span class="checkmark"><i class="pi pi-check"></i></span>
+                        </label>
+                      </td>
+                      <td class="code-font bold">{{ proc.procedureNumber }}</td>
+                      <td>{{ proc.calibrationProcedure }}</td>
+                      <td><p-tag [value]="proc.lab" severity="info"></p-tag></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right Table: Primary Secondary Master List -->
+          <div class="table-card-inner">
+            <div class="inner-table-header">
+              <h4><i class="pi pi-database text-cyan"></i> Primary / Secondary Master List</h4>
+              <span class="count-badge green">{{ selectedMasterCount() }} Selected</span>
+            </div>
+            <div class="search-box mb-2">
+              <i class="pi pi-search search-icon"></i>
+              <input type="text" placeholder="Filter master standards..." [ngModel]="masterSearch()" (ngModelChange)="masterSearch.set($event)" class="search-input" />
+            </div>
+            <div class="table-responsive max-h-260">
+              <table class="data-table selectable-table">
+                <thead>
+                  <tr>
+                    <th style="width: 36px; text-align: center;">Select</th>
+                    <th>Description</th>
+                    <th style="width: 80px;">SrNo</th>
+                    <th style="width: 70px;">Model</th>
+                    <th style="width: 85px;">Lab</th>
+                    <th style="width: 85px;">Due Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (master of filteredMasterEquipment(); track master.srNo) {
+                    <tr [class.selected-row]="master.selected" (click)="toggleMaster(master)">
+                      <td style="text-align: center;" (click)="$event.stopPropagation()">
+                        <label class="custom-table-checkbox">
+                          <input type="checkbox" [checked]="master.selected" (change)="toggleMaster(master)" />
+                          <span class="checkmark"><i class="pi pi-check"></i></span>
+                        </label>
+                      </td>
+                      <td class="bold">{{ master.description }}</td>
+                      <td class="code-font">{{ master.srNo }}</td>
+                      <td>{{ master.model }}</td>
+                      <td><p-tag [value]="master.lab" severity="info"></p-tag></td>
+                      <td><span class="due-badge">{{ master.dueDate }}</span></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 5: Review & Submit (Final Step) -->
+    @if (currentStep() === 5) {
+      <div class="glass-card form-step-card fade-in">
+        <div class="section-title-bar">
+          <div class="title-left">
+            <i class="pi pi-verified text-cyan"></i>
+            <h3>Step 5: Review Certificate Specifications & Submit</h3>
+          </div>
+          <span class="badge-step success">Final Review</span>
+        </div>
+
+        <!-- Summary Badges Banner -->
+        <div class="summary-banner-card">
+          <div class="summary-column">
+            <span class="sum-label">CERTIFICATE NO</span>
+            <h3 class="sum-val code-font text-cyan">{{ certNo() }}</h3>
+          </div>
+          <div class="summary-column">
+            <span class="sum-label">CUSTOMER NAME</span>
+            <h4 class="sum-val">{{ customerName() }}</h4>
+          </div>
+          <div class="summary-column">
+            <span class="sum-label">EQUIPMENT</span>
+            <h4 class="sum-val">{{ instrumentDescription() }} ({{ model() }})</h4>
+          </div>
+          <div class="summary-column">
+            <span class="sum-label">SERVICE DATES</span>
+            <span class="sum-sub">Calib: {{ calibDate() }} | Due: {{ dueDate() }}</span>
+          </div>
+          <p-tag value="ISO 17025 DRAFT READY" severity="success"></p-tag>
+        </div>
+
+        <!-- Quick Summary Cards for Steps 1-4 with Jump Links -->
+        <div class="summary-sections-grid mt-3">
+          <!-- Step 1 Summary -->
+          <div class="summary-box">
+            <div class="box-header">
+              <h5><i class="pi pi-building text-cyan"></i> General & Customer</h5>
+              <button class="edit-link-btn" (click)="goToStep(1)"><i class="pi pi-pencil"></i> Edit</button>
+            </div>
+            <div class="box-content">
+              <p><strong>Service Mode:</strong> {{ serviceLocation() }}</p>
+              <p><strong>Lab:</strong> {{ lab() }} ({{ procedureType() }})</p>
+              <p><strong>Work Order:</strong> {{ woNo() }} | Pages: {{ totalPages() }}</p>
+              <p><strong>Customer:</strong> {{ customerName() }}</p>
+              <p><strong>Conditions:</strong> Rec: {{ asReceivedCondition() }} | Left: {{ asLeftCondition() }}</p>
+            </div>
+          </div>
+
+          <!-- Step 2 Summary -->
+          <div class="summary-box">
+            <div class="box-header">
+              <h5><i class="pi pi-cog text-cyan"></i> Instrument Specs</h5>
+              <button class="edit-link-btn" (click)="goToStep(2)"><i class="pi pi-pencil"></i> Edit</button>
+            </div>
+            <div class="box-content">
+              <p><strong>Description:</strong> {{ instrumentDescription() }}</p>
+              <p><strong>Make / Model:</strong> {{ manufacturer() }} {{ model() }}</p>
+              <p><strong>Serial No:</strong> {{ serialNo() }} | Tag: {{ roTagNo() }}</p>
+              <p><strong>Range:</strong> {{ range() }}</p>
+              <p><strong>Sticker ID:</strong> {{ instrIdLabel() }} = {{ serialNo() }}</p>
+            </div>
+          </div>
+
+          <!-- Step 3 Summary -->
+          <div class="summary-box">
+            <div class="box-header">
+              <h5><i class="pi pi-shield text-cyan"></i> Environmental & QC</h5>
+              <button class="edit-link-btn" (click)="goToStep(3)"><i class="pi pi-pencil"></i> Edit</button>
+            </div>
+            <div class="box-content">
+              <p><strong>Temp:</strong> {{ tempVal() }} ± {{ tempUnc() }} °C</p>
+              <p><strong>Pressure:</strong> {{ pressVal() }} ± {{ pressUnc() }} mbar</p>
+              <p><strong>Humidity:</strong> {{ humidityVal() }} ± {{ humidityUnc() }} %rh</p>
+              <p><strong>Decision Rule:</strong> {{ decisionRule() }}</p>
+              <p><strong>CTR Uploads:</strong> {{ ctrFiles().length }} File(s)</p>
+            </div>
+          </div>
+
+          <!-- Step 4 Summary -->
+          <div class="summary-box">
+            <div class="box-header">
+              <h5><i class="pi pi-book text-cyan"></i> Master Standards</h5>
+              <button class="edit-link-btn" (click)="goToStep(4)"><i class="pi pi-pencil"></i> Edit</button>
+            </div>
+            <div class="box-content">
+              <p><strong>Selected SOPs:</strong> {{ selectedProceduresCount() }} Procedure(s)</p>
+              <p><strong>Selected Master Equipment:</strong> {{ selectedMasterCount() }} Standard(s)</p>
+              <p><strong>Sub Labs:</strong> {{ subLab1() }}, {{ subLab2() }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CaliBro ISO 17025 Certificate Document Sheet Preview -->
+        <div class="cert-document-sheet mt-4">
+          <div class="sheet-watermark">ISO 17025 PASSED</div>
+          
+          <!-- CaliBro Header Bar -->
+          <div class="sheet-header">
+            <div class="sheet-brand">
+              <i class="pi pi-compass brand-icon text-cyan"></i>
+              <div>
+                <h2>CaliBro Calibration Laboratories</h2>
+                <span>Accredited ISO/IEC 17025:2017 Calibration Facility</span>
+              </div>
+            </div>
+            <div class="sheet-cert-badge">
+              <span class="cert-title">CALIBRATION CERTIFICATE</span>
+              <span class="cert-number code-font">{{ certNo() }} -Rev.0</span>
+            </div>
+          </div>
+
+          <!-- Document Sub-Header Metadata Grid -->
+          <div class="cert-meta-grid">
+            <div class="meta-item"><span>WO.No:</span> <strong>{{ woNo() }}</strong></div>
+            <div class="meta-item"><span>Issue Date:</span> <strong>{{ issueDate() }}</strong></div>
+            <div class="meta-item"><span>Calib Date:</span> <strong>{{ calibDate() }}</strong></div>
+            <div class="meta-item"><span>Due Date:</span> <strong>{{ dueDate() }}</strong></div>
+            <div class="meta-item"><span>Job Location:</span> <strong>{{ serviceLocation() }}</strong></div>
+            <div class="meta-item"><span>Lab Location:</span> <strong>Industrial Area 13, Sharjah, UAE</strong></div>
+          </div>
+
+          <!-- Customer & Instrument Specs Grid -->
+          <div class="sheet-body-grid mt-3">
+            <div class="sheet-col">
+              <h4>CUSTOMER DETAILS</h4>
+              <p><strong>Name:</strong> {{ customerName() }}</p>
+              <p><strong>Alias / Area:</strong> {{ mName() ? mName() : 'GTP' }}</p>
+              <p><strong>Address:</strong> {{ customerAddress() }}</p>
+              <p><strong>Site Location:</strong> {{ mAddress() }}</p>
+            </div>
+            <div class="sheet-col">
+              <h4>EQUIPMENT UNDER TEST</h4>
+              <p><strong>Description:</strong> {{ instrumentDescription() }}</p>
+              <p><strong>Make / Model:</strong> {{ manufacturer() }} {{ model() }}</p>
+              <p><strong>Serial No:</strong> <span class="code-font">{{ serialNo() }}</span> &nbsp;|&nbsp; <strong>Part No:</strong> {{ partNo() ? partNo() : '-' }}</p>
+              <p><strong>RO / Tag No:</strong> {{ roTagNo() ? roTagNo() : '-' }}</p>
+              <p><strong>Range:</strong> {{ range() }} &nbsp;|&nbsp; <strong>Accuracy:</strong> {{ accuracy() ? accuracy() : 'Refer calibration results' }}</p>
+              <p><strong>Resolution:</strong> {{ resolution() ? resolution() : 'Refer Calibration Results' }}</p>
+            </div>
+          </div>
+
+          <!-- Environmental Conditions Bar -->
+          <div class="sheet-env-bar mt-3">
+            <span><strong>Temperature:</strong> {{ tempVal() }} ± {{ tempUnc() }} °C</span>
+            <span><strong>Atm Pressure:</strong> {{ pressVal() ? pressVal() + ' ± ' + pressUnc() + ' mbar' : '1013.2 ± 1.5 mbar' }}</span>
+            <span><strong>Humidity:</strong> {{ humidityVal() }} ± {{ humidityUnc() }} %rh</span>
+          </div>
+
+          <!-- Conditions & Reference Procedures Bar -->
+          <div class="sheet-conditions-bar mt-2">
+            <span><strong>As Received:</strong> {{ asReceivedCondition() }}</span>
+            <span><strong>As Left:</strong> {{ asLeftCondition() }}</span>
+            <span><strong>Reference Procedure:</strong> CI/01/EC1 Rev.7, CI/01/M1 Rev.11</span>
+            <span><strong>Total Pages:</strong> {{ totalPages() }}</span>
+          </div>
+
+          <!-- ISO & EA-4/02 Compliance Statements -->
+          <div class="cert-statements-box mt-3">
+            <p>
+              Calibration of the above-mentioned equipment has been carried out in accordance with the requirements specified in ISO/IEC 17025:2017 standard. It provides traceability of measurement to the SI system of units and/or to units of measurement realized at recognized national metrology institutes (NPL, NIST etc.).
+            </p>
+            <p class="mt-1">
+              The uncertainty evaluation has been carried out in accordance with EA-4/02 requirements. Reported expanded uncertainty is based on a combined uncertainty multiplied by coverage factor k=2, providing a confidence level of approximately 95%.
+            </p>
+            <p class="mt-1 font-bold">
+              Statement of conformity is based on {{ statementConformityBasedOn() }}. Issuance of this certificate indicates successful calibration (Result of calibration: PASS)
+            </p>
+          </div>
+
+          <!-- Comments Box -->
+          <div class="cert-comments-box mt-3">
+            <strong>Comments / Notes:</strong>
+            <p>{{ commentsText() ? commentsText() : 'NIL' }}</p>
+          </div>
+
+          <!-- Main Master Equipment Used Table -->
+          <div class="master-equipment-section mt-3">
+            <h4>MAIN MASTER EQUIPMENT USED</h4>
+            <table class="data-table master-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Serial Number</th>
+                  <th>Model / Part No</th>
+                  <th>Calibration Due</th>
+                  <th>Traceability</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (master of filteredMasterEquipment(); track master.srNo) {
+                  @if (master.selected) {
+                    <tr>
+                      <td class="bold">{{ master.description }}</td>
+                      <td class="code-font">{{ master.srNo }}</td>
+                      <td>{{ master.model }}</td>
+                      <td>{{ master.dueDate }}</td>
+                      <td class="code-font">NPL/01-C631486</td>
+                    </tr>
+                  }
+                }
+                @if (selectedMasterCount() === 0) {
+                  <tr>
+                    <td class="bold">AC/DC Clamp Meter</td>
+                    <td class="code-font">17011452</td>
+                    <td>CM 4373</td>
+                    <td>21 October 2026</td>
+                    <td class="code-font">NPL/01-C631486</td>
+                  </tr>
+                  <tr>
+                    <td class="bold">Digital Multimeter</td>
+                    <td class="code-font">54570151</td>
+                    <td>287</td>
+                    <td>03 November 2026</td>
+                    <td class="code-font">1A Cal Gmbh/01-C633350</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Signatures Footer Bar -->
+          <div class="sheet-footer-sign mt-4">
+            <div class="sign-block">
+              <span class="sign-title">Calibrated By:</span>
+              <span class="sign-name">Alex Rivera</span>
+              <span class="sign-role">Senior Metrologist</span>
+            </div>
+            <div class="sign-block">
+              <span class="sign-title">Approved By:</span>
+              <span class="sign-name">Dr. Marcus Vance</span>
+              <span class="sign-role">Quality Assurance Manager</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+
+  <!-- BOTTOM WIZARD NAVIGATION BAR -->
+  <div class="glass-card wizard-bottom-nav">
+    <div class="nav-left">
+      @if (currentStep() > 1) {
+        <button class="btn-secondary" (click)="prevStep()">
+          <i class="pi pi-arrow-left"></i> Previous Step
+        </button>
+      }
+    </div>
+
+    <div class="nav-right">
+      <button class="btn-secondary" (click)="saveDraft()">
+        <i class="pi pi-save"></i> Save Draft
+      </button>
+
+      @if (currentStep() < 5) {
+        <button class="btn-primary" (click)="nextStep()">
+          <span>Next Step</span> <i class="pi pi-arrow-right"></i>
+        </button>
+      } @else {
+        <button class="btn-primary success-btn" (click)="submitCertificate()">
+          <i class="pi pi-check-circle"></i> <span>Submit & Generate Certificate</span>
+        </button>
+      }
+    </div>
+  </div>
+</div>

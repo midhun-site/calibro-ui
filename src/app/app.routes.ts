@@ -4,6 +4,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { CustomerListComponent } from './components/customers/customer-list.component';
 import { EquipmentListComponent } from './components/equipment/equipment-list.component';
 import { CertificateViewerComponent } from './components/certificates/certificate-viewer.component';
+import { CertificateGenerateComponent } from './components/certificates/certificate-generate.component';
 import { EnquiryComponent } from './components/transactions/enquiry.component';
 import { EnquiryAddComponent } from './components/transactions/enquiry-add.component';
 import { ReviewComponent } from './components/transactions/review.component';
@@ -33,6 +34,7 @@ export const routes: Routes = [
   { path: 'transactions/quotation', component: QuotationComponent, canActivate: [authGuard] },
   { path: 'transactions/delivery-in', component: DeliveryInComponent, canActivate: [authGuard] },
   { path: 'transactions/job-register', component: JobRegisterComponent, canActivate: [authGuard] },
+  { path: 'transactions/certificate-generate', component: CertificateGenerateComponent, canActivate: [authGuard] },
   { path: 'transactions/delivery-ticket', component: DeliveryTicketComponent, canActivate: [authGuard] },
 
   // Masters Group
@@ -41,6 +43,7 @@ export const routes: Routes = [
 
   // Reports Group
   { path: 'certificates', component: CertificateViewerComponent, canActivate: [authGuard] },
+  { path: 'certificates/generate', component: CertificateGenerateComponent, canActivate: [authGuard] },
   { path: 'reports/calibration-report', component: CalibrationReportComponent, canActivate: [authGuard] },
   { path: 'reports/invoice-summary', component: InvoiceReportComponent, canActivate: [authGuard] },
 
