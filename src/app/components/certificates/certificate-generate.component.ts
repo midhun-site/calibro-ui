@@ -59,37 +59,37 @@ export class CertificateGenerateComponent {
   serviceLocation = signal<string>('Onsite'); // Onsite | Faulty | In-House Lab
   lab = signal<string>('Electrical');
   procedureType = signal<string>('Traceable');
-  certNo = signal<string>('01-OC568648');
+  certNo = signal<string>('CERT-2026-1048');
   issueDate = signal<string>('2026-06-28');
   calibDate = signal<string>('2026-06-28');
   durationVal = signal<number>(1);
   durationUnit = signal<string>('Years');
   dueDate = signal<string>('2027-06-27');
   hideDueDateInCert = signal<boolean>(false);
-  woNo = signal<string>('WA151108');
+  woNo = signal<string>('WO-2026-9104');
   totalPages = signal<number>(3);
   asReceivedCondition = signal<string>('Satisfactory');
   asLeftCondition = signal<string>('Calibrated');
   hideCustomerRequestText = signal<boolean>(false);
 
   // Customer Info
-  customerName = signal<string>('Servizi Energia Italia S.p.A');
-  customerAddress = signal<string>('P.B No: 03843480272, Via Martiri Di Cefalonia 67, Registro Delle Imprese');
-  mName = signal<string>('Azule-Energy');
-  mAddress = signal<string>('Via Martiri Di Cefalonia 67, Registro Delle Imprese Di Milano, Others, Italy');
+  customerName = signal<string>('Apex Global Energy Solutions LLC');
+  customerAddress = signal<string>('P.O. Box 45210, Industrial Zone 4, Sharjah, UAE');
+  mName = signal<string>('Energy Operations Division');
+  mAddress = signal<string>('Facility A-4, Sharjah Industrial Park, UAE');
 
   // Step 2: Instrument Details
-  instrumentDescription = signal<string>('Relay Test System');
-  manufacturer = signal<string>('FREJA');
-  model = signal<string>('FREJA 300');
-  programma = signal<string>('Different');
+  instrumentDescription = signal<string>('Relay Testing System');
+  manufacturer = signal<string>('CAL-TECH');
+  model = signal<string>('CAL-PRO 5000');
+  programma = signal<string>('Standard');
   range = signal<string>('0 - 1000 A / 0 - 300 V');
-  accuracy = signal<string>('Refer calibration results');
+  accuracy = signal<string>('Refer Calibration Results');
   hidePlusMinusAccuracy = signal<boolean>(false);
   resolution = signal<string>('Refer Calibration Results');
-  serialNo = signal<string>('5501452');
-  partNo = signal<string>('P-8829-X');
-  roTagNo = signal<string>('TAG-2026-99');
+  serialNo = signal<string>('SN-780491');
+  partNo = signal<string>('PART-904-X');
+  roTagNo = signal<string>('TAG-CAL-2026');
   instrIdLabel = signal<string>('Default: Sr No');
   instrIdValue = signal<string>('SrNo');
 
@@ -113,9 +113,9 @@ export class CertificateGenerateComponent {
   ctrFiles = signal<CTRFileItem[]>([
     {
       id: 'ctr-1',
-      fileName: '568648_CTR_10367627_1.doc',
+      fileName: 'CTR_CAL_2026_1048.doc',
       uploadDate: '08/08/2026 11:13:07',
-      uploadedBy: 'Smitha Gopalakrishnan Nair'
+      uploadedBy: 'Alex Rivera'
     }
   ]);
 
@@ -126,18 +126,18 @@ export class CertificateGenerateComponent {
   // Procedures Table State
   procedureSearch = signal<string>('');
   proceduresList = signal<ProcedureItem[]>([
-    { selected: true, procedureNumber: 'CI/01/EC1 Rev.7', calibrationProcedure: 'Electrical Sourcing Instruments', lab: 'Electrical' },
-    { selected: false, procedureNumber: 'CI/01/ET1 Rev.0', calibrationProcedure: 'Electrode Testing Procedure', lab: 'Electrical' },
-    { selected: false, procedureNumber: 'CI/01/F1 Rev.3', calibrationProcedure: 'Frequency Meter Calibration', lab: 'Electrical' },
-    { selected: true, procedureNumber: 'CI/02/TEMP Rev.2', calibrationProcedure: 'Thermal Sensor & RTD Calibration', lab: 'Temperature' },
-    { selected: false, procedureNumber: 'CI/03/PRESS Rev.5', calibrationProcedure: 'Digital Pressure Gauge Standard', lab: 'Pressure' }
+    { selected: true, procedureNumber: 'CAL-SOP-EC-01 Rev.4', calibrationProcedure: 'Electrical Sourcing Instruments', lab: 'Electrical' },
+    { selected: false, procedureNumber: 'CAL-SOP-ET-02 Rev.1', calibrationProcedure: 'Electrode Testing Procedure', lab: 'Electrical' },
+    { selected: false, procedureNumber: 'CAL-SOP-FM-03 Rev.2', calibrationProcedure: 'Frequency Meter Calibration', lab: 'Electrical' },
+    { selected: true, procedureNumber: 'CAL-SOP-TMP-04 Rev.3', calibrationProcedure: 'Thermal Sensor & RTD Calibration', lab: 'Temperature' },
+    { selected: false, procedureNumber: 'CAL-SOP-PRS-05 Rev.2', calibrationProcedure: 'Digital Pressure Gauge Standard', lab: 'Pressure' }
   ]);
 
   // Master Equipment Table State
   masterSearch = signal<string>('');
   masterEquipmentList = signal<MasterStandardItem[]>([
-    { selected: true, description: 'AC/DC Clamp Meter', srNo: '170114552', model: 'CM 4373', lab: 'Electrical', dueDate: '21 Oct 2026' },
-    { selected: true, description: 'Digital Multimeter', srNo: '54570151', model: '287', lab: 'Electrical', dueDate: '03 Nov 2026' },
+    { selected: true, description: 'AC/DC Clamp Meter', srNo: 'MS-104928', model: 'CM 4373', lab: 'Electrical', dueDate: '21 Oct 2026' },
+    { selected: true, description: 'Digital Multimeter', srNo: 'MS-549012', model: '287', lab: 'Electrical', dueDate: '03 Nov 2026' },
     { selected: false, description: 'AC/DC Multifunction Site Calibrator', srNo: '202008917', model: 'ZMSMFC45', lab: 'Electrical', dueDate: '15 Jan 2027' },
     { selected: true, description: 'Fluke 8508A Reference Multimeter', srNo: '99201411', model: '8508A', lab: 'Electrical', dueDate: '19 Dec 2026' }
   ]);

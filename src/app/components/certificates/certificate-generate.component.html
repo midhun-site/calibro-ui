@@ -311,25 +311,25 @@
           <div class="form-group">
             <label>Temp (°C)</label>
             <div class="unc-input-group">
-              <input type="number" pInputText [(ngModel)]="tempVal" class="p-inputtext" style="width: 90px;" />
+              <input type="number" pInputText [(ngModel)]="tempVal" class="p-inputtext" placeholder="Value" />
               <span class="pm-symbol">±</span>
-              <input type="number" pInputText [(ngModel)]="tempUnc" class="p-inputtext" style="width: 70px;" />
+              <input type="number" pInputText [(ngModel)]="tempUnc" class="p-inputtext" placeholder="Unc" />
             </div>
           </div>
           <div class="form-group">
             <label>Atm. Pressure (mbar)</label>
             <div class="unc-input-group">
-              <input type="number" pInputText [(ngModel)]="pressVal" class="p-inputtext" style="width: 100px;" />
+              <input type="number" pInputText [(ngModel)]="pressVal" class="p-inputtext" placeholder="Value" />
               <span class="pm-symbol">±</span>
-              <input type="number" pInputText [(ngModel)]="pressUnc" class="p-inputtext" style="width: 70px;" />
+              <input type="number" pInputText [(ngModel)]="pressUnc" class="p-inputtext" placeholder="Unc" />
             </div>
           </div>
           <div class="form-group">
             <label>Relative Humidity (%rh)</label>
             <div class="unc-input-group">
-              <input type="number" pInputText [(ngModel)]="humidityVal" class="p-inputtext" style="width: 90px;" />
+              <input type="number" pInputText [(ngModel)]="humidityVal" class="p-inputtext" placeholder="Value" />
               <span class="pm-symbol">±</span>
-              <input type="number" pInputText [(ngModel)]="humidityUnc" class="p-inputtext" style="width: 70px;" />
+              <input type="number" pInputText [(ngModel)]="humidityUnc" class="p-inputtext" placeholder="Unc" />
             </div>
           </div>
         </div>
@@ -680,7 +680,7 @@
           <div class="sheet-conditions-bar mt-2">
             <span><strong>As Received:</strong> {{ asReceivedCondition() }}</span>
             <span><strong>As Left:</strong> {{ asLeftCondition() }}</span>
-            <span><strong>Reference Procedure:</strong> CI/01/EC1 Rev.7, CI/01/M1 Rev.11</span>
+            <span><strong>Reference Procedure:</strong> CAL-SOP-EC-01 Rev.4, CAL-SOP-TMP-04 Rev.3</span>
             <span><strong>Total Pages:</strong> {{ totalPages() }}</span>
           </div>
 
