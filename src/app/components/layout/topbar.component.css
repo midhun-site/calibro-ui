@@ -503,12 +503,14 @@
 @media (max-width: 768px) {
   .topbar, .topbar.collapsed {
     margin-left: 0 !important;
-    padding: 0 0.75rem !important;
+    padding: 0 0.5rem !important;
     width: 100% !important;
   }
 
   .hamburger-btn {
     display: flex !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 
   .topbar-search-box,
@@ -517,7 +519,50 @@
   }
 
   .topbar-actions {
-    gap: 0.4rem !important;
+    gap: 0.35rem !important;
+  }
+
+  /* Compact Theme Switch Button on Mobile */
+  .theme-label {
+    display: none !important;
+  }
+
+  .theme-switch-btn {
+    padding: 0.4rem !important;
+    width: 36px !important;
+    height: 36px !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+  }
+
+  /* Compact User Profile Chip on Mobile */
+  .user-details-chip,
+  .chevron-icon {
+    display: none !important;
+  }
+
+  .profile-chip-btn {
+    padding: 0.2rem !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    border-color: var(--border-color) !important;
+  }
+
+  .user-avatar-chip {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  /* Compact AI Beta Button on Mobile */
+  .ai-beta-btn {
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.78rem !important;
+    gap: 0.3rem !important;
+  }
+
+  .beta-pill {
+    font-size: 0.6rem !important;
+    padding: 0.05rem 0.35rem !important;
   }
 
   /* Centered Fixed Dropdown Position on Mobile Phones */
@@ -528,11 +573,17 @@
     top: 72px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 92vw !important;
+    width: 94vw !important;
     max-width: 400px !important;
     right: auto !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
     z-index: 2000 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .beta-pill {
+    display: none !important;
   }
 }
 
