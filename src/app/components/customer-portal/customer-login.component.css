@@ -1,5 +1,5 @@
-/* Enterprise CRM Staff Login Page Styling */
-.staff-login-container {
+/* Customer Portal Login Page Styling */
+.customer-login-container {
   min-height: 100vh;
   background: var(--bg-dark);
   display: flex;
@@ -29,7 +29,7 @@
 .orb-2 {
   width: 550px;
   height: 550px;
-  background: #0284c7;
+  background: #3b82f6;
   bottom: -200px;
   right: -200px;
 }
@@ -285,7 +285,7 @@
 
 /* Right Panel */
 .login-features-panel {
-  background: linear-gradient(135deg, rgba(0, 242, 254, 0.12) 0%, rgba(15, 23, 42, 0.92) 100%);
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
   border-left: 1px solid var(--border-color);
   padding: 3rem 2.5rem;
   display: flex;

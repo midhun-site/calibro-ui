@@ -21,6 +21,6 @@ export class AppComponent {
 
   isStandalonePage(): boolean {
     const url = this.router.url;
-    return url.includes('/login') || url.includes('print-preview') || url.includes('/print');
+    return url.includes('/login') || url.includes('/customer') || url.includes('print-preview') || url.includes('/print') || url.includes('/certificates/view');
   }
 }

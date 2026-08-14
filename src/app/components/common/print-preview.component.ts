@@ -318,6 +318,12 @@ export class PrintPreviewComponent implements OnInit {
     ]);
   }
 
+  getQrCodeUrl(id: string): string {
+    const certId = id || 'CERT-2026-1048';
+    const targetUrl = window.location.origin + '/certificates/view/' + certId;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(targetUrl)}`;
+  }
+
   printDocument() {
     window.print();
   }

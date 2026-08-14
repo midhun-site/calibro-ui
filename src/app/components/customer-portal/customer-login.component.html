@@ -1,10 +1,10 @@
-<div class="staff-login-container">
-  <!-- Ambient Background Glow Orbs -->
+<div class="customer-login-container">
+  <!-- Ambient Background Glow Effects -->
   <div class="glow-orb orb-1"></div>
   <div class="glow-orb orb-2"></div>
 
   <div class="login-split-card">
-    <!-- Left Panel: Staff Login Form -->
+    <!-- Left Panel: Login Form -->
     <div class="login-form-panel">
       <div class="brand-header">
         <div class="brand-left">
@@ -13,7 +13,7 @@
           </div>
           <div>
             <h1 class="brand-title">Cali<span class="text-cyan">Bro</span></h1>
-            <span class="portal-badge"><i class="pi pi-verified"></i> CALIBRATION CRM &bull; ISO 17025</span>
+            <span class="portal-badge"><i class="pi pi-shield"></i> CUSTOMER PORTAL</span>
           </div>
         </div>
 
@@ -24,28 +24,28 @@
       </div>
 
       <div class="welcome-text-box">
-        <h2>Enterprise Staff Login</h2>
-        <p>Sign in to access CaliBro Metrology Workspace & Laboratory CRM.</p>
+        <h2>Customer Portal Login</h2>
+        <p>Access your ISO 17025 calibration records, certificates, and job progress.</p>
       </div>
 
-      <form (submit)="onLogin()" class="login-form">
+      <form (submit)="login()" class="login-form">
         <div class="form-group">
-          <label for="staff-user"><i class="pi pi-user"></i> Username or Staff ID</label>
+          <label for="cust-email"><i class="pi pi-envelope"></i> Customer Email / Account ID</label>
           <input
-            id="staff-user"
-            type="text"
+            id="cust-email"
+            type="email"
             class="input-control"
-            placeholder="e.g. admin or alex.rivera"
-            [value]="username()"
-            (input)="username.set($any($event.target).value)"
+            placeholder="e.g. client@apexenergy.ae"
+            [value]="email()"
+            (input)="email.set($any($event.target).value)"
             required
           />
         </div>
 
         <div class="form-group">
-          <label for="staff-pass"><i class="pi pi-lock"></i> Password</label>
+          <label for="cust-pass"><i class="pi pi-lock"></i> Password</label>
           <input
-            id="staff-pass"
+            id="cust-pass"
             type="password"
             class="input-control"
             placeholder="••••••••••••"
@@ -58,7 +58,7 @@
         <div class="form-options-row">
           <label class="checkbox-label">
             <input type="checkbox" [checked]="rememberMe()" (change)="rememberMe.set($any($event.target).checked)" />
-            <span>Keep me logged in</span>
+            <span>Remember Account</span>
           </label>
           <a href="javascript:void(0)" class="forgot-link">Forgot Password?</a>
         </div>
@@ -67,15 +67,15 @@
           @if (isLoading()) {
             <i class="pi pi-spin pi-spinner"></i> Authenticating...
           } @else {
-            <i class="pi pi-sign-in"></i> Sign In to CaliBro CRM
+            <i class="pi pi-sign-in"></i> Login to Customer Portal
           }
         </button>
       </form>
 
       <div class="customer-portal-link-box">
-        <span>Are you a calibration customer?</span>
-        <a routerLink="/customer/login" class="customer-link">
-          <i class="pi pi-shield text-cyan"></i> Go to Customer Self-Service Portal <i class="pi pi-arrow-right"></i>
+        <span>Laboratory Staff or Metrologist?</span>
+        <a routerLink="/login" class="customer-link">
+          <i class="pi pi-user-edit text-cyan"></i> Go to Staff CRM Login <i class="pi pi-arrow-right"></i>
         </a>
       </div>
     </div>
@@ -83,12 +83,12 @@
     <!-- Right Panel: Feature Highlights Grid -->
     <div class="login-features-panel">
       <div class="features-header">
-        <h3>ISO/IEC 17025 Laboratory CRM</h3>
-        <p>Enterprise Calibration Operations, CQRS Workflows & Compliance Suite</p>
+        <h3>Self-Service Calibration Portal</h3>
+        <p>24/7 Access to Accredited Calibration Services & Asset Intelligence</p>
       </div>
 
       <div class="features-list">
-        @for (feat of staffFeatures; track feat.title) {
+        @for (feat of portalFeatures; track feat.title) {
           <div class="feature-item">
             <div class="feat-icon-box">
               <i class="pi" [ngClass]="feat.icon"></i>

@@ -239,6 +239,12 @@ export class CertificateGenerateComponent {
     this.toastService.showSuccess('Draft Saved', `Certificate draft ${this.certNo()} saved successfully.`);
   }
 
+  getQrCodeUrl(id: string): string {
+    const certId = id || 'CERT-2026-1048';
+    const targetUrl = window.location.origin + '/certificates/view/' + certId;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(targetUrl)}`;
+  }
+
   submitCertificate() {
     this.toastService.showSuccess(
       'Certificate Generated!',

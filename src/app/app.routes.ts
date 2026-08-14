@@ -23,12 +23,19 @@ import { TechLabMappingComponent } from './components/qc/tech-lab-mapping.compon
 import { UserListComponent } from './components/user-management/user-list.component';
 import { UserPermissionsComponent } from './components/user-management/user-permissions.component';
 import { PrintPreviewComponent } from './components/common/print-preview.component';
+import { CustomerLoginComponent } from './components/customer-portal/customer-login.component';
+import { CustomerDashboardComponent } from './components/customer-portal/customer-dashboard.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+
+  // Customer Portal Routes (http://localhost:4200/customer/login & /customer/dashboard)
+  { path: 'customer', redirectTo: 'customer/login', pathMatch: 'full' },
+  { path: 'customer/login', component: CustomerLoginComponent },
+  { path: 'customer/dashboard', component: CustomerDashboardComponent },
   
   // Generic Print Preview Route (supports /print-preview/:type/:id & /transactions/:type/print/:id)
   { path: 'print-preview/:type/:id', component: PrintPreviewComponent, canActivate: [authGuard] },
@@ -51,8 +58,10 @@ export const routes: Routes = [
   { path: 'customers', component: CustomerListComponent, canActivate: [authGuard] },
   { path: 'equipment', component: EquipmentListComponent, canActivate: [authGuard] },
 
-  // Reports Group
+  // Reports & Certificate Viewer Group
   { path: 'certificates', component: CertificateViewerComponent, canActivate: [authGuard] },
+  { path: 'certificates/view', component: CertificateViewerComponent },
+  { path: 'certificates/view/:id', component: CertificateViewerComponent },
   { path: 'certificates/generate', component: CertificateGenerateComponent, canActivate: [authGuard] },
   { path: 'reports/calibration-report', component: CalibrationReportComponent, canActivate: [authGuard] },
   { path: 'reports/invoice-summary', component: InvoiceReportComponent, canActivate: [authGuard] },

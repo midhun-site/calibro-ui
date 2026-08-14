@@ -34,10 +34,18 @@
           <span class="sub-brand">CALIBRATION LABORATORIES</span>
         </div>
       </div>
-      <div class="lab-meta-block">
-        <h2>ISO/IEC 17025:2017 ACCREDITED LABORATORY</h2>
-        <p>Plot 412, Industrial Area 4, P.O. Box 45210, Sharjah, UAE</p>
-        <p>Tel: +971 6 5345678 &bull; Email: enquiry&#64;calibro.ae &bull; Web: www.calibro.ae</p>
+      <div class="sheet-header-right-block">
+        @if (docType().includes('cert')) {
+          <div class="header-qr-box" title="Scan QR Code to Verify Certificate & Download PDF">
+            <img [src]="getQrCodeUrl(docId())" alt="Certificate QR Code" class="header-qr-img" />
+            <span class="header-qr-subtext font-bold">Scan to Verify & Download</span>
+          </div>
+        }
+        <div class="lab-meta-block">
+          <h2>ISO/IEC 17025:2017 ACCREDITED LABORATORY</h2>
+          <p>Plot 412, Industrial Area 4, P.O. Box 45210, Sharjah, UAE</p>
+          <p>Tel: +971 6 5345678 &bull; Email: enquiry&#64;calibro.ae &bull; Web: www.calibro.ae</p>
+        </div>
       </div>
     </div>
 

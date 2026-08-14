@@ -633,9 +633,15 @@
                 <span>Accredited ISO/IEC 17025:2017 Calibration Facility</span>
               </div>
             </div>
-            <div class="sheet-cert-badge">
-              <span class="cert-title">CALIBRATION CERTIFICATE</span>
-              <span class="cert-number code-font">{{ certNo() }} -Rev.0</span>
+            <div class="sheet-header-right">
+              <div class="sheet-qr-box" title="Scan QR Code to Verify Certificate & Download PDF">
+                <img [src]="getQrCodeUrl(certNo())" alt="Certificate Verification QR Code" class="cert-qr-img" />
+                <span class="qr-label font-bold">Scan to Verify & Download</span>
+              </div>
+              <div class="sheet-cert-badge">
+                <span class="cert-title">CALIBRATION CERTIFICATE</span>
+                <span class="cert-number code-font">{{ certNo() }} -Rev.0</span>
+              </div>
             </div>
           </div>
 

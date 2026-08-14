@@ -1,0 +1,408 @@
+<div class="customer-portal-layout">
+  <!-- Top Customer Header Bar -->
+  <header class="cust-topbar">
+    <div class="brand-block">
+      <div class="brand-logo-icon">
+        <i class="pi pi-compass text-cyan"></i>
+      </div>
+      <div>
+        <h1 class="brand-title">Cali<span class="text-cyan">Bro</span></h1>
+        <span class="sub-title">CUSTOMER SELF-SERVICE PORTAL &bull; ISO 17025</span>
+      </div>
+    </div>
+
+    <div class="cust-account-block">
+      <button type="button" class="btn-theme-toggle" (click)="themeService.toggleTheme()" [title]="themeService.isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+        <i class="pi" [ngClass]="themeService.isDarkMode() ? 'pi-sun text-amber' : 'pi-moon text-cyan'"></i>
+        <span>{{ themeService.isDarkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
+      </button>
+
+      <div class="account-details">
+        <span class="account-name">{{ customerName() }}</span>
+        <span class="account-code">{{ customerCode() }}</span>
+      </div>
+      <button class="btn-logout" (click)="logout()" title="Logout of Customer Portal">
+        <i class="pi pi-power-off"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Quick Summary Metric Badges Banner -->
+  <div class="cust-metrics-grid">
+    <div class="metric-card cyan" (click)="setTab('progress')">
+      <div class="metric-icon"><i class="pi pi-truck"></i></div>
+      <div class="metric-info">
+        <span class="metric-val">{{ jobs().length }}</span>
+        <span class="metric-lbl">Active Jobs in Lab</span>
+      </div>
+    </div>
+
+    <div class="metric-card green" (click)="setTab('certs')">
+      <div class="metric-icon"><i class="pi pi-file-pdf"></i></div>
+      <div class="metric-info">
+        <span class="metric-val">{{ instruments().length }}</span>
+        <span class="metric-lbl">Available Certificates</span>
+      </div>
+    </div>
+
+    <div class="metric-card amber" (click)="setTab('due-dates')">
+      <div class="metric-icon"><i class="pi pi-calendar-times"></i></div>
+      <div class="metric-info">
+        <span class="metric-val">1</span>
+        <span class="metric-lbl">Recalibration Due (30 Days)</span>
+      </div>
+    </div>
+
+    <div class="metric-card purple" (click)="setTab('invoices')">
+      <div class="metric-icon"><i class="pi pi-file-excel"></i></div>
+      <div class="metric-info">
+        <span class="metric-val">1</span>
+        <span class="metric-lbl">Unpaid Tax Invoices</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Workspace Tabs Bar -->
+  <div class="cust-tabs-nav">
+    <button class="tab-btn" [class.active]="activeTab() === 'progress'" (click)="setTab('progress')">
+      <i class="pi pi-truck"></i> Track Job Progress
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'history'" (click)="setTab('history')">
+      <i class="pi pi-history"></i> Instrument History
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'certs'" (click)="setTab('certs')">
+      <i class="pi pi-file-pdf"></i> Download Certificates
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'invoices'" (click)="setTab('invoices')">
+      <i class="pi pi-file-excel"></i> Download Invoices
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'due-dates'" (click)="setTab('due-dates')">
+      <i class="pi pi-calendar-times"></i> Recalibration Due Dates
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'submit-job'" (click)="setTab('submit-job')">
+      <i class="pi pi-send"></i> Submit Calibration Request
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'request-quote'" (click)="setTab('request-quote')">
+      <i class="pi pi-dollar"></i> Request Quotation
+    </button>
+  </div>
+
+  <!-- TAB 1: Track Job Progress -->
+  @if (activeTab() === 'progress') {
+    <div class="workspace-card">
+      <div class="card-header-bar">
+        <h3><i class="pi pi-truck text-cyan"></i> Real-Time Calibration Job Progress Tracking</h3>
+        <button class="btn-action-sm" (click)="setTab('submit-job')"><i class="pi pi-plus"></i> Submit New Job</button>
+      </div>
+
+      <div class="jobs-list">
+        @for (job of jobs(); track job.jobNo) {
+          <div class="job-progress-card">
+            <div class="job-card-header">
+              <div class="job-title-group">
+                <span class="job-id">{{ job.jobNo }}</span>
+                <span class="wo-tag code-font">({{ job.woNo }})</span>
+                <h4 class="inst-name">{{ job.instrumentName }}</h4>
+              </div>
+              <div class="job-meta-dates">
+                <span>Received: <strong>{{ job.intakeDate }}</strong></span>
+                <span>Target: <strong class="text-cyan">{{ job.expectedDate }}</strong></span>
+              </div>
+            </div>
+
+            <div class="job-status-banner">
+              <span class="status-lbl"><i class="pi pi-spin pi-cog text-cyan"></i> Current Stage: <strong>{{ job.statusLabel }}</strong></span>
+              <span class="serial-tag code-font">Serial No: {{ job.serialNo }}</span>
+            </div>
+
+            <!-- 5-Step Stepper Bar -->
+            <div class="stepper-progress-bar">
+              <div class="step-point" [class.active]="job.currentStep >= 1" [class.completed]="job.currentStep > 1">
+                <div class="dot"><i class="pi pi-check" *ngIf="job.currentStep > 1"></i><span *ngIf="job.currentStep <= 1">1</span></div>
+                <span class="step-lbl">Lab Intake</span>
+              </div>
+              <div class="step-line" [class.active]="job.currentStep > 1"></div>
+
+              <div class="step-point" [class.active]="job.currentStep >= 2" [class.completed]="job.currentStep > 2">
+                <div class="dot"><i class="pi pi-check" *ngIf="job.currentStep > 2"></i><span *ngIf="job.currentStep <= 2">2</span></div>
+                <span class="step-lbl">Contract Review</span>
+              </div>
+              <div class="step-line" [class.active]="job.currentStep > 2"></div>
+
+              <div class="step-point" [class.active]="job.currentStep >= 3" [class.completed]="job.currentStep > 3">
+                <div class="dot"><i class="pi pi-check" *ngIf="job.currentStep > 3"></i><span *ngIf="job.currentStep <= 3">3</span></div>
+                <span class="step-lbl">Calibration Run</span>
+              </div>
+              <div class="step-line" [class.active]="job.currentStep > 3"></div>
+
+              <div class="step-point" [class.active]="job.currentStep >= 4" [class.completed]="job.currentStep > 4">
+                <div class="dot"><i class="pi pi-check" *ngIf="job.currentStep > 4"></i><span *ngIf="job.currentStep <= 4">4</span></div>
+                <span class="step-lbl">QA Signoff</span>
+              </div>
+              <div class="step-line" [class.active]="job.currentStep > 4"></div>
+
+              <div class="step-point" [class.active]="job.currentStep >= 5" [class.completed]="job.currentStep >= 5">
+                <div class="dot"><i class="pi pi-check" *ngIf="job.currentStep >= 5"></i><span *ngIf="job.currentStep < 5">5</span></div>
+                <span class="step-lbl">Ready / Dispatched</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: View Instrument History -->
+  @if (activeTab() === 'history') {
+    <div class="workspace-card">
+      <div class="card-header-bar">
+        <h3><i class="pi pi-history text-cyan"></i> Equipment Asset Registry & Historical Calibration Records</h3>
+      </div>
+
+      <div class="table-responsive">
+        <table class="cust-data-table">
+          <thead>
+            <tr>
+              <th>Asset ID</th>
+              <th>Instrument Description</th>
+              <th>Manufacturer & Model</th>
+              <th>Serial Number</th>
+              <th>Last Calibrated</th>
+              <th>Recalibration Due</th>
+              <th>Certificate No</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (inst of instruments(); track inst.assetId) {
+              <tr>
+                <td class="code-font font-bold">{{ inst.assetId }}</td>
+                <td><strong>{{ inst.description }}</strong></td>
+                <td>{{ inst.makeModel }}</td>
+                <td class="code-font">{{ inst.serialNo }}</td>
+                <td>{{ inst.lastCalibDate }}</td>
+                <td class="font-bold" [class.text-amber]="inst.status === 'DUE_SOON'" [class.text-danger]="inst.status === 'EXPIRED'">
+                  {{ inst.dueDate }}
+                </td>
+                <td class="code-font text-cyan">{{ inst.certNo }}</td>
+                <td>
+                  <span class="badge-status" [ngClass]="inst.status">
+                    {{ inst.status === 'VALID' ? 'ACTIVE / VALID' : (inst.status === 'DUE_SOON' ? 'DUE SOON' : 'EXPIRED') }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-table-action" (click)="downloadCert(inst.certNo)">
+                    <i class="pi pi-file-pdf"></i> Certificate
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: Download Calibration Certificates -->
+  @if (activeTab() === 'certs') {
+    <div class="workspace-card">
+      <div class="card-header-bar">
+        <h3><i class="pi pi-file-pdf text-cyan"></i> Official ISO/IEC 17025 Accredited Calibration Certificates</h3>
+      </div>
+
+      <div class="certs-grid">
+        @for (inst of instruments(); track inst.assetId) {
+          <div class="cert-download-card">
+            <div class="cert-card-icon">
+              <i class="pi pi-verified text-cyan"></i>
+            </div>
+            <div class="cert-card-info">
+              <span class="cert-code code-font">{{ inst.certNo }}</span>
+              <h4>{{ inst.description }}</h4>
+              <p>Serial: <strong>{{ inst.serialNo }}</strong> &bull; Make: <strong>{{ inst.makeModel }}</strong></p>
+              <div class="cert-dates-row">
+                <span>Calib Date: {{ inst.lastCalibDate }}</span>
+                <span>Due: <strong class="text-cyan">{{ inst.dueDate }}</strong></span>
+              </div>
+            </div>
+            <button class="btn-download-cert" (click)="downloadCert(inst.certNo)">
+              <i class="pi pi-download"></i> View & Download PDF
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 4: Download Invoices -->
+  @if (activeTab() === 'invoices') {
+    <div class="workspace-card">
+      <div class="card-header-bar">
+        <h3><i class="pi pi-file-excel text-cyan"></i> Billing Statements & Official Tax Invoices</h3>
+      </div>
+
+      <div class="table-responsive">
+        <table class="cust-data-table">
+          <thead>
+            <tr>
+              <th>Invoice No</th>
+              <th>Date</th>
+              <th>Net Amount</th>
+              <th>VAT (5%)</th>
+              <th>Total Amount</th>
+              <th>Payment Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (inv of invoices(); track inv.invoiceNo) {
+              <tr>
+                <td class="code-font font-bold text-cyan">{{ inv.invoiceNo }}</td>
+                <td>{{ inv.date }}</td>
+                <td>{{ inv.amount }}</td>
+                <td>{{ inv.tax }}</td>
+                <td class="font-bold">{{ inv.total }}</td>
+                <td>
+                  <span class="badge-status" [class.VALID]="inv.status === 'PAID'" [class.EXPIRED]="inv.status === 'UNPAID'">
+                    {{ inv.status }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-table-action" (click)="downloadInvoice(inv.invoiceNo)">
+                    <i class="pi pi-download"></i> Download Invoice PDF
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 5: View Recalibration Due Dates -->
+  @if (activeTab() === 'due-dates') {
+    <div class="workspace-card">
+      <div class="card-header-bar">
+        <h3><i class="pi pi-calendar-times text-amber"></i> Recalibration Schedule & 30-Day Expiry Alerts</h3>
+      </div>
+
+      <div class="due-dates-list">
+        @for (inst of instruments(); track inst.assetId) {
+          @if (inst.status === 'DUE_SOON' || inst.status === 'EXPIRED') {
+            <div class="due-alert-card" [class.expired]="inst.status === 'EXPIRED'">
+              <div class="alert-icon">
+                <i class="pi" [ngClass]="inst.status === 'EXPIRED' ? 'pi-exclamation-triangle' : 'pi-clock'"></i>
+              </div>
+              <div class="alert-details">
+                <div class="alert-header">
+                  <span class="badge-status" [ngClass]="inst.status">
+                    {{ inst.status === 'EXPIRED' ? 'EXPIRED - IMMEDIATE RECALIBRATION REQUIRED' : 'RECALIBRATION DUE WITHIN 30 DAYS' }}
+                  </span>
+                  <span class="due-date-text">Recalibration Due Date: <strong>{{ inst.dueDate }}</strong></span>
+                </div>
+                <h4>{{ inst.description }} (Serial: {{ inst.serialNo }})</h4>
+                <p>Asset ID: <strong>{{ inst.assetId }}</strong> &bull; Make/Model: <strong>{{ inst.makeModel }}</strong></p>
+              </div>
+              <button class="btn-schedule-now" (click)="setTab('submit-job')">
+                <i class="pi pi-calendar-plus"></i> Schedule Calibration
+              </button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 6: Submit Calibration Requests Online -->
+  @if (activeTab() === 'submit-job') {
+    <div class="workspace-card">
+      <div class="card-header-bar">
+        <h3><i class="pi pi-send text-cyan"></i> Submit New Calibration Equipment Request Online</h3>
+      </div>
+
+      <form (submit)="submitJobRequest()" class="cust-form-grid">
+        <div class="form-group">
+          <label>Instrument Description / Name *</label>
+          <input type="text" class="input-control" placeholder="e.g. 4-Gas Personal Monitor H2S/CO/O2" [(ngModel)]="newJob.instrumentName" name="instName" required />
+        </div>
+
+        <div class="form-group">
+          <label>Manufacturer / Make & Model</label>
+          <input type="text" class="input-control" placeholder="e.g. Honeywell BW MAX XT II" [(ngModel)]="newJob.makeModel" name="makeModel" />
+        </div>
+
+        <div class="form-group">
+          <label>Serial Number / RO Tag No *</label>
+          <input type="text" class="input-control" placeholder="e.g. SN-99120" [(ngModel)]="newJob.serialNo" name="serialNo" required />
+        </div>
+
+        <div class="form-group">
+          <label>Service Intake Type</label>
+          <select class="input-control" [(ngModel)]="newJob.serviceType" name="serviceType">
+            <option value="In-Lab Calibration">In-Lab Calibration (Laboratory)</option>
+            <option value="On-Site Calibration">On-Site Calibration (Client Site)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Turnaround Urgency</label>
+          <select class="input-control" [(ngModel)]="newJob.urgency" name="urgency">
+            <option value="Standard (3-5 Days)">Standard (3-5 Business Days)</option>
+            <option value="Express Expedited (24-48 Hours)">Express Expedited (24-48 Hours)</option>
+          </select>
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>Special Instructions / Calibration Range Requirements</label>
+          <textarea class="input-control textarea" rows="3" placeholder="Specify test points, range limits, or special handling notes..." [(ngModel)]="newJob.notes" name="notes"></textarea>
+        </div>
+
+        <div class="form-actions col-span-2">
+          <button type="submit" class="btn-submit-form"><i class="pi pi-check"></i> Submit Calibration Request</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- TAB 7: Request Quotations -->
+  @if (activeTab() === 'request-quote') {
+    <div class="workspace-card">
+      <div class="card-header-bar">
+        <h3><i class="pi pi-dollar text-cyan"></i> Commercial Price Quotation Request Form</h3>
+      </div>
+
+      <form (submit)="submitQuoteRequest()" class="cust-form-grid">
+        <div class="form-group">
+          <label>Contact Person Name</label>
+          <input type="text" class="input-control" [(ngModel)]="newQuote.contactPerson" name="contactPerson" required />
+        </div>
+
+        <div class="form-group">
+          <label>Contact Email</label>
+          <input type="email" class="input-control" [(ngModel)]="newQuote.email" name="email" required />
+        </div>
+
+        <div class="form-group">
+          <label>Telephone / Mobile No</label>
+          <input type="text" class="input-control" [(ngModel)]="newQuote.phone" name="phone" required />
+        </div>
+
+        <div class="form-group">
+          <label>Estimated Quantity of Equipment</label>
+          <input type="number" class="input-control" [(ngModel)]="newQuote.estimatedQuantity" name="estQty" min="1" />
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>Scope & Equipment Details for Quotation *</label>
+          <textarea class="input-control textarea" rows="4" placeholder="List instrument models, ranges, accuracy required, and if on-site calibration service is needed..." [(ngModel)]="newQuote.scopeDetails" name="scopeDetails" required></textarea>
+        </div>
+
+        <div class="form-actions col-span-2">
+          <button type="submit" class="btn-submit-form"><i class="pi pi-send"></i> Submit Quotation Proposal Request</button>
+        </div>
+      </form>
+    </div>
+  }
+</div>
