@@ -386,23 +386,34 @@
               <span class="ctr-title"><i class="pi pi-file-edit text-cyan"></i> Calibration Test Result (CTR) Raw Data Entry</span>
             </div>
             
-            <div class="mode-toggle-buttons">
+            <div class="ctr-header-actions">
               <button
                 type="button"
-                class="btn-mode"
-                [class.active]="ctrInputMode() === 'upload'"
-                (click)="setCtrInputMode('upload')"
+                class="btn-standalone-unc"
+                (click)="openUncertaintyCalculator()"
+                title="Open ISO 17025 Uncertainty Budget Calculator Sheet in New Tab"
               >
-                <i class="pi pi-paperclip"></i> Upload CTR Attachment Files
+                <i class="pi pi-table text-cyan"></i> <span>Uncertainty Calculator Sheet</span> <i class="pi pi-external-link text-xs"></i>
               </button>
-              <button
-                type="button"
-                class="btn-mode"
-                [class.active]="ctrInputMode() === 'manual'"
-                (click)="setCtrInputMode('manual')"
-              >
-                <i class="pi pi-pencil"></i> Manual CTR Template Editor
-              </button>
+
+              <div class="mode-toggle-buttons">
+                <button
+                  type="button"
+                  class="btn-mode"
+                  [class.active]="ctrInputMode() === 'upload'"
+                  (click)="setCtrInputMode('upload')"
+                >
+                  <i class="pi pi-paperclip"></i> Upload CTR Attachment Files
+                </button>
+                <button
+                  type="button"
+                  class="btn-mode"
+                  [class.active]="ctrInputMode() === 'manual'"
+                  (click)="setCtrInputMode('manual')"
+                >
+                  <i class="pi pi-pencil"></i> Manual CTR Template Editor
+                </button>
+              </div>
             </div>
           </div>
 

@@ -170,6 +170,10 @@
             <i class="pi pi-map"></i>
             @if (!layoutService.isSidebarCollapsed()) { <span>Tech-Lab mapping</span> }
           </a>
+          <a routerLink="/qc/uncertainty-calculator" target="_blank" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Uncertainty Calculator Sheet">
+            <i class="pi pi-table text-cyan"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Uncertainty Calculator</span> }
+          </a>
         </div>
       }
     </div>

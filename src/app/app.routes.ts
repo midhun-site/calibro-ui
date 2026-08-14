@@ -29,6 +29,8 @@ import { CustomerLoginComponent } from './components/customer-portal/customer-lo
 import { CustomerDashboardComponent } from './components/customer-portal/customer-dashboard.component';
 import { authGuard } from './guards/auth.guard';
 
+import { UncertaintyCalculatorComponent } from './components/qc/uncertainty-calculator.component';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -74,6 +76,8 @@ export const routes: Routes = [
   { path: 'qc/procedures-list', component: ProceduresListComponent, canActivate: [authGuard] },
   { path: 'qc/tech-proc-mapping', component: TechProcMappingComponent, canActivate: [authGuard] },
   { path: 'qc/tech-lab-mapping', component: TechLabMappingComponent, canActivate: [authGuard] },
+  { path: 'qc/uncertainty-calculator', component: UncertaintyCalculatorComponent, canActivate: [authGuard] },
+  { path: 'uncertainty-calculator', component: UncertaintyCalculatorComponent },
 
   // User Management Group
   { path: 'user-management/user-list', component: UserListComponent, canActivate: [authGuard] },

@@ -1,0 +1,232 @@
+<div class="unc-workspace-wrapper">
+  <!-- Top Non-Printable Action Header Bar -->
+  <div class="unc-header-bar">
+    <div class="header-left">
+      <div class="brand-badge">
+        <i class="pi pi-table text-cyan"></i>
+        <span>ISO 17025 SPREADSHEET</span>
+      </div>
+      <h2 class="doc-title-text">{{ docTitle() }}</h2>
+    </div>
+
+    <div class="header-center">
+      <label class="preset-label font-bold"><i class="pi pi-sliders-h text-cyan"></i> Preset Discipline:</label>
+      <select [value]="selectedPreset()" (change)="loadPreset($any($event.target).value)" class="preset-select">
+        <option value="pressure">Pressure Gauge (0-10,000 PSI)</option>
+        <option value="temperature">Dry Block Temperature Bath (-30 to 150°C)</option>
+        <option value="multimeter">Digital Multimeter (10V DC)</option>
+        <option value="dimensional">Outside Micrometer (0-25mm)</option>
+      </select>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn-action btn-apply" (click)="applyToCtrEditor()" title="Copy & Apply Uncertainty Budget to Certificate Page 2">
+        <i class="pi pi-check-circle"></i> Apply & Copy to CTR
+      </button>
+      <button type="button" class="btn-action btn-csv" (click)="exportCsv()" title="Export CSV Sheet">
+        <i class="pi pi-download"></i> Export CSV
+      </button>
+      <button type="button" class="btn-action btn-close" (click)="closeTab()" title="Close Tab">
+        <i class="pi pi-times"></i> Close Sheet
+      </button>
+    </div>
+  </div>
+
+  <!-- Google Sheets Formula Bar (fx) -->
+  <div class="formula-bar-container">
+    <div class="cell-name-box code-font">{{ activeCell() }}</div>
+    <div class="fx-label font-bold">fx</div>
+    <input type="text" class="formula-input code-font" [value]="formulaInput()" readonly />
+
+    <div class="formula-summary-pills">
+      <span class="pill pill-cyan">u_A: ±{{ typeAUncertainty() }} {{ unitName() }}</span>
+      <span class="pill pill-purple">u_c: ±{{ combinedUncertainty() }} {{ unitName() }}</span>
+      <span class="pill pill-emerald font-bold">U (k=2): ±{{ expandedUncertainty() }} {{ unitName() }}</span>
+      <span class="pill pill-gold">v_eff: {{ effectiveDOF() }}</span>
+    </div>
+  </div>
+
+  <!-- Spreadsheet Grid & Calculator Body -->
+  <div class="spreadsheet-container">
+    
+    <!-- SECTION 1: Type A Evaluation (5 Repeated Measurement Runs) -->
+    <div class="grid-card mb-4">
+      <div class="grid-card-header bg-cyan-dark">
+        <span class="section-badge">TYPE A EVALUATION</span>
+        <h3>Statistical Analysis of Repeated Measurements (n = 5 Runs)</h3>
+      </div>
+
+      <div class="grid-table-wrapper">
+        <table class="spreadsheet-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>Cell</th>
+              <th>Measurement Parameter / Run Number</th>
+              <th>Observed Value</th>
+              <th>Unit</th>
+              <th>Calculated Metric</th>
+              <th>Formula Applied</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr (click)="selectCell('B4', '=RUN_1_MEASUREMENT')">
+              <td class="row-num">4</td>
+              <td class="cell-id">B4</td>
+              <td>Repeated Reading Run 1 (X1)</td>
+              <td><input type="number" step="0.0001" [(ngModel)]="run1" class="cell-input" /></td>
+              <td><span class="unit-tag">{{ unitName() }}</span></td>
+              <td class="text-muted">-</td>
+              <td class="code-font text-muted">Direct Reading</td>
+            </tr>
+            <tr (click)="selectCell('B5', '=RUN_2_MEASUREMENT')">
+              <td class="row-num">5</td>
+              <td class="cell-id">B5</td>
+              <td>Repeated Reading Run 2 (X2)</td>
+              <td><input type="number" step="0.0001" [(ngModel)]="run2" class="cell-input" /></td>
+              <td><span class="unit-tag">{{ unitName() }}</span></td>
+              <td class="text-muted">-</td>
+              <td class="code-font text-muted">Direct Reading</td>
+            </tr>
+            <tr (click)="selectCell('B6', '=RUN_3_MEASUREMENT')">
+              <td class="row-num">6</td>
+              <td class="cell-id">B6</td>
+              <td>Repeated Reading Run 3 (X3)</td>
+              <td><input type="number" step="0.0001" [(ngModel)]="run3" class="cell-input" /></td>
+              <td><span class="unit-tag">{{ unitName() }}</span></td>
+              <td class="text-muted">-</td>
+              <td class="code-font text-muted">Direct Reading</td>
+            </tr>
+            <tr (click)="selectCell('B7', '=RUN_4_MEASUREMENT')">
+              <td class="row-num">7</td>
+              <td class="cell-id">B7</td>
+              <td>Repeated Reading Run 4 (X4)</td>
+              <td><input type="number" step="0.0001" [(ngModel)]="run4" class="cell-input" /></td>
+              <td><span class="unit-tag">{{ unitName() }}</span></td>
+              <td class="text-muted">-</td>
+              <td class="code-font text-muted">Direct Reading</td>
+            </tr>
+            <tr (click)="selectCell('B8', '=RUN_5_MEASUREMENT')">
+              <td class="row-num">8</td>
+              <td class="cell-id">B8</td>
+              <td>Repeated Reading Run 5 (X5)</td>
+              <td><input type="number" step="0.0001" [(ngModel)]="run5" class="cell-input" /></td>
+              <td><span class="unit-tag">{{ unitName() }}</span></td>
+              <td class="text-muted">-</td>
+              <td class="code-font text-muted">Direct Reading</td>
+            </tr>
+
+            <!-- Summary Rows -->
+            <tr class="summary-row-cyan" (click)="selectCell('C9', '=AVERAGE(B4:B8)')">
+              <td class="row-num">9</td>
+              <td class="cell-id">C9</td>
+              <td class="font-bold">Calculated Arithmetic Mean (x̄)</td>
+              <td class="font-bold highlight-cyan">{{ meanValue() }}</td>
+              <td>{{ unitName() }}</td>
+              <td class="font-bold">Mean Output</td>
+              <td class="code-font">=AVERAGE(B4:B8)</td>
+            </tr>
+            <tr class="summary-row-cyan" (click)="selectCell('C10', '=STDEV.S(B4:B8)')">
+              <td class="row-num">10</td>
+              <td class="cell-id">C10</td>
+              <td class="font-bold">Sample Standard Deviation s(x)</td>
+              <td class="font-bold highlight-cyan">{{ stdDev() }}</td>
+              <td>{{ unitName() }}</td>
+              <td class="font-bold">Standard Deviation</td>
+              <td class="code-font">=STDEV.S(B4:B8)</td>
+            </tr>
+            <tr class="summary-row-cyan" (click)="selectCell('C11', '=C10/SQRT(5)')">
+              <td class="row-num">11</td>
+              <td class="cell-id">C11</td>
+              <td class="font-bold">Type A Standard Uncertainty u_A</td>
+              <td class="font-bold highlight-emerald">± {{ typeAUncertainty() }}</td>
+              <td>{{ unitName() }}</td>
+              <td class="font-bold">u_A (Type A)</td>
+              <td class="code-font">=s(x) / √5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Type B Evaluation & Uncertainty Components -->
+    <div class="grid-card mb-4">
+      <div class="grid-card-header bg-purple-dark">
+        <span class="section-badge">TYPE B EVALUATION</span>
+        <h3>Systematic Calibration Uncertainty Components (Master, Resolution, Env)</h3>
+      </div>
+
+      <div class="grid-table-wrapper">
+        <table class="spreadsheet-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>Source Description</th>
+              <th>Uncertainty Value</th>
+              <th>Distribution</th>
+              <th>Divisor</th>
+              <th>Sensitivity (c_i)</th>
+              <th>Std Uncertainty u(x_i)</th>
+              <th>Degrees of Freedom (v_i)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of typeBList(); track $index) {
+              <tr (click)="selectCell('D' + (12 + $index), '=TYPE_B_DIVISOR(' + item.value + ')')">
+                <td class="row-num">{{ 12 + $index }}</td>
+                <td><input type="text" [(ngModel)]="item.source" class="cell-input text-left" /></td>
+                <td><input type="number" step="0.001" [(ngModel)]="item.value" class="cell-input" /></td>
+                <td>
+                  <select [(ngModel)]="item.distribution" class="cell-select">
+                    <option value="Normal (k=2)">Normal (k=2)</option>
+                    <option value="Rectangular (√3)">Rectangular (√3)</option>
+                    <option value="Triangular (√6)">Triangular (√6)</option>
+                  </select>
+                </td>
+                <td class="code-font text-center">{{ item.divisor }}</td>
+                <td class="code-font text-center">{{ item.sensitivityCoeff }}</td>
+                <td class="font-bold text-cyan text-center">± {{ (item.value / item.divisor) | number:'1.4-5' }}</td>
+                <td><input type="number" [(ngModel)]="item.degreesOfFreedom" class="cell-input text-center" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Combined & Expanded Uncertainty Summary (Welch-Satterthwaite) -->
+    <div class="grid-card">
+      <div class="grid-card-header bg-emerald-dark">
+        <span class="section-badge">FINAL ISO 17025 BUDGET SUMMARY</span>
+        <h3>Combined & Expanded Calibration Uncertainty (k=2.00 &#64; 95% Confidence)</h3>
+      </div>
+
+      <div class="summary-grid-box">
+        <div class="summary-card">
+          <span class="summary-title">Combined Standard Uncertainty u_c</span>
+          <div class="summary-value text-cyan">± {{ combinedUncertainty() }} {{ unitName() }}</div>
+          <span class="summary-sub code-font">u_c = √(u_A² + ∑u_B²)</span>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-title">Coverage Factor k</span>
+          <div class="summary-value text-purple">{{ coverageFactor() }}</div>
+          <span class="summary-sub">95.45% Confidence Level</span>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-title">Effective Degrees of Freedom v_eff</span>
+          <div class="summary-value text-gold">{{ effectiveDOF() }}</div>
+          <span class="summary-sub code-font">Welch-Satterthwaite Formula</span>
+        </div>
+
+        <div class="summary-card highlight-card">
+          <span class="summary-title">REPORTED EXPANDED UNCERTAINTY (U)</span>
+          <div class="summary-value text-emerald">± {{ expandedUncertainty() }} {{ unitName() }}</div>
+          <span class="summary-sub font-bold">U = k × u_c</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

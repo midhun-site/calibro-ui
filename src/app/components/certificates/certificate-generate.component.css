@@ -299,6 +299,34 @@
   font-weight: 700;
 }
 
+.ctr-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.btn-standalone-unc {
+  background: rgba(0, 242, 254, 0.12) !important;
+  border: 1px solid rgba(0, 242, 254, 0.35) !important;
+  color: var(--accent-cyan) !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  padding: 0.45rem 0.95rem !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-standalone-unc:hover {
+  background: var(--accent-cyan) !important;
+  color: #000000 !important;
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.4) !important;
+}
+
 /* Template Selector Bar */
 .template-selector-bar {
   display: flex;

@@ -545,7 +545,15 @@ export class CertificateGenerateComponent {
     this.loadCtrTemplate(val);
   }
 
+  openUncertaintyCalculator() {
+    window.open('/qc/uncertainty-calculator', '_blank');
+  }
+
   saveManualCtr() {
+    const budgetHtml = localStorage.getItem('calibro_uncertainty_budget_html');
+    if (budgetHtml) {
+      this.ctrEditorContent.set(budgetHtml);
+    }
     this.ctrManualSaved.set(true);
     this.toastService.showSuccess('Manual CTR Saved', 'CTR template values saved successfully for this certificate.');
   }
