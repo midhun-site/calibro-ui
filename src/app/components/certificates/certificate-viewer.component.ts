@@ -77,6 +77,66 @@ export class CertificateViewerComponent implements OnInit {
     { description: 'Digital Reference Thermometer & Barometer', srNo: '54570151', model: 'Fluke 1524', dueDate: '2026-11-03', traceability: '1A Cal Gmbh/01-C633350' }
   ]);
 
+  public ctrPageContent = signal<string>(`<div style="font-family: Arial, sans-serif; color: #0f172a;">
+  <h3 style="color: #0284c7; border-bottom: 2px solid #0284c7; padding-bottom: 5px; margin-top: 0;">
+    CALIBRATION TEST RESULTS (CTR) & MEASUREMENT DATA SHEET
+  </h3>
+  <p><strong>Instrument:</strong> Digital Pressure Gauge 0-10,000 PSI | <strong>Serial No:</strong> SN-78041 | <strong>Tag:</strong> TAG-CAL-2026</p>
+  <p><strong>Environmental Conditions:</strong> Temperature: 23.1 °C | Relative Humidity: 48 %RH | Pressure: 1013 mbar</p>
+  
+  <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px;">
+    <thead>
+      <tr style="background-color: #0284c7; color: #ffffff;">
+        <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">Nominal Applied (PSI)</th>
+        <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">Upward Reading (PSI)</th>
+        <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">Downward Reading (PSI)</th>
+        <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">Deviation / Error (PSI)</th>
+        <th style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">Expanded Uncertainty (±)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">0.0</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">0.0</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">0.0</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">0.0</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">0.05 PSI</td>
+      </tr>
+      <tr style="background-color: #f8fafc;">
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">2500.0</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">2500.2</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">2500.1</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.2</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">0.08 PSI</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">5000.0</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">5000.4</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">5000.3</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.4</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">0.12 PSI</td>
+      </tr>
+      <tr style="background-color: #f8fafc;">
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">7500.0</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">7500.5</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">7500.4</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.5</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">0.15 PSI</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">10000.0</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">10000.8</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">10000.6</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.8</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">0.18 PSI</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <p style="margin-top: 15px;"><strong>Calibration Result Status:</strong> <span style="background-color: #10b981; color: #ffffff; padding: 3px 8px; border-radius: 4px; font-weight: bold;">PASSED</span> Within manufacturer tolerance limit of ± 1.0 PSI.</p>
+  <p><strong>Remarks / Traceability Notes:</strong> Reported expanded uncertainty is calculated using coverage factor k=2 providing ~95% confidence level in accordance with ISO/IEC Guide 98-3 (GUM).</p>
+</div>`);
+
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {

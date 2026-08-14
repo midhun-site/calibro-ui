@@ -109,6 +109,82 @@ export class CertificateGenerateComponent {
   decisionRule = signal<string>('Simple acceptance');
   commentsText = signal<string>('The reported expanded uncertainty is based on a standard uncertainty multiplied by coverage factor k=2 providing 95% confidence.');
 
+  // CTR Input Mode ('upload' | 'manual')
+  ctrInputMode = signal<'upload' | 'manual'>('upload');
+
+  // CTR Template Selection Options
+  selectedCtrTemplate = signal<string>('pressure');
+  ctrTemplateOptions = [
+    { label: 'Standard Pressure Gauge CTR Raw Data (0 - 10,000 PSI)', value: 'pressure' },
+    { label: 'Dry Block Temperature Calibrator CTR Raw Data (-30 to 150°C)', value: 'temperature' },
+    { label: 'Digital Multimeter CTR Raw Data (V / A / Ω)', value: 'multimeter' },
+    { label: 'Outside Micrometer / Caliper CTR Raw Data (0 - 25mm)', value: 'dimensional' },
+    { label: 'Custom Blank CTR Raw Data Template', value: 'blank' }
+  ];
+
+  // Manual CTR Editor Content State
+  ctrEditorContent = signal<string>(`
+<h3 style="color: #00f2fe; border-bottom: 2px solid #00f2fe; padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; font-size: 1.1rem;">
+  CALIBRATION TEST RESULTS (CTR) & MEASUREMENT DATA SHEET
+</h3>
+<p style="margin: 6px 0;"><strong>Instrument:</strong> Digital Pressure Gauge 0-10,000 PSI &nbsp;|&nbsp; <strong>Serial No:</strong> SN-78041 &nbsp;|&nbsp; <strong>Tag:</strong> TAG-CAL-2026</p>
+<p style="margin: 6px 0 16px 0;"><strong>Environmental Conditions:</strong> Temperature: 23.1 °C &nbsp;|&nbsp; Relative Humidity: 48 %RH &nbsp;|&nbsp; Pressure: 1013 mbar</p>
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 16px; font-size: 13px;">
+  <thead>
+    <tr style="background-color: #0284c7; color: #ffffff;">
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Nominal Applied (PSI)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Upward Reading (PSI)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Downward Reading (PSI)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Deviation / Error (PSI)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Expanded Uncertainty (±)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">0.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.05 PSI</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">2500.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">2500.2</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">2500.1</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.2</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.08 PSI</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5000.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5000.4</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5000.3</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.4</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.12 PSI</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">7500.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">7500.5</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">7500.4</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.5</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.15 PSI</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10000.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10000.8</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10000.6</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.8</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.18 PSI</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="margin: 12px 0 6px 0;"><strong>Calibration Result Status:</strong> <span style="background-color: #10b981; color: #ffffff; padding: 3px 8px; border-radius: 4px; font-weight: bold;">PASSED</span> Within manufacturer tolerance limit of ± 1.0 PSI.</p>
+<p style="margin: 6px 0;"><strong>Remarks / Traceability Notes:</strong> Reported expanded uncertainty is calculated using coverage factor k=2 providing ~95% confidence level in accordance with ISO/IEC Guide 98-3 (GUM).</p>
+`);
+
+  ctrManualSaved = signal<boolean>(false);
+
   // CTR File Upload List
   ctrFiles = signal<CTRFileItem[]>([
     {
@@ -233,6 +309,245 @@ export class CertificateGenerateComponent {
   deleteCtrFile(id: string) {
     this.ctrFiles.update(files => files.filter(f => f.id !== id));
     this.toastService.showInfo('CTR File Removed', 'File deleted from certificate attachments.');
+  }
+
+  setCtrInputMode(mode: 'upload' | 'manual') {
+    this.ctrInputMode.set(mode);
+  }
+
+  execEditorCommand(command: string, value: string | null = null) {
+    document.execCommand(command, false, value ?? undefined);
+  }
+
+  loadCtrTemplate(templateKey: string) {
+    let html = '';
+    switch (templateKey) {
+      case 'pressure':
+        html = `
+<h3 style="color: #00f2fe; border-bottom: 2px solid #00f2fe; padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; font-size: 1.1rem;">
+  CALIBRATION TEST RESULTS (CTR) & MEASUREMENT DATA SHEET
+</h3>
+<p style="margin: 6px 0;"><strong>Instrument:</strong> Digital Pressure Gauge 0-10,000 PSI &nbsp;|&nbsp; <strong>Serial No:</strong> SN-78041 &nbsp;|&nbsp; <strong>Tag:</strong> TAG-CAL-2026</p>
+<p style="margin: 6px 0 16px 0;"><strong>Environmental Conditions:</strong> Temperature: 23.1 °C &nbsp;|&nbsp; Relative Humidity: 48 %RH &nbsp;|&nbsp; Pressure: 1013 mbar</p>
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 16px; font-size: 13px;">
+  <thead>
+    <tr style="background-color: #0284c7; color: #ffffff;">
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Nominal Applied (PSI)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Upward Reading (PSI)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Downward Reading (PSI)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Deviation / Error (PSI)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: left;">Expanded Uncertainty (±)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">0.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.05 PSI</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">2500.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">2500.2</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">2500.1</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.2</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.08 PSI</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5000.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5000.4</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5000.3</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.4</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.12 PSI</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">7500.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">7500.5</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">7500.4</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.5</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.15 PSI</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10000.0</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10000.8</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10000.6</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.8</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.18 PSI</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="margin: 12px 0 6px 0;"><strong>Calibration Result Status:</strong> <span style="background-color: #10b981; color: #ffffff; padding: 3px 8px; border-radius: 4px; font-weight: bold;">PASSED</span> Within manufacturer tolerance limit of ± 1.0 PSI.</p>
+<p style="margin: 6px 0;"><strong>Remarks / Traceability Notes:</strong> Reported expanded uncertainty is calculated using coverage factor k=2 providing ~95% confidence level in accordance with ISO/IEC Guide 98-3 (GUM).</p>
+`;
+        break;
+      case 'temperature':
+        html = `
+<h3 style="color: #00f2fe; border-bottom: 2px solid #00f2fe; padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; font-size: 1.1rem;">
+  CALIBRATION TEST RESULTS (CTR) & MEASUREMENT DATA SHEET
+</h3>
+<p style="margin: 6px 0;"><strong>Instrument:</strong> Dry Block Temperature Calibrator (-30 to 150°C) &nbsp;|&nbsp; <strong>Serial No:</strong> SN-99420</p>
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 16px; font-size: 13px;">
+  <thead>
+    <tr style="background-color: #0284c7; color: #ffffff;">
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Nominal Setpoint (°C)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Master Ref Temp (°C)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">UUT Indicated (°C)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Error (°C)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Uncertainty (±)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">-30.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">-30.02</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">-30.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.02</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.04 °C</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">-0.01</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.01</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.03 °C</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">50.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">50.01</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">50.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">-0.01</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.03 °C</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">100.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">100.03</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">100.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">-0.03</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.05 °C</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">150.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">150.05</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">150.00</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">-0.05</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.06 °C</td>
+    </tr>
+  </tbody>
+</table>
+<p style="margin: 12px 0 6px 0;"><strong>Compliance:</strong> <span style="background-color: #10b981; color: #ffffff; padding: 3px 8px; border-radius: 4px; font-weight: bold;">PASSED</span></p>
+`;
+        break;
+      case 'multimeter':
+        html = `
+<h3 style="color: #00f2fe; border-bottom: 2px solid #00f2fe; padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; font-size: 1.1rem;">
+  CALIBRATION TEST RESULTS (CTR) & MEASUREMENT DATA SHEET
+</h3>
+<p style="margin: 6px 0;"><strong>Instrument:</strong> 6.5 Digit Precision Multimeter &nbsp;|&nbsp; <strong>Range:</strong> 10 V DC</p>
+<table style="width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 16px; font-size: 13px;">
+  <thead>
+    <tr style="background-color: #0284c7; color: #ffffff;">
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Applied Standard (V)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">UUT Measured (V)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Deviation (mV)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Spec Limit</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">1.000000 V</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">1.000002 V</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.002 mV</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">±0.035 mV</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">PASS</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5.000000 V</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5.000008 V</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.008 mV</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">±0.150 mV</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">PASS</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10.000000 V</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10.000015 V</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.015 mV</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">±0.300 mV</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">PASS</td>
+    </tr>
+  </tbody>
+</table>
+`;
+        break;
+      case 'dimensional':
+        html = `
+<h3 style="color: #00f2fe; border-bottom: 2px solid #00f2fe; padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; font-size: 1.1rem;">
+  CALIBRATION TEST RESULTS (CTR) & MEASUREMENT DATA SHEET
+</h3>
+<p style="margin: 6px 0;"><strong>Instrument:</strong> Outside Vernier Micrometer 0-25mm &nbsp;|&nbsp; <strong>Serial No:</strong> SN-11029</p>
+<table style="width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 16px; font-size: 13px;">
+  <thead>
+    <tr style="background-color: #0284c7; color: #ffffff;">
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Nominal Gauge Block (mm)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">UUT Measured (mm)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Error (mm)</th>
+      <th style="padding: 10px 12px; border: 1px solid #cbd5e1;">Max Permissible Error</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.000 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">0.000 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">0.000 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">± 0.002 mm</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5.100 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">5.101 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.001 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">± 0.002 mm</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10.300 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">10.301 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.001 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">± 0.002 mm</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">25.000 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">25.002 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1; color: #10b981; font-weight: bold;">+0.002 mm</td>
+      <td style="padding: 8px 12px; border: 1px solid #cbd5e1;">± 0.002 mm</td>
+    </tr>
+  </tbody>
+</table>
+`;
+        break;
+      default:
+        html = `
+<h3 style="color: #00f2fe; border-bottom: 2px solid #00f2fe; padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; font-size: 1.1rem;">
+  CALIBRATION TEST RESULTS (CTR) & MEASUREMENT DATA SHEET
+</h3>
+<p style="margin: 6px 0;">Enter custom raw calibration measurements, tables, errors, and notes here...</p>
+`;
+        break;
+    }
+    this.ctrEditorContent.set(html);
+  }
+
+  onTemplateChange(event: any) {
+    const val = event.target ? event.target.value : event;
+    this.selectedCtrTemplate.set(val);
+    this.loadCtrTemplate(val);
+  }
+
+  saveManualCtr() {
+    this.ctrManualSaved.set(true);
+    this.toastService.showSuccess('Manual CTR Saved', 'CTR template values saved successfully for this certificate.');
   }
 
   saveDraft() {

@@ -379,41 +379,146 @@
           <textarea id="comments" pInputText [(ngModel)]="commentsText" class="p-inputtext w-full textarea-box" rows="2"></textarea>
         </div>
 
-        <!-- CTR Upload File Grid -->
+        <!-- CTR Section: Upload Attachment Files vs Manual Template Editor -->
         <div class="ctr-upload-box mt-3">
           <div class="ctr-header">
-            <span class="ctr-title"><i class="pi pi-paperclip text-cyan"></i> CTR Upload Attachments</span>
-            <label class="btn-secondary upload-btn">
-              <i class="pi pi-upload"></i> Browse Files...
-              <input type="file" (change)="onFileUpload($event)" hidden />
-            </label>
+            <div class="ctr-title-group">
+              <span class="ctr-title"><i class="pi pi-file-edit text-cyan"></i> Calibration Test Result (CTR) Raw Data Entry</span>
+            </div>
+            
+            <div class="mode-toggle-buttons">
+              <button
+                type="button"
+                class="btn-mode"
+                [class.active]="ctrInputMode() === 'upload'"
+                (click)="setCtrInputMode('upload')"
+              >
+                <i class="pi pi-paperclip"></i> Upload CTR Attachment Files
+              </button>
+              <button
+                type="button"
+                class="btn-mode"
+                [class.active]="ctrInputMode() === 'manual'"
+                (click)="setCtrInputMode('manual')"
+              >
+                <i class="pi pi-pencil"></i> Manual CTR Template Editor
+              </button>
+            </div>
           </div>
-          <div class="table-responsive mt-2">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>FileName</th>
-                  <th>Upload Date</th>
-                  <th>Uploaded By</th>
-                  <th style="width: 60px; text-align: center;">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (file of ctrFiles(); track file.id) {
-                  <tr>
-                    <td><i class="pi pi-file-word text-cyan"></i> {{ file.fileName }}</td>
-                    <td>{{ file.uploadDate }}</td>
-                    <td>{{ file.uploadedBy }}</td>
-                    <td style="text-align: center;">
-                      <button class="action-btn icon-only delete" (click)="deleteCtrFile(file.id)" title="Remove File">
-                        <i class="pi pi-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
+
+          <!-- MODE A: Upload CTR Attachment Files -->
+          @if (ctrInputMode() === 'upload') {
+            <div class="mode-content-box mt-2">
+              <div class="text-right mb-2">
+                <label class="btn-secondary upload-btn">
+                  <i class="pi pi-upload"></i> Browse CTR Files...
+                  <input type="file" (change)="onFileUpload($event)" hidden />
+                </label>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>FileName</th>
+                      <th>Upload Date</th>
+                      <th>Uploaded By</th>
+                      <th style="width: 60px; text-align: center;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (file of ctrFiles(); track file.id) {
+                      <tr>
+                        <td><i class="pi pi-file-word text-cyan"></i> {{ file.fileName }}</td>
+                        <td>{{ file.uploadDate }}</td>
+                        <td>{{ file.uploadedBy }}</td>
+                        <td style="text-align: center;">
+                          <button type="button" class="btn-action-delete" (click)="deleteCtrFile(file.id)" title="Remove File">
+                            <i class="pi pi-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+
+          <!-- MODE B: Manual CTR Template Editor -->
+          @if (ctrInputMode() === 'manual') {
+            <div class="mode-content-box mt-2">
+              <div class="template-selector-bar mb-3">
+                <div class="selector-left">
+                  <label class="font-bold"><i class="pi pi-sliders-h text-cyan"></i> Select CTR Preset Template:</label>
+                  <select
+                    [value]="selectedCtrTemplate()"
+                    (change)="onTemplateChange($event)"
+                    class="custom-template-select"
+                  >
+                    @for (opt of ctrTemplateOptions; track opt.value) {
+                      <option [value]="opt.value">{{ opt.label }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="selector-right">
+                  @if (ctrManualSaved()) {
+                    <span class="badge-saved-status"><i class="pi pi-check-circle"></i> Manual CTR Saved</span>
+                  }
+                  <button type="button" class="btn-primary btn-save-ctr" (click)="saveManualCtr()">
+                    <i class="pi pi-save"></i> Save CTR Values
+                  </button>
+                </div>
+              </div>
+
+              <div class="editor-textarea-container mt-3">
+                <div class="rich-toolbar">
+                  <div class="toolbar-group">
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('bold')" title="Bold (Ctrl+B)"><b>B</b></button>
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('italic')" title="Italic (Ctrl+I)"><i>I</i></button>
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('underline')" title="Underline (Ctrl+U)"><u>U</u></button>
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('strikeThrough')" title="Strikethrough"><s>S</s></button>
+                  </div>
+                  <div class="toolbar-divider"></div>
+                  <div class="toolbar-group">
+                    <label class="color-picker-label" title="Text Color">
+                      <span class="text-color-icon">A</span>
+                      <input type="color" (change)="execEditorCommand('foreColor', $any($event.target).value)" value="#0284c7" />
+                    </label>
+                    <label class="color-picker-label" title="Highlight Color">
+                      <span class="bg-color-icon">🎨</span>
+                      <input type="color" (change)="execEditorCommand('hiliteColor', $any($event.target).value)" value="#fef08a" />
+                    </label>
+                  </div>
+                  <div class="toolbar-divider"></div>
+                  <div class="toolbar-group">
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('justifyLeft')" title="Align Left"><i class="pi pi-align-left"></i></button>
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('justifyCenter')" title="Align Center"><i class="pi pi-align-center"></i></button>
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('justifyRight')" title="Align Right"><i class="pi pi-align-right"></i></button>
+                  </div>
+                  <div class="toolbar-divider"></div>
+                  <div class="toolbar-group">
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('insertUnorderedList')" title="Bullet List"><i class="pi pi-list"></i></button>
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('insertOrderedList')" title="Numbered List">1.</button>
+                    <button type="button" class="btn-rte" (click)="execEditorCommand('removeFormat')" title="Clear Formatting"><i class="pi pi-ban"></i></button>
+                  </div>
+                  <div class="toolbar-right">
+                    <button type="button" class="btn-tool" (click)="loadCtrTemplate(selectedCtrTemplate())" title="Reload Preset Template">
+                      <i class="pi pi-refresh"></i> Reset Template
+                    </button>
+                  </div>
+                </div>
+                
+                <div
+                  #richEditor
+                  contenteditable="true"
+                  class="rich-editable-area"
+                  [innerHTML]="ctrEditorContent()"
+                  (input)="ctrEditorContent.set(richEditor.innerHTML)"
+                ></div>
+              </div>
+            </div>
+          }
         </div>
       </div>
     }
@@ -602,7 +707,11 @@
               <p><strong>Pressure:</strong> {{ pressVal() }} ± {{ pressUnc() }} mbar</p>
               <p><strong>Humidity:</strong> {{ humidityVal() }} ± {{ humidityUnc() }} %rh</p>
               <p><strong>Decision Rule:</strong> {{ decisionRule() }}</p>
-              <p><strong>CTR Uploads:</strong> {{ ctrFiles().length }} File(s)</p>
+              @if (ctrInputMode() === 'manual') {
+                <p><strong>CTR Entry Mode:</strong> <span class="text-cyan font-bold">Manual Template Editor</span> @if (ctrManualSaved()) { <span class="text-green font-bold">(Saved)</span> }</p>
+              } @else {
+                <p><strong>CTR Uploads:</strong> {{ ctrFiles().length }} File(s)</p>
+              }
             </div>
           </div>
 

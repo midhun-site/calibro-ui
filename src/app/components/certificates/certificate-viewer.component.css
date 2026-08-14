@@ -367,6 +367,21 @@
 .mt-1 { margin-top: 0.25rem; }
 .font-bold { font-weight: 700; }
 
+/* Page 2 Break Styling for PDF Certificate */
+.cert-page-break {
+  page-break-before: always;
+  break-before: page;
+}
+
+.ctr-page-content {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  padding: 1rem 0;
+  font-family: Arial, sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
 /* Print Media Query */
 @media print {
   body {

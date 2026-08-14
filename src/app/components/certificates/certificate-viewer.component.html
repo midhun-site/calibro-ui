@@ -85,7 +85,7 @@
       <span><strong>As Received:</strong> {{ asReceivedCondition() }}</span>
       <span><strong>As Left:</strong> {{ asLeftCondition() }}</span>
       <span><strong>Reference Procedure:</strong> CAL-SOP-EC-01 Rev.4, CAL-SOP-TMP-04 Rev.3</span>
-      <span><strong>Total Pages:</strong> 1 of 1</span>
+      <span><strong>Total Pages:</strong> Page 1 of 2</span>
     </div>
 
     <!-- ISO & EA-4/02 Compliance Statements -->
@@ -130,7 +130,7 @@
 
     <!-- Measurement Calibration Results Table -->
     <div class="master-equipment-section mt-3">
-      <h4>CALIBRATION MEASUREMENT RESULTS</h4>
+      <h4>CALIBRATION MEASUREMENT RESULTS SUMMARY</h4>
       <table class="master-table">
         <thead>
           <tr>
@@ -171,7 +171,49 @@
 
     <!-- Footer Verification Stamp -->
     <div class="sheet-footer-stamp">
-      <span>CaliBro CRM ISO/IEC 17025 System Generated Verified Document &bull; Document ID: {{ certNo() }} &bull; Scan QR Code to Verify Original</span>
+      <span>CaliBro CRM ISO/IEC 17025 System Generated Verified Document &bull; Document ID: {{ certNo() }} &bull; Page 1 of 2</span>
+    </div>
+  </div>
+
+  <!-- PAGE 2: CALIBRATION TEST RESULTS (CTR) RAW DATA SHEET -->
+  <div class="cert-document-sheet cert-page-break mt-4">
+    <!-- Header Section: Logo & Accredited Laboratory Details -->
+    <div class="sheet-header">
+      <div class="sheet-brand">
+        <i class="pi pi-compass brand-icon text-cyan"></i>
+        <div>
+          <h2>CaliBro Calibration Laboratories</h2>
+          <span>Accredited ISO/IEC 17025:2017 Calibration Facility</span>
+        </div>
+      </div>
+      <div class="sheet-header-right">
+        <div class="sheet-cert-badge">
+          <span class="cert-title">CTR MEASUREMENT DATA SHEET</span>
+          <span class="cert-number code-font">Page 2 of 2 &bull; {{ certNo() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 2 Content: Rich HTML CTR Measurement Results Table -->
+    <div class="ctr-page-content mt-3" [innerHTML]="ctrPageContent()"></div>
+
+    <!-- Signatures Footer Bar -->
+    <div class="sheet-footer-sign mt-4">
+      <div class="sign-block">
+        <span class="sign-title">Calibrated By:</span>
+        <span class="sign-name">Alex Rivera</span>
+        <span class="sign-role">Senior Metrologist</span>
+      </div>
+      <div class="sign-block">
+        <span class="sign-title">Approved By:</span>
+        <span class="sign-name">Dr. Marcus Vance</span>
+        <span class="sign-role">Quality Assurance Manager</span>
+      </div>
+    </div>
+
+    <!-- Footer Verification Stamp -->
+    <div class="sheet-footer-stamp">
+      <span>CaliBro CRM ISO/IEC 17025 System Generated Verified Document &bull; Document ID: {{ certNo() }} &bull; Page 2 of 2</span>
     </div>
   </div>
 </div>
