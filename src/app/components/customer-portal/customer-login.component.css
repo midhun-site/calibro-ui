@@ -285,7 +285,7 @@
 
 /* Right Panel */
 .login-features-panel {
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.25) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
   border-left: 1px solid var(--border-color);
   padding: 3rem 2.5rem;
   display: flex;
@@ -295,13 +295,13 @@
 
 .features-header h3 {
   font-size: 1.25rem;
-  color: #ffffff;
+  color: #ffffff !important;
   margin: 0 0 0.3rem 0;
 }
 
 .features-header p {
   font-size: 0.82rem;
-  color: #94a3b8;
+  color: #cbd5e1 !important;
   margin: 0 0 1.75rem 0;
 }
 
@@ -321,8 +321,8 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: rgba(0, 242, 254, 0.12);
-  color: var(--accent-cyan);
+  background: rgba(0, 242, 254, 0.18) !important;
+  color: #00f2fe !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -333,29 +333,14 @@
 .feat-content h4 {
   margin: 0 0 0.15rem 0;
   font-size: 0.88rem;
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 .feat-content p {
   margin: 0;
   font-size: 0.76rem;
-  color: #94a3b8;
+  color: #cbd5e1 !important;
   line-height: 1.35;
-}
-
-/* Light Theme Overrides */
-html[data-theme="light"] .login-features-panel {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-}
-
-html[data-theme="light"] .features-header h3,
-html[data-theme="light"] .feat-content h4 {
-  color: #0f172a !important;
-}
-
-html[data-theme="light"] .features-header p,
-html[data-theme="light"] .feat-content p {
-  color: #475569 !important;
 }
 
 .mt-4 { margin-top: 1.5rem; }

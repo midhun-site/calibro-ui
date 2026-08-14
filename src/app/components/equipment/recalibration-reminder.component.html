@@ -1,0 +1,406 @@
+<div class="reminder-page-container">
+  <!-- Page Header -->
+  <div class="page-header no-print">
+    <div>
+      <h2><i class="pi pi-history text-cyan"></i> Recalibration Reminder System</h2>
+      <p class="subtitle">ISO/IEC 17025 Automated Recalibration Due Date Scheduling, Multi-Recipient Alerts & Reports</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-action btn-export" (click)="exportReportCsv()" title="Export Recalibration Schedule to CSV">
+        <i class="pi pi-file-excel"></i> Export CSV
+      </button>
+      <button class="btn-action btn-print" (click)="printReport()" title="Print Summary Report">
+        <i class="pi pi-print"></i> Print Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Top KPI Metrics Summary -->
+  <div class="kpi-grid no-print mb-4">
+    <div class="kpi-card glass-card">
+      <div class="kpi-icon icon-blue"><i class="pi pi-box"></i></div>
+      <div class="kpi-info">
+        <span class="kpi-label">Total Tracked Assets</span>
+        <h3 class="kpi-val">{{ totalAssetsTracked() }}</h3>
+      </div>
+    </div>
+
+    <div class="kpi-card glass-card">
+      <div class="kpi-icon icon-red"><i class="pi pi-exclamation-triangle"></i></div>
+      <div class="kpi-info">
+        <span class="kpi-label">Overdue Alerts</span>
+        <h3 class="kpi-val text-danger">{{ overdueCount() }}</h3>
+      </div>
+    </div>
+
+    <div class="kpi-card glass-card">
+      <div class="kpi-icon icon-amber"><i class="pi pi-clock"></i></div>
+      <div class="kpi-info">
+        <span class="kpi-label">Due within 30 Days</span>
+        <h3 class="kpi-val text-amber">{{ dueSoonCount() }}</h3>
+      </div>
+    </div>
+
+    <div class="kpi-card glass-card">
+      <div class="kpi-icon icon-green"><i class="pi pi-check-circle"></i></div>
+      <div class="kpi-info">
+        <span class="kpi-label">Auto-Stopped (Calibrated)</span>
+        <h3 class="kpi-val text-green">{{ autoStoppedCount() }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Workspace Tabs -->
+  <div class="workspace-tabs-bar no-print mb-4">
+    <button class="tab-btn" [class.active]="activeTab() === 'matrix'" (click)="setTab('matrix')">
+      <i class="pi pi-table"></i> Equipment Due Matrix
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'config'" (click)="setTab('config')">
+      <i class="pi pi-sliders-h"></i> Configurable Rules & Intervals
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'reports'" (click)="setTab('reports')">
+      <i class="pi pi-file-pdf"></i> Reminder Reports Generator
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'audit'" (click)="setTab('audit')">
+      <i class="pi pi-list"></i> Notification Delivery Audit Log
+    </button>
+  </div>
+
+  <!-- TAB 1: Equipment Due Matrix -->
+  @if (activeTab() === 'matrix') {
+    <div class="glass-card main-card">
+      <!-- Toolbar Filters Bar -->
+      <div class="matrix-filter-bar mb-3">
+        <div class="search-box">
+          <i class="pi pi-search search-icon"></i>
+          <input
+            type="text"
+            pInputText
+            placeholder="Search by Asset ID, Instrument Name, Serial No, or Customer..."
+            [value]="globalFilter()"
+            (input)="globalFilter.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="filter-dropdown-group">
+          <label>Status Filter:</label>
+          <select [value]="selectedStatusFilter()" (change)="selectedStatusFilter.set($any($event.target).value)" class="custom-select">
+            <option value="ALL">All Recalibration Statuses</option>
+            <option value="OVERDUE">Overdue Alerts Only</option>
+            <option value="DUE_7_DAYS">Due in 7 Days</option>
+            <option value="DUE_15_DAYS">Due in 15 Days</option>
+            <option value="DUE_30_DAYS">Due in 30 Days</option>
+            <option value="DUE_60_DAYS">Due in 60 Days</option>
+            <option value="COMPLETED_AUTO_STOPPED">Auto-Stopped (Calibrated)</option>
+          </select>
+        </div>
+
+        <button class="btn-action btn-send-batch" (click)="sendSelectedBatchReminders()">
+          <i class="pi pi-send"></i> Dispatch Selected Batch
+        </button>
+      </div>
+
+      <!-- Equipment Table Grid -->
+      <div class="table-responsive">
+        <p-table
+          [value]="filteredEquipment()"
+          [paginator]="true"
+          [rows]="10"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          styleClass="p-datatable-striped"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="width: 2.5rem; text-align: center"><i class="pi pi-check-square"></i></th>
+              <th pSortableColumn="assetId" style="min-width: 140px">Asset ID <p-sortIcon field="assetId"></p-sortIcon></th>
+              <th pSortableColumn="instrumentName" style="min-width: 220px">Instrument Name <p-sortIcon field="instrumentName"></p-sortIcon></th>
+              <th pSortableColumn="customerName" style="min-width: 200px">Customer <p-sortIcon field="customerName"></p-sortIcon></th>
+              <th pSortableColumn="dueDate" style="min-width: 120px">Due Date <p-sortIcon field="dueDate"></p-sortIcon></th>
+              <th pSortableColumn="daysRemaining" style="min-width: 130px">Days Left <p-sortIcon field="daysRemaining"></p-sortIcon></th>
+              <th style="min-width: 170px">Status Tag</th>
+              <th style="min-width: 200px">Notification Email List</th>
+              <th style="min-width: 150px">Last Sent</th>
+              <th style="min-width: 110px; text-align: center">Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <td style="text-align: center">
+                <input type="checkbox" [(ngModel)]="item.selected" [disabled]="item.status === 'COMPLETED_AUTO_STOPPED'" />
+              </td>
+              <td class="text-nowrap"><span class="code-font text-cyan font-bold">{{ item.assetId }}</span></td>
+              <td>
+                <div class="inst-info">
+                  <span class="font-bold">{{ item.instrumentName }}</span>
+                  <span class="sub-code">SN: {{ item.serialNo }} &bull; {{ item.serviceLocation }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="cust-info">
+                  <span class="font-bold">{{ item.customerName }}</span>
+                  <span class="sub-code">{{ item.customerCode }}</span>
+                </div>
+              </td>
+              <td class="text-nowrap"><span class="code-font">{{ item.dueDate }}</span></td>
+              <td class="text-nowrap">
+                @if (item.daysRemaining < 0) {
+                  <span class="badge-days days-overdue">{{ item.daysRemaining }} days (OVERDUE)</span>
+                } @else if (item.daysRemaining <= 30) {
+                  <span class="badge-days days-warning">{{ item.daysRemaining }} days left</span>
+                } @else {
+                  <span class="badge-days days-ok">{{ item.daysRemaining }} days left</span>
+                }
+              </td>
+              <td class="text-nowrap">
+                <p-tag [value]="getStatusLabel(item.status)" [severity]="getStatusSeverity(item.status)"></p-tag>
+              </td>
+              <td>
+                <div class="recipients-chips">
+                  @for (email of item.recipients; track email) {
+                    <span class="email-chip"><i class="pi pi-envelope"></i> {{ email }}</span>
+                  }
+                </div>
+              </td>
+              <td class="text-nowrap"><span class="text-muted text-xs">{{ item.lastNotificationSent ? item.lastNotificationSent : 'Not Sent Yet' }}</span></td>
+              <td style="text-align: center">
+                <div class="action-buttons-cell">
+                  @if (item.status !== 'COMPLETED_AUTO_STOPPED') {
+                    <button class="btn-icon btn-mail" (click)="sendReminder(item)" title="Send Manual Reminder Email">
+                      <i class="pi pi-send"></i>
+                    </button>
+                    <button class="btn-icon btn-check" (click)="markCalibrated(item)" title="Mark Calibrated (Auto-Stop Reminders)">
+                      <i class="pi pi-check"></i>
+                    </button>
+                  } @else {
+                    <span class="text-green font-bold text-xs text-nowrap"><i class="pi pi-check-circle"></i> Auto-Stopped</span>
+                  }
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: Configurable Schedule Rules & Lead Times -->
+  @if (activeTab() === 'config') {
+    <div class="glass-card main-card">
+      <div class="config-section-header mb-4">
+        <h3><i class="pi pi-sliders-h text-cyan"></i> Configurable Reminder Lead Times & Interval Rules</h3>
+        <p>Set automated notification triggers before instrument calibration due dates.</p>
+      </div>
+
+      <div class="config-grid">
+        <!-- Lead Time Triggers Box -->
+        <div class="config-box">
+          <h4 class="box-title"><i class="pi pi-clock"></i> Automated Lead-Time Schedule Triggers</h4>
+          <div class="checkbox-list mt-3">
+            <label class="config-check-item">
+              <input type="checkbox" [checked]="enable60Days()" (change)="enable60Days.set($any($event.target).checked)" />
+              <div>
+                <strong>60 Days Before Due Date</strong>
+                <p>Sends initial courtesy recalibration notice to customer QA department.</p>
+              </div>
+            </label>
+
+            <label class="config-check-item">
+              <input type="checkbox" [checked]="enable30Days()" (change)="enable30Days.set($any($event.target).checked)" />
+              <div>
+                <strong>30 Days Before Due Date</strong>
+                <p>Sends standard recalibration reminder with booking link & quotation request.</p>
+              </div>
+            </label>
+
+            <label class="config-check-item">
+              <input type="checkbox" [checked]="enable15Days()" (change)="enable15Days.set($any($event.target).checked)" />
+              <div>
+                <strong>15 Days Before Due Date</strong>
+                <p>Urgent recalibration alert to prevent instrument downtime.</p>
+              </div>
+            </label>
+
+            <label class="config-check-item">
+              <input type="checkbox" [checked]="enable7Days()" (change)="enable7Days.set($any($event.target).checked)" />
+              <div>
+                <strong>7 Days Before Due Date (Final Notice)</strong>
+                <p>Final pre-due notification requiring immediate equipment intake scheduling.</p>
+              </div>
+            </label>
+
+            <label class="config-check-item">
+              <input type="checkbox" [checked]="enableOverdueAlerts()" (change)="enableOverdueAlerts.set($any($event.target).checked)" />
+              <div>
+                <strong>Overdue Alerts (Weekly Recurring)</strong>
+                <p>Weekly overdue warnings until calibration is completed and new certificate is issued.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Default Recipient & Template Box -->
+        <div class="config-box">
+          <h4 class="box-title"><i class="pi pi-envelope"></i> Multi-Recipient CC & Email Template Settings</h4>
+          
+          <div class="form-group mt-3">
+            <label class="font-bold">Default Laboratory & Admin CC Email Recipients:</label>
+            <input
+              type="text"
+              pInputText
+              class="w-full"
+              [value]="defaultCcEmails()"
+              (input)="defaultCcEmails.set($any($event.target).value)"
+            />
+            <span class="help-text">Comma-separated emails that receive copies of all customer recalibration notices.</span>
+          </div>
+
+          <div class="form-group mt-3">
+            <label class="font-bold">Email Notification Subject Line:</label>
+            <input
+              type="text"
+              pInputText
+              class="w-full"
+              [value]="emailTemplateSubject()"
+              (input)="emailTemplateSubject.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-group mt-3">
+            <label class="font-bold">Email Message Template Body:</label>
+            <textarea
+              rows="6"
+              class="w-full custom-textarea"
+              [value]="emailTemplateBody()"
+              (input)="emailTemplateBody.set($any($event.target).value)"
+            ></textarea>
+          </div>
+
+          <div class="mt-4 text-right">
+            <button class="btn-primary" (click)="saveSettings()">
+              <i class="pi pi-save"></i> Save Configuration Rules
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: Reminder Reports Generator -->
+  @if (activeTab() === 'reports') {
+    <div class="glass-card main-card">
+      <div class="config-section-header mb-4">
+        <h3><i class="pi pi-file-pdf text-cyan"></i> Recalibration Reminder Compliance Report Sheet</h3>
+        <p>Official ISO 17025 Recalibration Schedule & Asset Intelligence Report</p>
+      </div>
+
+      <!-- Printable Report Sheet -->
+      <div class="report-document-sheet">
+        <div class="report-header">
+          <div class="report-brand">
+            <i class="pi pi-compass brand-icon text-cyan"></i>
+            <div>
+              <h2>CaliBro Calibration Laboratories</h2>
+              <span>Recalibration Compliance & Schedule Report &bull; ISO/IEC 17025</span>
+            </div>
+          </div>
+          <div class="report-meta">
+            <span class="report-title">RECALIBRATION REPORT</span>
+            <span class="report-date">Generated: {{ '2026-08-14' }}</span>
+          </div>
+        </div>
+
+        <div class="report-summary-bar mt-3">
+          <span><strong>Total Assets:</strong> {{ totalAssetsTracked() }}</span>
+          <span><strong>Overdue:</strong> <strong class="text-danger">{{ overdueCount() }}</strong></span>
+          <span><strong>Due in 30 Days:</strong> <strong class="text-amber">{{ dueSoonCount() }}</strong></span>
+          <span><strong>Auto-Stopped:</strong> <strong class="text-green">{{ autoStoppedCount() }}</strong></span>
+        </div>
+
+        <table class="report-table mt-3">
+          <thead>
+            <tr>
+              <th>Asset ID</th>
+              <th>Instrument Description</th>
+              <th>Serial Number</th>
+              <th>Customer Name</th>
+              <th>Last Calib Date</th>
+              <th>Next Due Date</th>
+              <th>Days Left</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of equipmentItems(); track item.id) {
+              <tr>
+                <td class="code-font font-bold">{{ item.assetId }}</td>
+                <td>{{ item.instrumentName }}</td>
+                <td class="code-font">{{ item.serialNo }}</td>
+                <td>{{ item.customerName }}</td>
+                <td>{{ item.lastCalibDate }}</td>
+                <td class="code-font font-bold">{{ item.dueDate }}</td>
+                <td>{{ item.daysRemaining }} d</td>
+                <td>
+                  <p-tag [value]="getStatusLabel(item.status)" [severity]="getStatusSeverity(item.status)"></p-tag>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="report-footer mt-4">
+          <span>CaliBro Metrology CRM &bull; ISO/IEC 17025 Compliance Engine &bull; System Generated Recalibration Report</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 4: Notification Delivery Audit Log -->
+  @if (activeTab() === 'audit') {
+    <div class="glass-card main-card">
+      <div class="config-section-header mb-4">
+        <h3><i class="pi pi-list text-cyan"></i> Dispatched Recalibration Notification Audit Log</h3>
+        <p>Complete historical delivery logs, recipient tracking, and auto-stop completion records.</p>
+      </div>
+
+      <div class="table-responsive">
+        <p-table [value]="auditLogs()" [paginator]="true" [rows]="10" styleClass="p-datatable-striped">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Log ID</th>
+              <th>Asset ID</th>
+              <th>Instrument & Customer</th>
+              <th>Dispatched Date & Time</th>
+              <th>Recipient Email List</th>
+              <th>Trigger Type</th>
+              <th>Delivery Status</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-log>
+            <tr>
+              <td><span class="code-font text-cyan font-bold">{{ log.id }}</span></td>
+              <td><span class="code-font font-bold">{{ log.assetId }}</span></td>
+              <td>
+                <div class="inst-info">
+                  <span class="font-bold">{{ log.instrumentName }}</span>
+                  <span class="sub-code">{{ log.customerName }}</span>
+                </div>
+              </td>
+              <td><span class="code-font">{{ log.sentDate }}</span></td>
+              <td><span class="text-xs text-muted">{{ log.recipients }}</span></td>
+              <td><span class="badge-trigger">{{ log.intervalTrigger }}</span></td>
+              <td>
+                @if (log.status === 'AUTO_STOPPED') {
+                  <p-tag value="Auto-Stopped (Completed)" severity="success"></p-tag>
+                } @else if (log.status === 'OPENED') {
+                  <p-tag value="Opened / Received" severity="info"></p-tag>
+                } @else {
+                  <p-tag value="Sent" severity="secondary"></p-tag>
+                }
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  }
+</div>

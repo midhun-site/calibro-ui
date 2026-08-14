@@ -1,0 +1,587 @@
+<div class="settings-page-container">
+  <!-- Page Header -->
+  <div class="page-header no-print">
+    <div>
+      <h2><i class="pi pi-building text-cyan"></i> Company & Laboratory Settings</h2>
+      <p class="subtitle">ISO/IEC 17025 Accreditation Identity, Report Header/Footer Uploads, Prefixes & System Configuration</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-action btn-save-main" (click)="saveProfile()" title="Save All Settings">
+        <i class="pi pi-save"></i> Save All Settings
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Navigation Tabs Bar -->
+  <div class="workspace-tabs-bar no-print mb-4">
+    <button class="tab-btn" [class.active]="activeTab() === 'profile'" (click)="setTab('profile')">
+      <i class="pi pi-id-card"></i> Company Profile & Address
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'branding'" (click)="setTab('branding')">
+      <i class="pi pi-images"></i> Header, Footer & Logo Uploads
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'defaults'" (click)="setTab('defaults')">
+      <i class="pi pi-cog"></i> Prefixes & Environmental Defaults
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'smtp'" (click)="setTab('smtp')">
+      <i class="pi pi-envelope"></i> SMTP Server & Dispatch Rules
+    </button>
+  </div>
+
+  <!-- TAB 1: Company Profile & Address -->
+  @if (activeTab() === 'profile') {
+    <div class="glass-card main-card">
+      <div class="card-section-title mb-4">
+        <h3><i class="pi pi-building text-cyan"></i> Company Identity & ISO 17025 Registration</h3>
+        <p>Official legal name, accreditation body registration, TRN number, and primary contacts.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group span-2">
+          <label class="font-bold">Official Company Legal Name:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="companyName()"
+            (input)="companyName.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Trade License Registration No:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="tradeLicenseNo()"
+            (input)="tradeLicenseNo.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">ISO/IEC 17025 Accreditation No:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="isoAccreditationNo()"
+            (input)="isoAccreditationNo.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Accredited Standard Version:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="isoStandard()"
+            (input)="isoStandard.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Tax Registration Number (TRN 5% VAT):</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font text-cyan"
+            [value]="trnNumber()"
+            (input)="trnNumber.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Primary Telephone:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="primaryPhone()"
+            (input)="primaryPhone.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Secondary / Support Phone:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="secondaryPhone()"
+            (input)="secondaryPhone.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Official General Email:</label>
+          <input
+            type="email"
+            pInputText
+            class="w-full"
+            [value]="officialEmail()"
+            (input)="officialEmail.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Technical Support Email:</label>
+          <input
+            type="email"
+            pInputText
+            class="w-full"
+            [value]="supportEmail()"
+            (input)="supportEmail.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group span-2">
+          <label class="font-bold">Official Website URL:</label>
+          <input
+            type="url"
+            pInputText
+            class="w-full"
+            [value]="websiteUrl()"
+            (input)="websiteUrl.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group span-2">
+          <label class="font-bold">Building & Laboratory Complex Address:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="addressBuilding()"
+            (input)="addressBuilding.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Street / Zone Address:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="addressStreet()"
+            (input)="addressStreet.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Emirate / State:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="addressEmirate()"
+            (input)="addressEmirate.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Country:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="addressCountry()"
+            (input)="addressCountry.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">P.O. Box Zip Code:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="poBox()"
+            (input)="poBox.set($any($event.target).value)"
+          />
+        </div>
+      </div>
+
+      <div class="mt-4 text-right">
+        <button class="btn-primary" (click)="saveProfile()">
+          <i class="pi pi-save"></i> Save Profile Settings
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: Header, Footer & Logo Image Uploads -->
+  @if (activeTab() === 'branding') {
+    <div class="glass-card main-card">
+      <div class="card-section-title mb-4">
+        <h3><i class="pi pi-images text-cyan"></i> Document Branding & Image Upload Manager</h3>
+        <p>Upload official laboratory logos, ISO accreditation seals, report header banners, and signature stamps.</p>
+      </div>
+
+      <div class="uploads-grid">
+        <!-- 1. Company Logo -->
+        <div class="upload-card">
+          <div class="card-top-title">
+            <i class="pi pi-compass text-cyan"></i>
+            <span>Official Company Logo</span>
+          </div>
+          <div class="img-preview-box">
+            <img [src]="companyLogoUrl()" alt="Company Logo Preview" class="preview-img" />
+          </div>
+          <p class="img-specs">PNG / SVG format with transparent background (Recommended: 300x100 px)</p>
+          <label class="btn-upload">
+            <i class="pi pi-upload"></i> Upload Logo
+            <input type="file" (change)="onFileSelected($event, 'logo')" accept="image/*" class="file-input-hidden" />
+          </label>
+        </div>
+
+        <!-- 2. ISO 17025 Accreditation Seal -->
+        <div class="upload-card">
+          <div class="card-top-title">
+            <i class="pi pi-verified text-cyan"></i>
+            <span>ISO 17025 Accreditation Seal</span>
+          </div>
+          <div class="img-preview-box">
+            <img [src]="isoSealUrl()" alt="ISO Seal Preview" class="preview-img" />
+          </div>
+          <p class="img-specs">Accreditation Body Logo (ENAS / DAC Seal, Recommended: 200x200 px)</p>
+          <label class="btn-upload">
+            <i class="pi pi-upload"></i> Upload ISO Seal
+            <input type="file" (change)="onFileSelected($event, 'iso')" accept="image/*" class="file-input-hidden" />
+          </label>
+        </div>
+
+        <!-- 3. Document Header Banner -->
+        <div class="upload-card span-full">
+          <div class="card-top-title">
+            <i class="pi pi-image text-cyan"></i>
+            <span>PDF Certificate / Report Header Banner</span>
+          </div>
+          <div class="img-preview-box banner-box">
+            <img [src]="reportHeaderUrl()" alt="Report Header Banner Preview" class="preview-img banner-img" />
+          </div>
+          <p class="img-specs">Full-width top header banner graphic for printable PDF reports & certificates (Recommended: 1200x200 px)</p>
+          <label class="btn-upload">
+            <i class="pi pi-upload"></i> Upload Header Banner Graphic
+            <input type="file" (change)="onFileSelected($event, 'header')" accept="image/*" class="file-input-hidden" />
+          </label>
+        </div>
+
+        <!-- 4. Document Footer Banner -->
+        <div class="upload-card span-full">
+          <div class="card-top-title">
+            <i class="pi pi-window-minimize text-cyan"></i>
+            <span>PDF Certificate / Report Footer Banner</span>
+          </div>
+          <div class="img-preview-box banner-box">
+            <img [src]="reportFooterUrl()" alt="Report Footer Banner Preview" class="preview-img banner-img" />
+          </div>
+          <p class="img-specs">Full-width bottom footer banner graphic for printable PDF reports (Recommended: 1200x150 px)</p>
+          <label class="btn-upload">
+            <i class="pi pi-upload"></i> Upload Footer Banner Graphic
+            <input type="file" (change)="onFileSelected($event, 'footer')" accept="image/*" class="file-input-hidden" />
+          </label>
+        </div>
+
+        <!-- 5. Senior Metrologist Signature Seal -->
+        <div class="upload-card">
+          <div class="card-top-title">
+            <i class="pi pi-user-edit text-cyan"></i>
+            <span>Metrologist Signature Stamp</span>
+          </div>
+          <div class="img-preview-box">
+            <img [src]="metrologistSealUrl()" alt="Metrologist Signature Seal" class="preview-img" />
+          </div>
+          <p class="img-specs">Digital sign-off seal for Senior Metrologist Alex Rivera</p>
+          <label class="btn-upload">
+            <i class="pi pi-upload"></i> Upload Signature Stamp
+            <input type="file" (change)="onFileSelected($event, 'metrologist')" accept="image/*" class="file-input-hidden" />
+          </label>
+        </div>
+
+        <!-- 6. QA Manager Signature Seal -->
+        <div class="upload-card">
+          <div class="card-top-title">
+            <i class="pi pi-shield text-cyan"></i>
+            <span>QA Manager Signature Seal</span>
+          </div>
+          <div class="img-preview-box">
+            <img [src]="qaManagerSealUrl()" alt="QA Manager Signature Seal" class="preview-img" />
+          </div>
+          <p class="img-specs">Digital sign-off seal for QA Manager Dr. Marcus Vance</p>
+          <label class="btn-upload">
+            <i class="pi pi-upload"></i> Upload Signature Stamp
+            <input type="file" (change)="onFileSelected($event, 'qa')" accept="image/*" class="file-input-hidden" />
+          </label>
+        </div>
+      </div>
+
+      <div class="mt-4 text-right">
+        <button class="btn-primary" (click)="saveBranding()">
+          <i class="pi pi-save"></i> Save Uploaded Branding Graphics
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: System Defaults & Numbering Prefixes -->
+  @if (activeTab() === 'defaults') {
+    <div class="glass-card main-card">
+      <div class="card-section-title mb-4">
+        <h3><i class="pi pi-cog text-cyan"></i> Transaction Prefixes, Tax & Environmental Tolerances</h3>
+        <p>Set automated document numbering sequences, VAT rates, and default environmental laboratory limits.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="font-bold">Customer Enquiry Prefix:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="prefixEnquiry()"
+            (input)="prefixEnquiry.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Quotation Prefix:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="prefixQuotation()"
+            (input)="prefixQuotation.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Workorder Job Prefix:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="prefixWorkorder()"
+            (input)="prefixWorkorder.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Calibration Certificate Prefix:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font text-cyan"
+            [value]="prefixCertificate()"
+            (input)="prefixCertificate.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Delivery Ticket Prefix:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="prefixDeliveryTicket()"
+            (input)="prefixDeliveryTicket.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Tax Invoice Prefix:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="prefixInvoice()"
+            (input)="prefixInvoice.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">System Default Currency:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="currencyCode()"
+            (input)="currencyCode.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Default VAT Tax Rate (%):</label>
+          <input
+            type="number"
+            pInputText
+            class="w-full"
+            [value]="defaultVatRate()"
+            (input)="defaultVatRate.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Default Calibration Cycle (Months):</label>
+          <input
+            type="number"
+            pInputText
+            class="w-full"
+            [value]="defaultCalibPeriodMonths()"
+            (input)="defaultCalibPeriodMonths.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Standard Lab Temperature Default:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="defaultTemp()"
+            (input)="defaultTemp.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Standard Lab Pressure Default:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="defaultPress()"
+            (input)="defaultPress.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Standard Lab Humidity Default:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="defaultHumidity()"
+            (input)="defaultHumidity.set($any($event.target).value)"
+          />
+        </div>
+      </div>
+
+      <div class="mt-4 text-right">
+        <button class="btn-primary" (click)="saveDefaults()">
+          <i class="pi pi-save"></i> Save System Defaults
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 4: SMTP Email Server & Dispatch Rules -->
+  @if (activeTab() === 'smtp') {
+    <div class="glass-card main-card">
+      <div class="card-section-title mb-4">
+        <h3><i class="pi pi-envelope text-cyan"></i> SMTP Server Details & Dispatch Rules</h3>
+        <p>Configure mail server host, credentials, and automated email dispatches.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group span-2">
+          <label class="font-bold">SMTP Mail Server Host:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="smtpHost()"
+            (input)="smtpHost.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">SMTP Server Port:</label>
+          <input
+            type="number"
+            pInputText
+            class="w-full code-font"
+            [value]="smtpPort()"
+            (input)="smtpPort.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">Sender Display Name:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full"
+            [value]="senderName()"
+            (input)="senderName.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group span-2">
+          <label class="font-bold">Sender Email Address:</label>
+          <input
+            type="email"
+            pInputText
+            class="w-full"
+            [value]="senderEmail()"
+            (input)="senderEmail.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">SMTP Username:</label>
+          <input
+            type="text"
+            pInputText
+            class="w-full code-font"
+            [value]="smtpUsername()"
+            (input)="smtpUsername.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="font-bold">SMTP Password / API Key:</label>
+          <input
+            type="password"
+            pInputText
+            class="w-full code-font"
+            [value]="smtpPassword()"
+            (input)="smtpPassword.set($any($event.target).value)"
+          />
+        </div>
+      </div>
+
+      <!-- Auto Dispatch Checkboxes Box -->
+      <div class="dispatch-box mt-4">
+        <h4 class="box-title"><i class="pi pi-send"></i> Automated Document Mail Dispatch Rules</h4>
+        <div class="checkbox-grid mt-3">
+          <label class="check-item">
+            <input type="checkbox" [checked]="autoSendQuotation()" (change)="autoSendQuotation.set($any($event.target).checked)" />
+            <span>Auto-email Quotation PDF upon approval</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" [checked]="autoSendWorkorder()" (change)="autoSendWorkorder.set($any($event.target).checked)" />
+            <span>Auto-email Workorder confirmation on intake</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" [checked]="autoSendCertificate()" (change)="autoSendCertificate.set($any($event.target).checked)" />
+            <span>Auto-email Calibration Certificate PDF on QA sign-off</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" [checked]="autoSendInvoice()" (change)="autoSendInvoice.set($any($event.target).checked)" />
+            <span>Auto-email Tax Invoice PDF on dispatch</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="mt-4 text-right-actions">
+        <button class="btn-secondary" (click)="testSmtpConnection()">
+          <i class="pi pi-bolt"></i> Test SMTP Connection
+        </button>
+        <button class="btn-primary" (click)="saveSmtp()">
+          <i class="pi pi-save"></i> Save SMTP Settings
+        </button>
+      </div>
+    </div>
+  }
+</div>

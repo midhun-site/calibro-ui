@@ -22,6 +22,8 @@ import { TechProcMappingComponent } from './components/qc/tech-proc-mapping.comp
 import { TechLabMappingComponent } from './components/qc/tech-lab-mapping.component';
 import { UserListComponent } from './components/user-management/user-list.component';
 import { UserPermissionsComponent } from './components/user-management/user-permissions.component';
+import { RecalibrationReminderComponent } from './components/equipment/recalibration-reminder.component';
+import { CompanySettingsComponent } from './components/settings/company-settings.component';
 import { PrintPreviewComponent } from './components/common/print-preview.component';
 import { CustomerLoginComponent } from './components/customer-portal/customer-login.component';
 import { CustomerDashboardComponent } from './components/customer-portal/customer-dashboard.component';
@@ -57,6 +59,7 @@ export const routes: Routes = [
   // Masters Group
   { path: 'customers', component: CustomerListComponent, canActivate: [authGuard] },
   { path: 'equipment', component: EquipmentListComponent, canActivate: [authGuard] },
+  { path: 'equipment/recalibration-reminders', component: RecalibrationReminderComponent, canActivate: [authGuard] },
 
   // Reports & Certificate Viewer Group
   { path: 'certificates', component: CertificateViewerComponent, canActivate: [authGuard] },
@@ -75,6 +78,9 @@ export const routes: Routes = [
   // User Management Group
   { path: 'user-management/user-list', component: UserListComponent, canActivate: [authGuard] },
   { path: 'user-management/user-permissions', component: UserPermissionsComponent, canActivate: [authGuard] },
+
+  // Settings Group
+  { path: 'settings/company', component: CompanySettingsComponent, canActivate: [authGuard] },
 
   { path: '**', redirectTo: 'login' }
 ];

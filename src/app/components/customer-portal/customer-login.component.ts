@@ -41,7 +41,6 @@ export class CustomerLoginComponent {
     this.isLoading.set(true);
     setTimeout(() => {
       this.isLoading.set(false);
-      this.toastService.showSuccess('Customer Login Successful', 'Welcome to CaliBro Customer Portal.');
       this.router.navigate(['/customer/dashboard']);
     }, 900);
   }

@@ -108,6 +108,10 @@
             <i class="pi pi-cog"></i>
             @if (!layoutService.isSidebarCollapsed()) { <span>Item Master</span> }
           </a>
+          <a routerLink="/equipment/recalibration-reminders" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Recalibration Reminders">
+            <i class="pi pi-history"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Recalibration Reminders</span> }
+          </a>
         </div>
       }
     </div>
@@ -190,6 +194,27 @@
           <a routerLink="/user-management/user-permissions" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="User Permissions">
             <i class="pi pi-shield"></i>
             @if (!layoutService.isSidebarCollapsed()) { <span>User Permissions</span> }
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- Settings Group -->
+    <div class="menu-group">
+      <button class="group-header" (click)="toggleGroup('settings')" title="Settings">
+        <div class="group-header-left">
+          <i class="pi pi-cog text-cyan"></i>
+          @if (!layoutService.isSidebarCollapsed()) { <span>Settings</span> }
+        </div>
+        @if (!layoutService.isSidebarCollapsed()) {
+          <i class="pi" [class.pi-chevron-down]="isOpen('settings')" [class.pi-chevron-right]="!isOpen('settings')"></i>
+        }
+      </button>
+      @if (isOpen('settings') || layoutService.isSidebarCollapsed()) {
+        <div class="sub-menu">
+          <a routerLink="/settings/company" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="Company Settings">
+            <i class="pi pi-building"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Company Settings</span> }
           </a>
         </div>
       }

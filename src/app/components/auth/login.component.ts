@@ -43,7 +43,6 @@ export class LoginComponent {
     setTimeout(() => {
       this.isLoading.set(false);
       if (this.authService.login(this.username(), this.password())) {
-        this.toastService.showSuccess('Welcome to CaliBro CRM', 'Logged in as Senior Metrologist Alex Rivera.');
         this.router.navigate(['/dashboard']);
       } else {
         this.toastService.showError('Login Failed', 'Invalid username or password credentials.');

@@ -94,7 +94,6 @@ export class CustomerDashboardComponent implements OnInit {
   ]);
 
   ngOnInit() {
-    this.toastService.showInfo('Customer Portal Active', `Logged in as ${this.customerName()}`);
   }
 
   setTab(tab: string) {

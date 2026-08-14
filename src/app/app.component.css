@@ -1,28 +1,35 @@
 .app-layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .main-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .content-area {
   margin-left: 220px;
+  max-width: calc(100% - 220px);
   flex: 1;
   background: var(--bg-primary);
   min-height: calc(100vh - 70px);
-  transition: margin-left 0.3s ease, background 0.3s ease;
+  transition: margin-left 0.3s ease, max-width 0.3s ease, background 0.3s ease;
+  box-sizing: border-box;
 }
 
 .content-area.collapsed {
   margin-left: 78px;
+  max-width: calc(100% - 78px);
 }
 
 @media (max-width: 768px) {
   .content-area, .content-area.collapsed {
     margin-left: 0;
+    max-width: 100%;
   }
 }
