@@ -31,6 +31,8 @@ import { authGuard } from './guards/auth.guard';
 
 import { UncertaintyCalculatorComponent } from './components/qc/uncertainty-calculator.component';
 
+import { AuditTrailComponent } from './components/user-management/audit-trail.component';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -82,6 +84,7 @@ export const routes: Routes = [
   // User Management Group
   { path: 'user-management/user-list', component: UserListComponent, canActivate: [authGuard] },
   { path: 'user-management/user-permissions', component: UserPermissionsComponent, canActivate: [authGuard] },
+  { path: 'user-management/audit-trail', component: AuditTrailComponent, canActivate: [authGuard] },
 
   // Settings Group
   { path: 'settings/company', component: CompanySettingsComponent, canActivate: [authGuard] },

@@ -1,0 +1,327 @@
+<div class="audit-workspace-wrapper">
+  <!-- Top Workspace Title Bar -->
+  <div class="glass-card page-title-bar">
+    <div class="title-left">
+      <div class="icon-circle bg-cyan-glow">
+        <i class="pi pi-history text-cyan"></i>
+      </div>
+      <div>
+        <h2>System Audit Trail & Activity Logging</h2>
+        <span class="sub-text">ISO/IEC 17025 Traceability Log & User Operation Security Audit</span>
+      </div>
+    </div>
+    <div class="title-actions">
+      <button class="btn-secondary" (click)="exportCsv()">
+        <i class="pi pi-download"></i> Export CSV
+      </button>
+      <button class="btn-primary" (click)="exportPdf()">
+        <i class="pi pi-file-pdf"></i> Printable Audit Log
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Summary Cards Grid -->
+  <div class="kpi-grid mt-3">
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon-box bg-blue-subtle">
+        <i class="pi pi-list text-cyan"></i>
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Total Logged Events</span>
+        <span class="kpi-value">{{ totalEventsCount() }}</span>
+        <span class="kpi-sub font-emerald">100% Traceable</span>
+      </div>
+    </div>
+
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon-box bg-emerald-subtle">
+        <i class="pi pi-calendar-plus text-emerald"></i>
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Today's Activities</span>
+        <span class="kpi-value text-emerald">{{ todayEventsCount() }}</span>
+        <span class="kpi-sub">Shift Activities</span>
+      </div>
+    </div>
+
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon-box bg-amber-subtle">
+        <i class="pi pi-shield text-amber"></i>
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Security & Permission Alerts</span>
+        <span class="kpi-value text-amber">{{ securityAlertsCount() }}</span>
+        <span class="kpi-sub font-amber">Requires QA Review</span>
+      </div>
+    </div>
+
+    <div class="glass-card kpi-card">
+      <div class="kpi-icon-box bg-purple-subtle">
+        <i class="pi pi-user text-purple"></i>
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Active Logged Users</span>
+        <span class="kpi-value text-purple">4 Active</span>
+        <span class="kpi-sub">Multi-User Sessions</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comprehensive Filters Panel -->
+  <div class="glass-card filter-panel mt-3">
+    <div class="filter-grid">
+      <!-- Row 1: Global Search & Date Range -->
+      <div class="filter-row-grid-1">
+        <div class="filter-group">
+          <label class="filter-label"><i class="pi pi-search text-cyan"></i> Global Search</label>
+          <input
+            type="text"
+            class="custom-input"
+            [value]="globalSearch()"
+            (input)="globalSearch.set($any($event.target).value)"
+            placeholder="Search by Action, User, Entity ID, IP Address..."
+          />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label"><i class="pi pi-calendar text-cyan"></i> From Date</label>
+          <input
+            type="date"
+            class="custom-input"
+            [value]="fromDate()"
+            (change)="fromDate.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label"><i class="pi pi-calendar text-cyan"></i> To Date</label>
+          <input
+            type="date"
+            class="custom-input"
+            [value]="toDate()"
+            (change)="toDate.set($any($event.target).value)"
+          />
+        </div>
+      </div>
+
+      <!-- Row 2: Category Dropdowns & Reset Action -->
+      <div class="filter-row-grid-2 mt-2">
+        <div class="filter-group">
+          <label class="filter-label"><i class="pi pi-user text-cyan"></i> User / Metrologist</label>
+          <select
+            [value]="selectedUser()"
+            (change)="selectedUser.set($any($event.target).value)"
+            class="custom-select"
+          >
+            <option value="ALL">All Users</option>
+            <option value="Alex Rivera">Alex Rivera</option>
+            <option value="Dr. Marcus Vance">Dr. Marcus Vance</option>
+            <option value="System Administrator">System Administrator</option>
+            <option value="Fatima Al-Zahra">Fatima Al-Zahra</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label"><i class="pi pi-th-large text-cyan"></i> Module</label>
+          <select
+            [value]="selectedModule()"
+            (change)="selectedModule.set($any($event.target).value)"
+            class="custom-select"
+          >
+            <option value="ALL">All Modules</option>
+            <option value="Certificates">Certificates</option>
+            <option value="Transactions">Transactions</option>
+            <option value="Equipment">Equipment</option>
+            <option value="QC">QC & Compliance</option>
+            <option value="Settings">Settings</option>
+            <option value="Security">Security</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label"><i class="pi pi-sliders-h text-cyan"></i> Action Type</label>
+          <select
+            [value]="selectedAction()"
+            (change)="selectedAction.set($any($event.target).value)"
+            class="custom-select"
+          >
+            <option value="ALL">All Actions</option>
+            <option value="CREATE">CREATE</option>
+            <option value="UPDATE">UPDATE</option>
+            <option value="DELETE">DELETE</option>
+            <option value="EXPORT">EXPORT</option>
+            <option value="LOGIN">LOGIN</option>
+            <option value="PERMISSION_CHANGE">PERMISSION_CHANGE</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label"><i class="pi pi-exclamation-triangle text-cyan"></i> Severity</label>
+          <select
+            [value]="selectedSeverity()"
+            (change)="selectedSeverity.set($any($event.target).value)"
+            class="custom-select"
+          >
+            <option value="ALL">All Severities</option>
+            <option value="INFO">INFO</option>
+            <option value="WARNING">WARNING</option>
+            <option value="CRITICAL">CRITICAL</option>
+          </select>
+        </div>
+
+        <div class="filter-group align-end">
+          <button type="button" class="btn-secondary btn-reset" (click)="resetFilters()" title="Reset Filters">
+            <i class="pi pi-refresh"></i> Reset Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit Logs Data Grid Table -->
+  <div class="glass-card grid-card mt-3">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="col-timestamp">Timestamp</th>
+            <th class="col-user">User & Role</th>
+            <th class="col-ip">IP Address</th>
+            <th class="col-module">Module</th>
+            <th class="col-action">Action</th>
+            <th class="col-summary">Activity Summary</th>
+            <th class="col-entity">Entity ID</th>
+            <th class="col-severity">Severity</th>
+            <th class="col-details">Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of paginatedLogs(); track log.id) {
+            <tr>
+              <td class="col-timestamp code-font whitespace-nowrap">{{ log.timestamp }}</td>
+              <td class="col-user">
+                <div class="user-chip">
+                  <span class="user-avatar">{{ log.userAvatar }}</span>
+                  <div class="user-meta">
+                    <span class="user-name font-bold">{{ log.userName }}</span>
+                    <span class="user-role-text">{{ log.userRole }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="col-ip code-font text-muted whitespace-nowrap">{{ log.ipAddress }}</td>
+              <td class="col-module">
+                <span class="module-badge">{{ log.module }}</span>
+              </td>
+              <td class="col-action">
+                <span
+                  class="action-tag"
+                  [ngClass]="{
+                    'tag-create': log.actionType === 'CREATE',
+                    'tag-update': log.actionType === 'UPDATE',
+                    'tag-delete': log.actionType === 'DELETE',
+                    'tag-export': log.actionType === 'EXPORT',
+                    'tag-security': log.actionType === 'PERMISSION_CHANGE' || log.actionType === 'LOGIN'
+                  }"
+                >
+                  {{ log.actionType }}
+                </span>
+              </td>
+              <td class="col-summary summary-text">{{ log.activitySummary }}</td>
+              <td class="col-entity code-font font-bold text-cyan whitespace-nowrap">{{ log.entityId }}</td>
+              <td class="col-severity">
+                <p-tag
+                  [value]="log.severity"
+                  [severity]="log.severity === 'CRITICAL' ? 'danger' : (log.severity === 'WARNING' ? 'warn' : 'info')"
+                ></p-tag>
+              </td>
+              <td class="col-details">
+                <button type="button" class="btn-icon-view" (click)="viewLogDetails(log)" title="View Detailed Payload">
+                  <i class="pi pi-eye"></i>
+                </button>
+              </td>
+            </tr>
+          }
+
+          @if (filteredLogs().length === 0) {
+            <tr>
+              <td colspan="9" class="empty-row text-center">
+                <i class="pi pi-info-circle text-cyan"></i> No audit log records found matching your filter criteria.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginator Footer Bar -->
+    <div class="paginator-footer">
+      <div class="paginator-left">
+        <span>Showing {{ (currentPage() - 1) * pageSize() + 1 }} - {{ Math.min(currentPage() * pageSize(), filteredLogs().length) }} of {{ filteredLogs().length }} log entries</span>
+      </div>
+
+      <div class="paginator-controls">
+        <button class="btn-page" [disabled]="currentPage() === 1" (click)="setPage(currentPage() - 1)">
+          <i class="pi pi-chevron-left"></i>
+        </button>
+
+        @for (p of pageNumbers(); track p) {
+          <button class="btn-page" [class.active]="currentPage() === p" (click)="setPage(p)">
+            {{ p }}
+          </button>
+        }
+
+        <button class="btn-page" [disabled]="currentPage() === totalPages()" (click)="setPage(currentPage() + 1)">
+          <i class="pi pi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Log Payload Details Modal -->
+@if (showDetailModal() && selectedLogEntry()) {
+  <div class="modal-backdrop fade-in" (click)="closeModal()">
+    <div class="modal-card glass-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="pi pi-code text-cyan"></i>
+          <h3>Audit Log Payload Details & State Diff</h3>
+        </div>
+        <button class="btn-icon-close" (click)="closeModal()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="log-meta-grid">
+          <div class="meta-item"><span>Log ID:</span> <strong class="code-font text-cyan">{{ selectedLogEntry()?.id }}</strong></div>
+          <div class="meta-item"><span>Timestamp:</span> <strong>{{ selectedLogEntry()?.timestamp }}</strong></div>
+          <div class="meta-item"><span>User:</span> <strong>{{ selectedLogEntry()?.userName }} ({{ selectedLogEntry()?.userRole }})</strong></div>
+          <div class="meta-item"><span>Client IP:</span> <strong class="code-font">{{ selectedLogEntry()?.ipAddress }}</strong></div>
+          <div class="meta-item"><span>Module / Entity:</span> <strong>{{ selectedLogEntry()?.module }} / {{ selectedLogEntry()?.entityId }}</strong></div>
+          <div class="meta-item"><span>Client Browser:</span> <strong>{{ selectedLogEntry()?.payloadDetails?.browser }}</strong></div>
+        </div>
+
+        <div class="payload-box mt-3">
+          <h4>ACTIVITY SUMMARY</h4>
+          <p class="summary-desc">{{ selectedLogEntry()?.activitySummary }}</p>
+        </div>
+
+        <div class="diff-grid mt-3">
+          <div class="diff-col">
+            <h4 class="text-muted">STATE BEFORE CHANGE</h4>
+            <pre class="json-box code-font">{{ selectedLogEntry()?.payloadDetails?.beforeState | json }}</pre>
+          </div>
+          <div class="diff-col">
+            <h4 class="text-cyan">STATE AFTER CHANGE</h4>
+            <pre class="json-box code-font highlight-json">{{ selectedLogEntry()?.payloadDetails?.afterState | json }}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModal()">Close Details</button>
+      </div>
+    </div>
+  </div>
+}

@@ -199,6 +199,10 @@
             <i class="pi pi-shield"></i>
             @if (!layoutService.isSidebarCollapsed()) { <span>User Permissions</span> }
           </a>
+          <a routerLink="/user-management/audit-trail" routerLinkActive="active" class="nav-sub-item" (click)="layoutService.closeMobileSidebar()" title="System Audit Trail">
+            <i class="pi pi-history text-cyan"></i>
+            @if (!layoutService.isSidebarCollapsed()) { <span>Audit Trail Log</span> }
+          </a>
         </div>
       }
     </div>
