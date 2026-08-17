@@ -61,7 +61,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 242, 254, 0.3) !important;
+  background: rgba(0, 242, 254, 0.35) !important;
   border-radius: 4px !important;
   transition: background 0.2s ease !important;
 }
@@ -880,7 +880,8 @@ span.p-tag i {
   color: #0284c7 !important;
 }
 
-.p-tag-warning {
+.p-tag-warning,
+.p-tag-warn {
   background: rgba(245, 158, 11, 0.18) !important;
   color: #f59e0b !important;
   border: 1px solid rgba(245, 158, 11, 0.4) !important;

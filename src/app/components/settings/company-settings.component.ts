@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputTextarea } from 'primeng/inputtextarea';
+import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ToastService } from '../../services/toast.service';
@@ -23,7 +23,7 @@ export interface ImageUploadItem {
     CommonModule,
     FormsModule,
     InputTextModule,
-    InputTextarea,
+    TextareaModule,
     ButtonModule,
     TagModule
   ],

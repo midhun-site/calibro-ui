@@ -2,10 +2,11 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
+import { SharedModule } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ToastService } from '../../services/toast.service';
 
@@ -44,10 +45,11 @@ export interface NotificationLog {
     CommonModule,
     FormsModule,
     TableModule,
+    SharedModule,
     TagModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    SelectModule,
     CheckboxModule
   ],
   templateUrl: './recalibration-reminder.component.html',
