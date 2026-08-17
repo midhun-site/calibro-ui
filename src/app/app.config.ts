@@ -4,7 +4,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import { provideHighcharts } from 'highcharts-angular';
-import Highcharts from 'highcharts';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -15,7 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     providePrimeNG({ ripple: true }),
     provideHighcharts({
-      instance: () => Promise.resolve(Highcharts)
+      instance: () => import('highcharts')
     })
   ]
 };
