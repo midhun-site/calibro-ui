@@ -14,7 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     providePrimeNG({ ripple: true }),
     provideHighcharts({
-      instance: () => import('highcharts')
+      instance: () => import('highcharts').then(m => m.default || m)
     })
   ]
 };
