@@ -7,6 +7,10 @@ import { ThemeService } from '../../services/theme.service';
 import { ToastService } from '../../services/toast.service';
 import { InputTextModule } from 'primeng/inputtext';
 
+/**
+ * Standalone login component for the CaliBro authentication screen.
+ * Submits credentials to the CaliBro API via AuthService and navigates to the dashboard on success.
+ */
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -20,9 +24,9 @@ export class LoginComponent {
   public toastService = inject(ToastService);
   private router = inject(Router);
 
-  public username = signal<string>('admin');
-  public password = signal<string>('password123');
-  public rememberMe = signal<boolean>(true);
+  public username = signal<string>('');
+  public password = signal<string>('');
+  public rememberMe = signal<boolean>(false);
   public isLoading = signal<boolean>(false);
 
   public staffFeatures = [
@@ -33,6 +37,10 @@ export class LoginComponent {
     { icon: 'pi-shield', title: 'Role-Based Audit & Security', desc: 'Granular permissions, metrologist sign-off seals, and full audit logs.' }
   ];
 
+  /**
+   * Handles the login form submission.
+   * Validates inputs, calls the real API via AuthService, and navigates to /dashboard on success.
+   */
   onLogin() {
     if (!this.username() || !this.password()) {
       this.toastService.showError('Validation Error', 'Please enter your username and password.');
@@ -40,16 +48,25 @@ export class LoginComponent {
     }
 
     this.isLoading.set(true);
-    setTimeout(() => {
-      this.isLoading.set(false);
-      if (this.authService.login(this.username(), this.password())) {
+
+    // Call the real CaliBro API login endpoint
+    this.authService.login({ username: this.username(), password: this.password() }).subscribe({
+      next: () => {
+        this.isLoading.set(false);
         this.router.navigate(['/dashboard']);
-      } else {
-        this.toastService.showError('Login Failed', 'Invalid username or password credentials.');
+      },
+      error: (err: Error) => {
+        this.isLoading.set(false);
+        this.toastService.showError('Login Failed', err.message);
       }
-    }, 600);
+    });
   }
 
+  /**
+   * Pre-fills credentials and submits login — used for demo/quick-access buttons.
+   * @param user - Demo username.
+   * @param pass - Demo password.
+   */
   quickDemoLogin(user: string, pass: string) {
     this.username.set(user);
     this.password.set(pass);

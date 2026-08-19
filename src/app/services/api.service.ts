@@ -13,7 +13,7 @@ export type { CustomerEquipment, CreateEquipmentPayload } from '../models/equipm
 })
 export class ApiService {
   private http = inject(HttpClient);
-  private baseUrl = 'https://localhost:7124/api'; // Standard ASP.NET Core HTTPS port
+  private baseUrl = 'https://localhost:7124/api/v1.0'; // Standard ASP.NET Core HTTPS port with v1.0 API version
 
   // Signals for reactive store
   public dashboardStats = signal<DashboardStats | null>(null);

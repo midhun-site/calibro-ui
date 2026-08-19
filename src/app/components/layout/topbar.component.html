@@ -90,7 +90,7 @@
         </div>
         <div class="user-details-chip">
           <span class="user-chip-name">{{ authService.currentUser()?.fullName ?? 'Alex Rivera' }}</span>
-          <span class="user-chip-role">{{ authService.currentUser()?.role ?? 'Senior Metrologist' }}</span>
+          <span class="user-chip-role">{{ authService.currentUser()?.roles?.[0] ?? authService.currentUser()?.role ?? 'Senior Metrologist' }}</span>
         </div>
         <i class="pi pi-chevron-down chevron-icon"></i>
       </button>

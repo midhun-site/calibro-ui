@@ -17,6 +17,9 @@
     <button class="tab-btn" [class.active]="activeTab() === 'profile'" (click)="setTab('profile')">
       <i class="pi pi-id-card"></i> Company Profile & Address
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'branches'" (click)="setTab('branches')">
+      <i class="pi pi-sitemap"></i> Branch & Lab Facilities
+    </button>
     <button class="tab-btn" [class.active]="activeTab() === 'branding'" (click)="setTab('branding')">
       <i class="pi pi-images"></i> Header, Footer & Logo Uploads
     </button>
@@ -211,7 +214,194 @@
     </div>
   }
 
-  <!-- TAB 2: Header, Footer & Logo Image Uploads -->
+  <!-- TAB 2: Branch & Laboratory Locations Entry -->
+  @if (activeTab() === 'branches') {
+    <div class="glass-card main-card">
+      <div class="section-split-header mb-4">
+        <div>
+          <h3><i class="pi pi-sitemap text-cyan"></i> Operational Branch & Laboratory Facilities</h3>
+          <p>Configure company branch locations, laboratory sites, contact personnel, and main headquarters designation.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-secondary" (click)="exportBranchesToCsv()" title="Export branches to CSV">
+            <i class="pi pi-download text-cyan"></i> Export CSV
+          </button>
+          <button class="btn-primary" (click)="openNewBranchModal()" title="Add New Branch Facility">
+            <i class="pi pi-plus"></i> + Add New Branch
+          </button>
+        </div>
+      </div>
+
+      <!-- Branches Data Grid -->
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th (click)="toggleBranchSort('code')" class="sortable-header" style="width: 140px;">
+                Branch Code <i class="pi" [ngClass]="getBranchSortIcon('code')"></i>
+              </th>
+              <th (click)="toggleBranchSort('name')" class="sortable-header">
+                Branch / Lab Name <i class="pi" [ngClass]="getBranchSortIcon('name')"></i>
+              </th>
+              <th (click)="toggleBranchSort('city')" class="sortable-header" style="width: 160px;">
+                City <i class="pi" [ngClass]="getBranchSortIcon('city')"></i>
+              </th>
+              <th (click)="toggleBranchSort('country')" class="sortable-header" style="width: 180px;">
+                Country <i class="pi" [ngClass]="getBranchSortIcon('country')"></i>
+              </th>
+              <th style="width: 220px;">Contact Info</th>
+              <th style="width: 130px;" class="text-center">Main HQ</th>
+              <th (click)="toggleBranchSort('isActive')" class="sortable-header text-center" style="width: 110px;">
+                Status <i class="pi" [ngClass]="getBranchSortIcon('isActive')"></i>
+              </th>
+              <th class="text-center" style="width: 130px;">Actions</th>
+            </tr>
+            <!-- Per-Column Filter Row -->
+            <tr class="filter-row">
+              <td>
+                <input
+                  type="text"
+                  pInputText
+                  [ngModel]="branchFilters()['code']"
+                  (ngModelChange)="updateBranchFilter('code', $event)"
+                  placeholder="Filter code..."
+                  class="filter-input"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  pInputText
+                  [ngModel]="branchFilters()['name']"
+                  (ngModelChange)="updateBranchFilter('name', $event)"
+                  placeholder="Filter facility name..."
+                  class="filter-input"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  pInputText
+                  [ngModel]="branchFilters()['city']"
+                  (ngModelChange)="updateBranchFilter('city', $event)"
+                  placeholder="Filter city..."
+                  class="filter-input"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  pInputText
+                  [ngModel]="branchFilters()['country']"
+                  (ngModelChange)="updateBranchFilter('country', $event)"
+                  placeholder="Filter country..."
+                  class="filter-input"
+                />
+              </td>
+              <td></td>
+              <td></td>
+              <td>
+                <input
+                  type="text"
+                  pInputText
+                  [ngModel]="branchFilters()['status']"
+                  (ngModelChange)="updateBranchFilter('status', $event)"
+                  placeholder="Status..."
+                  class="filter-input"
+                />
+              </td>
+              <td></td>
+            </tr>
+          </thead>
+          <tbody>
+            @for (branch of branchPaginatedData(); track branch.code) {
+              <tr>
+                <td>
+                  <span class="code-badge">{{ branch.code }}</span>
+                </td>
+                <td>
+                  <div class="branch-name-box">
+                    <strong class="branch-title">{{ branch.name }}</strong>
+                    <span class="branch-address"><i class="pi pi-map-marker"></i> {{ branch.address }}</span>
+                  </div>
+                </td>
+                <td>{{ branch.city }}</td>
+                <td>
+                  <span class="country-pill"><i class="pi pi-globe text-cyan"></i> {{ branch.country }}</span>
+                </td>
+                <td>
+                  <div class="contact-details">
+                    <span class="contact-line"><i class="pi pi-envelope text-cyan"></i> {{ branch.email }}</span>
+                    <span class="contact-line"><i class="pi pi-phone text-cyan"></i> {{ branch.phone }}</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  @if (branch.isMainBranch) {
+                    <span class="p-tag p-tag-cyan" title="Primary Headquarters"><i class="pi pi-star-fill"></i> Main HQ</span>
+                  } @else {
+                    <button class="btn-link-action" (click)="setMainBranch(branch)" title="Set as Main Headquarters">
+                      Set as Main
+                    </button>
+                  }
+                </td>
+                <td class="text-center">
+                  @if (branch.isActive) {
+                    <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> Active</span>
+                  } @else {
+                    <span class="p-tag p-tag-danger"><i class="pi pi-ban"></i> Inactive</span>
+                  }
+                </td>
+                <td class="text-center">
+                  <div class="action-buttons">
+                    <button class="icon-btn edit-btn" (click)="editBranch(branch)" title="Edit Branch">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button class="icon-btn delete-btn" (click)="deleteBranch(branch)" title="Delete Branch">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                  No branch facilities found matching the search criteria.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Numbered Pagination Footer -->
+      <div class="table-paginator">
+        <div class="paginator-info">
+          Showing {{ (branchCurrentPage() - 1) * branchPageSize() + 1 }} to {{ Math.min(branchCurrentPage() * branchPageSize(), branchSortedData().length) }} of {{ branchSortedData().length }} entries
+        </div>
+        <div class="paginator-controls">
+          <button class="paginator-btn" [disabled]="branchCurrentPage() === 1" (click)="prevBranchPage()" title="Previous Page">
+            <i class="pi pi-chevron-left"></i>
+          </button>
+          <div class="page-numbers">
+            @for (p of branchPageNumbers(); track $index) {
+              @if (p === '...') {
+                <span class="ellipsis">...</span>
+              } @else {
+                <button class="page-number-btn" [class.active]="p === branchCurrentPage()" (click)="goToBranchPage(+p)">
+                  {{ p }}
+                </button>
+              }
+            }
+          </div>
+          <button class="paginator-btn" [disabled]="branchCurrentPage() === branchTotalPages()" (click)="nextBranchPage()" title="Next Page">
+            <i class="pi pi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: Header, Footer & Logo Image Uploads -->
   @if (activeTab() === 'branding') {
     <div class="glass-card main-card">
       <div class="card-section-title mb-4">
@@ -325,7 +515,7 @@
     </div>
   }
 
-  <!-- TAB 3: System Defaults & Numbering Prefixes -->
+  <!-- TAB 4: System Defaults & Numbering Prefixes -->
   @if (activeTab() === 'defaults') {
     <div class="glass-card main-card">
       <div class="card-section-title mb-4">
@@ -475,7 +665,7 @@
     </div>
   }
 
-  <!-- TAB 4: SMTP Email Server & Dispatch Rules -->
+  <!-- TAB 5: SMTP Email Server & Dispatch Rules -->
   @if (activeTab() === 'smtp') {
     <div class="glass-card main-card">
       <div class="card-section-title mb-4">
@@ -585,3 +775,138 @@
     </div>
   }
 </div>
+
+<!-- Branch Entry & Edit Modal Popup -->
+@if (showBranchModal()) {
+  <div class="modal-overlay" (click)="closeBranchModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>
+          <i class="pi pi-sitemap text-cyan"></i>
+          {{ isEditingBranch() ? 'Edit Laboratory Branch Facility' : 'Register New Branch Location' }}
+        </h3>
+        <button class="modal-close-btn" (click)="closeBranchModal()" title="Close">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-form-grid">
+          <div class="form-group">
+            <label class="font-bold">Branch Code: <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              pInputText
+              class="w-full code-font"
+              placeholder="e.g. BR-DXB-01"
+              [ngModel]="branchForm().code"
+              (ngModelChange)="branchForm.update(f => ({ ...f, code: $event }))"
+            />
+          </div>
+
+          <div class="form-group span-2">
+            <label class="font-bold">Branch / Facility Name: <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              pInputText
+              class="w-full"
+              placeholder="e.g. Dubai Central Calibration Laboratory"
+              [ngModel]="branchForm().name"
+              (ngModelChange)="branchForm.update(f => ({ ...f, name: $event }))"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="font-bold">Contact Email: <span class="text-danger">*</span></label>
+            <input
+              type="email"
+              pInputText
+              class="w-full"
+              placeholder="branch-lab@calibro.ae"
+              [ngModel]="branchForm().email"
+              (ngModelChange)="branchForm.update(f => ({ ...f, email: $event }))"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="font-bold">Contact Telephone: <span class="text-danger">*</span></label>
+            <input
+              type="tel"
+              pInputText
+              class="w-full"
+              placeholder="+971 4 555 0199"
+              [ngModel]="branchForm().phone"
+              (ngModelChange)="branchForm.update(f => ({ ...f, phone: $event }))"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="font-bold">City / Emirate / State: <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              pInputText
+              class="w-full"
+              placeholder="e.g. Dubai"
+              [ngModel]="branchForm().city"
+              (ngModelChange)="branchForm.update(f => ({ ...f, city: $event }))"
+            />
+          </div>
+
+          <div class="form-group span-2">
+            <label class="font-bold">Street / Facility Address:</label>
+            <input
+              type="text"
+              pInputText
+              class="w-full"
+              placeholder="e.g. Building 4, Dubai Silicon Oasis"
+              [ngModel]="branchForm().address"
+              (ngModelChange)="branchForm.update(f => ({ ...f, address: $event }))"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="font-bold">Country: <span class="text-danger">*</span></label>
+            <select
+              class="custom-select w-full"
+              [ngModel]="branchForm().country"
+              (ngModelChange)="branchForm.update(f => ({ ...f, country: $event }))"
+            >
+              @for (c of availableCountries(); track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group span-full branch-toggles-row">
+            <label class="toggle-checkbox">
+              <input
+                type="checkbox"
+                [checked]="branchForm().isMainBranch"
+                (change)="branchForm.update(f => ({ ...f, isMainBranch: $any($event.target).checked }))"
+              />
+              <span><strong>Designate as Main Headquarters Branch</strong> (Primary facility for ISO 17025 reports)</span>
+            </label>
+
+            <label class="toggle-checkbox">
+              <input
+                type="checkbox"
+                [checked]="branchForm().isActive"
+                (change)="branchForm.update(f => ({ ...f, isActive: $any($event.target).checked }))"
+              />
+              <span><strong>Active Status</strong> (Accepts job intakes & calibrations)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeBranchModal()">
+          <i class="pi pi-times"></i> Cancel
+        </button>
+        <button class="btn-primary" (click)="saveBranch()">
+          <i class="pi pi-check"></i> {{ isEditingBranch() ? 'Update Branch' : 'Register Branch' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
