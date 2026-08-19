@@ -246,8 +246,8 @@
               <th (click)="toggleBranchSort('city')" class="sortable-header" style="width: 160px;">
                 City <i class="pi" [ngClass]="getBranchSortIcon('city')"></i>
               </th>
-              <th (click)="toggleBranchSort('country')" class="sortable-header" style="width: 180px;">
-                Country <i class="pi" [ngClass]="getBranchSortIcon('country')"></i>
+              <th (click)="toggleBranchSort('countryName')" class="sortable-header" style="width: 180px;">
+                Country <i class="pi" [ngClass]="getBranchSortIcon('countryName')"></i>
               </th>
               <th style="width: 220px;">Contact Info</th>
               <th style="width: 130px;" class="text-center">Main HQ</th>
@@ -327,7 +327,7 @@
                 </td>
                 <td>{{ branch.city }}</td>
                 <td>
-                  <span class="country-pill"><i class="pi pi-globe text-cyan"></i> {{ branch.country }}</span>
+                  <span class="country-pill"><i class="pi pi-globe text-cyan"></i> {{ branch.countryName || 'N/A' }}</span>
                 </td>
                 <td>
                   <div class="contact-details">
@@ -868,8 +868,8 @@
             <label class="font-bold">Country: <span class="text-danger">*</span></label>
             <select
               class="custom-select w-full"
-              [ngModel]="branchForm().country"
-              (ngModelChange)="branchForm.update(f => ({ ...f, country: $event }))"
+              [ngModel]="branchForm().countryName"
+              (ngModelChange)="branchForm.update(f => ({ ...f, countryName: $event }))"
             >
               @for (c of availableCountries(); track c) {
                 <option [value]="c">{{ c }}</option>

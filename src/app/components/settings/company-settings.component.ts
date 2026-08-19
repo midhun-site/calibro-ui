@@ -6,6 +6,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ToastService } from '../../services/toast.service';
+import { ApiService, Branch, CompanySettings } from '../../services/api.service';
 
 /**
  * Interface representing an image upload item in the branding manager.
@@ -17,23 +18,6 @@ export interface ImageUploadItem {
   previewUrl: string;
   fileSize: string;
   recommendedSize: string;
-}
-
-/**
- * Interface representing an operational laboratory branch location belonging to the company.
- */
-export interface BranchItem {
-  id?: number;
-  uid?: string;
-  code: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  country: string;
-  isMainBranch: boolean;
-  isActive: boolean;
 }
 
 /**
@@ -56,12 +40,15 @@ export interface BranchItem {
 })
 export class CompanySettingsComponent implements OnInit {
   private toastService = inject(ToastService);
+  private apiService = inject(ApiService);
   protected Math = Math;
 
   /** Active navigation tab identifier ('profile' | 'branding' | 'defaults' | 'smtp' | 'branches'). */
   public activeTab = signal<string>('profile');
 
   // Tab 1: Company Profile Signals
+  public companyId = signal<number>(1);
+  public companyCode = signal<string>('COMP-001');
   public companyName = signal<string>('CaliBro Calibration Laboratories LLC');
   public tradeLicenseNo = signal<string>('CN-1048290-UAE');
   public isoAccreditationNo = signal<string>('ENAS / DAC Accreditation No: IB-048');
@@ -112,48 +99,8 @@ export class CompanySettingsComponent implements OnInit {
   public autoSendCertificate = signal<boolean>(true);
   public autoSendInvoice = signal<boolean>(true);
 
-  // Tab 5: Branch Management Signals
-  public branches = signal<BranchItem[]>([
-    {
-      id: 1,
-      uid: 'e8f1b2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c',
-      code: 'BR-HOU-01',
-      name: 'Houston Central Metrology Laboratory',
-      email: 'houston-lab@calibro-metrology.com',
-      phone: '+1 800-555-0190',
-      address: '100 Innovation Boulevard, Building B',
-      city: 'Houston',
-      country: 'United States',
-      isMainBranch: true,
-      isActive: true
-    },
-    {
-      id: 2,
-      uid: 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d',
-      code: 'BR-BOS-02',
-      name: 'Boston Life Sciences Calibration Facility',
-      email: 'boston-lab@calibro-metrology.com',
-      phone: '+1 800-555-0195',
-      address: '45 Science Park Drive',
-      city: 'Boston',
-      country: 'United States',
-      isMainBranch: false,
-      isActive: true
-    },
-    {
-      id: 3,
-      uid: 'c7d8e9f0-1a2b-3c4d-5e6f-7a8b9c0d1e2f',
-      code: 'BR-DXB-03',
-      name: 'Dubai Gulf Regional Metrology Center',
-      email: 'dubai-lab@calibro.ae',
-      phone: '+971 4 380 9100',
-      address: 'Dubai Silicon Oasis, Tech Hub Unit 14',
-      city: 'Dubai',
-      country: 'United Arab Emirates',
-      isMainBranch: false,
-      isActive: true
-    }
-  ]);
+  // Tab 5: Branch Management Signals (Synced from ApiService)
+  public branches = computed(() => this.apiService.branches());
 
   /** Master list of available countries for branch location selection. */
   public availableCountries = signal<string[]>([
@@ -175,16 +122,17 @@ export class CompanySettingsComponent implements OnInit {
   // Branch Modal State
   public showBranchModal = signal<boolean>(false);
   public isEditingBranch = signal<boolean>(false);
-  public editingBranchIndex = signal<number>(-1);
 
-  public branchForm = signal<BranchItem>({
+  public branchForm = signal<Branch>({
+    id: 0,
+    companyId: 1,
     code: '',
     name: '',
     email: '',
     phone: '',
     address: '',
     city: '',
-    country: 'United States',
+    countryName: 'United States',
     isMainBranch: false,
     isActive: true
   });
@@ -199,7 +147,7 @@ export class CompanySettingsComponent implements OnInit {
   });
 
   // Branch Grid Sort State
-  public branchSortColumn = signal<keyof BranchItem>('code');
+  public branchSortColumn = signal<keyof Branch>('code');
   public branchSortDirection = signal<'asc' | 'desc'>('asc');
 
   // Branch Grid Pagination State
@@ -217,6 +165,9 @@ export class CompanySettingsComponent implements OnInit {
         if (key === 'status') {
           const statusText = row.isActive ? 'active' : 'inactive';
           return statusText.includes(query);
+        }
+        if (key === 'country') {
+          return (row.countryName || '').toLowerCase().includes(query);
         }
         return String((row as any)[key] || '').toLowerCase().includes(query);
       });
@@ -263,7 +214,50 @@ export class CompanySettingsComponent implements OnInit {
     return pages;
   });
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.loadCompanySettings();
+    this.loadBranches();
+  }
+
+  /**
+   * Fetches company settings from the backend API.
+   */
+  loadCompanySettings() {
+    this.apiService.getCompanySettings().subscribe({
+      next: (settings: CompanySettings) => {
+        if (settings) {
+          this.companyId.set(settings.id);
+          this.companyCode.set(settings.code);
+          this.companyName.set(settings.name);
+          if (settings.taxNumber) this.trnNumber.set(settings.taxNumber);
+          if (settings.registrationNumber) this.tradeLicenseNo.set(settings.registrationNumber);
+          if (settings.email) this.officialEmail.set(settings.email);
+          if (settings.phone) this.primaryPhone.set(settings.phone);
+          if (settings.address) this.addressBuilding.set(settings.address);
+          if (settings.city) this.addressEmirate.set(settings.city);
+          if (settings.countryName) this.addressCountry.set(settings.countryName);
+          if (settings.currencyCode) this.currencyCode.set(settings.currencyCode);
+        }
+      },
+      error: () => {
+        // Fallback gracefully on local preview mode
+      }
+    });
+  }
+
+  /**
+   * Fetches all registered branches from the backend API.
+   */
+  loadBranches() {
+    this.apiService.getBranches().subscribe({
+      next: (branchList: Branch[]) => {
+        // Automatically populated into this.apiService.branches() signal
+      },
+      error: () => {
+        // Fallback gracefully on local preview mode
+      }
+    });
+  }
 
   /**
    * Switches the active settings workspace tab.
@@ -274,10 +268,29 @@ export class CompanySettingsComponent implements OnInit {
   }
 
   /**
-   * Persists company profile, legal registration, and contact information.
+   * Persists company profile, legal registration, and contact information to backend API.
    */
   saveProfile() {
-    this.toastService.showSuccess('Settings Saved', 'Company profile and accreditation details updated successfully.');
+    const payload = {
+      id: this.companyId(),
+      name: this.companyName(),
+      taxNumber: this.trnNumber(),
+      registrationNumber: this.tradeLicenseNo(),
+      email: this.officialEmail(),
+      phone: this.primaryPhone(),
+      address: `${this.addressBuilding()} ${this.addressStreet()}`.trim(),
+      city: this.addressEmirate(),
+      isActive: true
+    };
+
+    this.apiService.updateCompanySettings(payload).subscribe({
+      next: () => {
+        this.toastService.showSuccess('Settings Saved', 'Company profile and accreditation details updated successfully.');
+      },
+      error: (err: any) => {
+        this.toastService.showError('Save Error', err?.error?.detail || 'Failed to update company settings on backend.');
+      }
+    });
   }
 
   /**
@@ -314,18 +327,19 @@ export class CompanySettingsComponent implements OnInit {
   openNewBranchModal() {
     const nextCode = `BR-LOC-${String(this.branches().length + 1).padStart(2, '0')}`;
     this.branchForm.set({
+      id: 0,
+      companyId: this.companyId(),
       code: nextCode,
       name: '',
       email: '',
       phone: '',
       address: '',
       city: '',
-      country: 'United States',
+      countryName: 'United States',
       isMainBranch: this.branches().length === 0,
       isActive: true
     });
     this.isEditingBranch.set(false);
-    this.editingBranchIndex.set(-1);
     this.showBranchModal.set(true);
   }
 
@@ -333,11 +347,9 @@ export class CompanySettingsComponent implements OnInit {
    * Opens the branch modal in edit mode with selected branch details.
    * @param branch The branch item to edit.
    */
-  editBranch(branch: BranchItem) {
-    const index = this.branches().findIndex(b => b.code === branch.code);
+  editBranch(branch: Branch) {
     this.branchForm.set({ ...branch });
     this.isEditingBranch.set(true);
-    this.editingBranchIndex.set(index);
     this.showBranchModal.set(true);
   }
 
@@ -349,81 +361,99 @@ export class CompanySettingsComponent implements OnInit {
   }
 
   /**
-   * Saves the new or updated branch entry to the reactive state.
+   * Saves the new or updated branch entry to the backend API.
    */
   saveBranch() {
     const form = this.branchForm();
-    if (!form.code.trim() || !form.name.trim()) {
-      this.toastService.showError('Validation Error', 'Branch code and facility name are required.');
+    if (!form.code.trim() || !form.name.trim() || !form.email.trim() || !form.phone.trim() || !form.city.trim()) {
+      this.toastService.showError('Validation Error', 'Branch code, facility name, email, phone, and city are required.');
       return;
     }
 
-    if (this.isEditingBranch()) {
-      const idx = this.editingBranchIndex();
-      if (idx >= 0) {
-        this.branches.update(list => {
-          const updated = [...list];
-          // If this branch is set as main, demote others
-          if (form.isMainBranch) {
-            updated.forEach(b => b.isMainBranch = false);
-          }
-          updated[idx] = { ...form };
-          return updated;
-        });
-        this.toastService.showSuccess('Branch Updated', `Branch '${form.name}' (${form.code}) has been updated.`);
-      }
-    } else {
-      // Check for duplicate branch code
-      if (this.branches().some(b => b.code.equalsIgnoreCase(form.code.trim()))) {
-        this.toastService.showError('Duplicate Code', `A branch with code '${form.code}' already exists.`);
-        return;
-      }
+    const payload = {
+      id: form.id > 0 ? form.id : undefined,
+      companyId: this.companyId(),
+      code: form.code.trim(),
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      address: form.address.trim(),
+      city: form.city.trim(),
+      isMainBranch: form.isMainBranch,
+      isActive: form.isActive
+    };
 
-      this.branches.update(list => {
-        const updated = [...list];
-        if (form.isMainBranch) {
-          updated.forEach(b => b.isMainBranch = false);
+    if (this.isEditingBranch() && form.id > 0) {
+      this.apiService.updateBranch(form.id, payload).subscribe({
+        next: () => {
+          this.toastService.showSuccess('Branch Updated', `Branch '${form.name}' (${form.code}) has been updated.`);
+          this.closeBranchModal();
+        },
+        error: (err: any) => {
+          this.toastService.showError('Update Failed', err?.error?.detail || 'Failed to update branch facility.');
         }
-        updated.push({
-          ...form,
-          id: updated.length + 1,
-          uid: crypto.randomUUID?.() ?? `br-${Date.now()}`
-        });
-        return updated;
       });
-      this.toastService.showSuccess('Branch Added', `Branch '${form.name}' (${form.code}) registered successfully.`);
+    } else {
+      this.apiService.createBranch(payload).subscribe({
+        next: () => {
+          this.toastService.showSuccess('Branch Added', `Branch '${form.name}' (${form.code}) registered successfully.`);
+          this.closeBranchModal();
+        },
+        error: (err: any) => {
+          this.toastService.showError('Registration Failed', err?.error?.detail || 'Failed to register branch facility.');
+        }
+      });
     }
-
-    this.closeBranchModal();
   }
 
   /**
-   * Sets the specified branch as the primary/main headquarters branch.
+   * Sets the specified branch as the primary/main headquarters branch via backend API.
    * @param branch The branch item to designate as main.
    */
-  setMainBranch(branch: BranchItem) {
-    this.branches.update(list => {
-      return list.map(b => ({
-        ...b,
-        isMainBranch: b.code === branch.code
-      }));
+  setMainBranch(branch: Branch) {
+    const payload = {
+      id: branch.id,
+      companyId: branch.companyId,
+      code: branch.code,
+      name: branch.name,
+      email: branch.email,
+      phone: branch.phone,
+      address: branch.address,
+      city: branch.city,
+      countryId: branch.countryId,
+      isMainBranch: true,
+      isActive: branch.isActive
+    };
+
+    this.apiService.updateBranch(branch.id, payload).subscribe({
+      next: () => {
+        this.toastService.showSuccess('Main Branch Updated', `'${branch.name}' is now designated as the Main Headquarters Branch.`);
+      },
+      error: (err: any) => {
+        this.toastService.showError('Update Failed', err?.error?.detail || 'Failed to designate branch as main.');
+      }
     });
-    this.toastService.showSuccess('Main Branch Updated', `'${branch.name}' is now designated as the Main Headquarters Branch.`);
   }
 
   /**
-   * Soft deletes / removes the specified branch from the location roster.
+   * Soft deletes / removes the specified branch from the location roster via backend API.
    * @param branch The branch item to remove.
    */
-  deleteBranch(branch: BranchItem) {
+  deleteBranch(branch: Branch) {
     if (branch.isMainBranch && this.branches().length > 1) {
       this.toastService.showError('Operation Denied', 'Cannot delete the Main Headquarters Branch. Please designate another branch as Main first.');
       return;
     }
 
     if (confirm(`Are you sure you want to remove branch '${branch.name}' (${branch.code})?`)) {
-      this.branches.update(list => list.filter(b => b.code !== branch.code));
-      this.toastService.showSuccess('Branch Removed', `Branch '${branch.name}' has been deleted.`);
+      this.apiService.deleteBranch(branch.id).subscribe({
+        next: () => {
+          this.toastService.showSuccess('Branch Removed', `Branch '${branch.name}' has been deleted.`);
+        },
+        error: (err: any) => {
+          this.toastService.showError('Delete Failed', err?.error?.detail || 'Failed to delete branch facility.');
+        }
+      });
     }
   }
 
@@ -441,7 +471,7 @@ export class CompanySettingsComponent implements OnInit {
    * Toggles column sorting order (asc / desc) on the branch grid.
    * @param col Column property name to sort by.
    */
-  toggleBranchSort(col: keyof BranchItem) {
+  toggleBranchSort(col: keyof Branch) {
     if (this.branchSortColumn() === col) {
       this.branchSortDirection.set(this.branchSortDirection() === 'asc' ? 'desc' : 'asc');
     } else {
@@ -454,7 +484,7 @@ export class CompanySettingsComponent implements OnInit {
    * Returns the appropriate PrimeNG sort indicator icon class.
    * @param col Column property name.
    */
-  getBranchSortIcon(col: keyof BranchItem): string {
+  getBranchSortIcon(col: keyof Branch): string {
     if (this.branchSortColumn() !== col) return 'pi-sort-alt';
     return this.branchSortDirection() === 'asc' ? 'pi-sort-amount-up-alt text-cyan' : 'pi-sort-amount-down text-cyan';
   }
@@ -475,7 +505,7 @@ export class CompanySettingsComponent implements OnInit {
       b.email,
       b.phone,
       `"${b.city}"`,
-      `"${b.country}"`,
+      `"${b.countryName || ''}"`,
       b.isMainBranch ? 'YES' : 'NO',
       b.isActive ? 'ACTIVE' : 'INACTIVE'
     ]);
@@ -514,13 +544,3 @@ export class CompanySettingsComponent implements OnInit {
     }
   }
 }
-
-declare global {
-  interface String {
-    equalsIgnoreCase(other: string): boolean;
-  }
-}
-
-String.prototype.equalsIgnoreCase = function (this: string, other: string): boolean {
-  return this.toLowerCase() === (other || '').toLowerCase();
-};
