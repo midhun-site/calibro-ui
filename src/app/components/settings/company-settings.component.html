@@ -232,38 +232,40 @@
         </div>
       </div>
 
-      <!-- Branches Data Grid -->
+      <!-- Branches Data Grid (Database-Backed via DataGridState) -->
       <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
-              <th (click)="toggleBranchSort('code')" class="sortable-header" style="width: 140px;">
-                Branch Code <i class="pi" [ngClass]="getBranchSortIcon('code')"></i>
+              <th (click)="branchGrid.toggleSort('code')" class="sortable-header" style="width: 140px;">
+                Branch Code <i class="pi" [ngClass]="branchGrid.getSortIcon('code')"></i>
               </th>
-              <th (click)="toggleBranchSort('name')" class="sortable-header">
-                Branch / Lab Name <i class="pi" [ngClass]="getBranchSortIcon('name')"></i>
+              <th (click)="branchGrid.toggleSort('name')" class="sortable-header">
+                Branch / Lab Name <i class="pi" [ngClass]="branchGrid.getSortIcon('name')"></i>
               </th>
-              <th (click)="toggleBranchSort('city')" class="sortable-header" style="width: 160px;">
-                City <i class="pi" [ngClass]="getBranchSortIcon('city')"></i>
+              <th (click)="branchGrid.toggleSort('city')" class="sortable-header" style="width: 160px;">
+                City <i class="pi" [ngClass]="branchGrid.getSortIcon('city')"></i>
               </th>
-              <th (click)="toggleBranchSort('countryName')" class="sortable-header" style="width: 180px;">
-                Country <i class="pi" [ngClass]="getBranchSortIcon('countryName')"></i>
+              <th (click)="branchGrid.toggleSort('countryName')" class="sortable-header" style="width: 180px;">
+                Country <i class="pi" [ngClass]="branchGrid.getSortIcon('countryName')"></i>
               </th>
               <th style="width: 220px;">Contact Info</th>
               <th style="width: 130px;" class="text-center">Main HQ</th>
-              <th (click)="toggleBranchSort('isActive')" class="sortable-header text-center" style="width: 110px;">
-                Status <i class="pi" [ngClass]="getBranchSortIcon('isActive')"></i>
+              <th (click)="branchGrid.toggleSort('isActive')" class="sortable-header text-center" style="width: 110px;">
+                Status <i class="pi" [ngClass]="branchGrid.getSortIcon('isActive')"></i>
               </th>
               <th class="text-center" style="width: 130px;">Actions</th>
             </tr>
-            <!-- Per-Column Filter Row -->
+            <!-- Per-Column Filter Row (Triggers on Enter Key or Blur / Focus lost) -->
             <tr class="filter-row">
               <td>
                 <input
                   type="text"
                   pInputText
-                  [ngModel]="branchFilters()['code']"
-                  (ngModelChange)="updateBranchFilter('code', $event)"
+                  [ngModel]="branchGrid.columnFilters()['code']"
+                  (ngModelChange)="branchGrid.setFilterValue('code', $event)"
+                  (keydown.enter)="branchGrid.applyFilter()"
+                  (blur)="branchGrid.applyFilter()"
                   placeholder="Filter code..."
                   class="filter-input"
                 />
@@ -272,8 +274,10 @@
                 <input
                   type="text"
                   pInputText
-                  [ngModel]="branchFilters()['name']"
-                  (ngModelChange)="updateBranchFilter('name', $event)"
+                  [ngModel]="branchGrid.columnFilters()['name']"
+                  (ngModelChange)="branchGrid.setFilterValue('name', $event)"
+                  (keydown.enter)="branchGrid.applyFilter()"
+                  (blur)="branchGrid.applyFilter()"
                   placeholder="Filter facility name..."
                   class="filter-input"
                 />
@@ -282,8 +286,10 @@
                 <input
                   type="text"
                   pInputText
-                  [ngModel]="branchFilters()['city']"
-                  (ngModelChange)="updateBranchFilter('city', $event)"
+                  [ngModel]="branchGrid.columnFilters()['city']"
+                  (ngModelChange)="branchGrid.setFilterValue('city', $event)"
+                  (keydown.enter)="branchGrid.applyFilter()"
+                  (blur)="branchGrid.applyFilter()"
                   placeholder="Filter city..."
                   class="filter-input"
                 />
@@ -292,8 +298,10 @@
                 <input
                   type="text"
                   pInputText
-                  [ngModel]="branchFilters()['country']"
-                  (ngModelChange)="updateBranchFilter('country', $event)"
+                  [ngModel]="branchGrid.columnFilters()['countryName']"
+                  (ngModelChange)="branchGrid.setFilterValue('countryName', $event)"
+                  (keydown.enter)="branchGrid.applyFilter()"
+                  (blur)="branchGrid.applyFilter()"
                   placeholder="Filter country..."
                   class="filter-input"
                 />
@@ -304,8 +312,10 @@
                 <input
                   type="text"
                   pInputText
-                  [ngModel]="branchFilters()['status']"
-                  (ngModelChange)="updateBranchFilter('status', $event)"
+                  [ngModel]="branchGrid.columnFilters()['status']"
+                  (ngModelChange)="branchGrid.setFilterValue('status', $event)"
+                  (keydown.enter)="branchGrid.applyFilter()"
+                  (blur)="branchGrid.applyFilter()"
                   placeholder="Status..."
                   class="filter-input"
                 />
@@ -314,7 +324,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (branch of branchPaginatedData(); track branch.code) {
+            @for (branch of branchGrid.items(); track branch.id) {
               <tr>
                 <td>
                   <span class="code-badge">{{ branch.code }}</span>
@@ -373,27 +383,38 @@
         </table>
       </div>
 
-      <!-- Numbered Pagination Footer -->
+      <!-- Numbered Pagination Footer with Page Size Switcher -->
       <div class="table-paginator">
         <div class="paginator-info">
-          Showing {{ (branchCurrentPage() - 1) * branchPageSize() + 1 }} to {{ Math.min(branchCurrentPage() * branchPageSize(), branchSortedData().length) }} of {{ branchSortedData().length }} entries
+          Showing {{ branchGrid.showingFrom() }} to {{ branchGrid.showingTo() }} of {{ branchGrid.totalCount().toLocaleString() }} entries (Page {{ branchGrid.currentPage().toLocaleString() }} of {{ branchGrid.totalPages().toLocaleString() }})
         </div>
         <div class="paginator-controls">
-          <button class="paginator-btn" [disabled]="branchCurrentPage() === 1" (click)="prevBranchPage()" title="Previous Page">
+          <select
+            class="page-size-select"
+            [ngModel]="branchGrid.pageSize()"
+            (ngModelChange)="branchGrid.onPageSizeChange($event)"
+            title="Rows per page"
+          >
+            @for (opt of branchGrid.pageSizeOptions(); track opt) {
+              <option [ngValue]="opt">{{ opt }} / page</option>
+            }
+          </select>
+
+          <button class="paginator-btn" [disabled]="branchGrid.currentPage() === 1" (click)="branchGrid.prevPage()" title="Previous Page">
             <i class="pi pi-chevron-left"></i>
           </button>
           <div class="page-numbers">
-            @for (p of branchPageNumbers(); track $index) {
+            @for (p of branchGrid.pageNumbers(); track $index) {
               @if (p === '...') {
                 <span class="ellipsis">...</span>
               } @else {
-                <button class="page-number-btn" [class.active]="p === branchCurrentPage()" (click)="goToBranchPage(+p)">
+                <button class="page-number-btn" [class.active]="p === branchGrid.currentPage()" (click)="branchGrid.goToPage(+p)">
                   {{ p }}
                 </button>
               }
             }
           </div>
-          <button class="paginator-btn" [disabled]="branchCurrentPage() === branchTotalPages()" (click)="nextBranchPage()" title="Next Page">
+          <button class="paginator-btn" [disabled]="branchGrid.currentPage() === branchGrid.totalPages()" (click)="branchGrid.nextPage()" title="Next Page">
             <i class="pi pi-chevron-right"></i>
           </button>
         </div>
@@ -867,12 +888,14 @@
           <div class="form-group">
             <label class="font-bold">Country: <span class="text-danger">*</span></label>
             <select
+              name="branchCountry"
               class="custom-select w-full"
-              [ngModel]="branchForm().countryName"
-              (ngModelChange)="branchForm.update(f => ({ ...f, countryName: $event }))"
+              [ngModel]="branchForm().countryId"
+              (ngModelChange)="onBranchCountryChange($event)"
             >
-              @for (c of availableCountries(); track c) {
-                <option [value]="c">{{ c }}</option>
+              <option [ngValue]="null" disabled>-- Select Country --</option>
+              @for (c of countries(); track c.id) {
+                <option [ngValue]="c.id" [value]="c.id">{{ c.name }}</option>
               }
             </select>
           </div>

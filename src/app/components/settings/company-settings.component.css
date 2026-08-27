@@ -504,13 +504,17 @@
 }
 
 .custom-select {
-  background: var(--input-bg);
+  background-color: #1e293b !important;
   border: 1px solid var(--border-color);
-  color: var(--text-main);
+  color: #f8fafc !important;
   padding: 0.65rem 0.85rem;
   border-radius: 8px;
   font-size: 0.85rem;
   outline: none;
+  width: 100%;
+  cursor: pointer;
+  appearance: auto;
+  -webkit-appearance: auto;
 }
 
 .custom-select:focus {
@@ -518,8 +522,9 @@
 }
 
 .custom-select option {
-  background: #0f172a;
-  color: var(--text-main);
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  padding: 0.5rem;
 }
 
 .branch-toggles-row {

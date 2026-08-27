@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -6,7 +6,8 @@ import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ToastService } from '../../services/toast.service';
-import { ApiService, Branch, CompanySettings } from '../../services/api.service';
+import { ApiService, Branch, CompanySettings, CountryLookup } from '../../services/api.service';
+import { DataGridState } from '../../common/grid';
 
 /**
  * Interface representing an image upload item in the branding manager.
@@ -22,7 +23,7 @@ export interface ImageUploadItem {
 
 /**
  * Component managing company profile, branding graphics, transaction numbering defaults,
- * SMTP mail server configuration, and operational laboratory branch locations.
+ * SMTP mail server configuration, and operational laboratory branch locations loaded directly from PostgreSQL database.
  */
 @Component({
   selector: 'app-company-settings',
@@ -99,24 +100,40 @@ export class CompanySettingsComponent implements OnInit {
   public autoSendCertificate = signal<boolean>(true);
   public autoSendInvoice = signal<boolean>(true);
 
-  // Tab 5: Branch Management Signals (Synced from ApiService)
-  public branches = computed(() => this.apiService.branches());
+  // Tab 5: Branch Management Generic DataGridState (Database-Backed)
+  public branchGrid = new DataGridState<Branch>({
+    defaultSortColumn: 'code',
+    defaultSortDirection: 'asc',
+    defaultPageSize: 5,
+    pageSizeOptions: [5, 10, 20, 50],
+    columns: [
+      { header: 'Branch Code', field: 'code' },
+      { header: 'Branch Name', field: 'name' },
+      { header: 'Email', field: 'email' },
+      { header: 'Phone', field: 'phone' },
+      { header: 'City', field: 'city' },
+      { header: 'Country', field: (b) => b.countryName || '' },
+      { header: 'Main HQ', field: (b) => b.isMainBranch ? 'YES' : 'NO' },
+      { header: 'Status', field: (b) => b.isActive ? 'ACTIVE' : 'INACTIVE' }
+    ],
+    fetchFn: (params) => this.apiService.getBranches(params)
+  });
 
-  /** Master list of available countries for branch location selection. */
-  public availableCountries = signal<string[]>([
-    'United States',
-    'United Arab Emirates',
-    'Saudi Arabia',
-    'United Kingdom',
-    'Germany',
-    'India',
-    'Qatar',
-    'Oman',
-    'Kuwait',
-    'Bahrain',
-    'Singapore',
-    'Canada',
-    'Australia'
+  /** Master list of available countries dynamically loaded from database. */
+  public countries = signal<CountryLookup[]>([
+    { id: 1, code: 'US', name: 'United States', phoneCode: '+1' },
+    { id: 2, code: 'AE', name: 'United Arab Emirates', phoneCode: '+971' },
+    { id: 3, code: 'SA', name: 'Saudi Arabia', phoneCode: '+966' },
+    { id: 4, code: 'GB', name: 'United Kingdom', phoneCode: '+44' },
+    { id: 5, code: 'DE', name: 'Germany', phoneCode: '+49' },
+    { id: 6, code: 'IN', name: 'India', phoneCode: '+91' },
+    { id: 7, code: 'QA', name: 'Qatar', phoneCode: '+974' },
+    { id: 8, code: 'OM', name: 'Oman', phoneCode: '+968' },
+    { id: 9, code: 'KW', name: 'Kuwait', phoneCode: '+965' },
+    { id: 10, code: 'BH', name: 'Bahrain', phoneCode: '+973' },
+    { id: 11, code: 'SG', name: 'Singapore', phoneCode: '+65' },
+    { id: 12, code: 'CA', name: 'Canada', phoneCode: '+1' },
+    { id: 13, code: 'AU', name: 'Australia', phoneCode: '+61' }
   ]);
 
   // Branch Modal State
@@ -132,91 +149,32 @@ export class CompanySettingsComponent implements OnInit {
     phone: '',
     address: '',
     city: '',
+    countryId: 1,
     countryName: 'United States',
     isMainBranch: false,
     isActive: true
   });
 
-  // Branch Grid Filter Signals
-  public branchFilters = signal<{ [key: string]: string }>({
-    code: '',
-    name: '',
-    city: '',
-    country: '',
-    status: ''
-  });
-
-  // Branch Grid Sort State
-  public branchSortColumn = signal<keyof Branch>('code');
-  public branchSortDirection = signal<'asc' | 'desc'>('asc');
-
-  // Branch Grid Pagination State
-  public branchCurrentPage = signal<number>(1);
-  public branchPageSize = signal<number>(5);
-
-  /** Computed list of branches filtered by column query terms. */
-  public branchFilteredData = computed(() => {
-    const list = this.branches();
-    const currentFilters = this.branchFilters();
-    return list.filter(row => {
-      return Object.keys(currentFilters).every(key => {
-        const query = currentFilters[key]?.toLowerCase() || '';
-        if (!query) return true;
-        if (key === 'status') {
-          const statusText = row.isActive ? 'active' : 'inactive';
-          return statusText.includes(query);
-        }
-        if (key === 'country') {
-          return (row.countryName || '').toLowerCase().includes(query);
-        }
-        return String((row as any)[key] || '').toLowerCase().includes(query);
-      });
-    });
-  });
-
-  /** Computed sorted list of branches. */
-  public branchSortedData = computed(() => {
-    const list = [...this.branchFilteredData()];
-    const col = this.branchSortColumn();
-    const dir = this.branchSortDirection();
-    return list.sort((a, b) => {
-      const valA = String(a[col] ?? '').toLowerCase();
-      const valB = String(b[col] ?? '').toLowerCase();
-      if (valA < valB) return dir === 'asc' ? -1 : 1;
-      if (valA > valB) return dir === 'asc' ? 1 : -1;
-      return 0;
-    });
-  });
-
-  /** Computed paginated slice of branches for current page view. */
-  public branchPaginatedData = computed(() => {
-    const start = (this.branchCurrentPage() - 1) * this.branchPageSize();
-    return this.branchSortedData().slice(start, start + this.branchPageSize());
-  });
-
-  /** Total pages calculated from filtered records count. */
-  public branchTotalPages = computed(() => Math.ceil(this.branchSortedData().length / this.branchPageSize()) || 1);
-
-  /** Computed array of numbered pagination items. */
-  public branchPageNumbers = computed(() => {
-    const total = this.branchTotalPages();
-    const current = this.branchCurrentPage();
-    const pages: (number | string)[] = [];
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (current > 3) pages.push('...');
-      for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
-      if (current < total - 2) pages.push('...');
-      pages.push(total);
-    }
-    return pages;
-  });
-
   ngOnInit() {
     this.loadCompanySettings();
-    this.loadBranches();
+    this.loadCountries();
+    this.branchGrid.load();
+  }
+
+  /**
+   * Fetches the country master reference list from the backend API.
+   */
+  loadCountries() {
+    this.apiService.getCountries().subscribe({
+      next: (list: CountryLookup[]) => {
+        if (list && list.length > 0) {
+          this.countries.set(list);
+        }
+      },
+      error: () => {
+        // Keeps the default fallback reference list
+      }
+    });
   }
 
   /**
@@ -238,20 +196,6 @@ export class CompanySettingsComponent implements OnInit {
           if (settings.countryName) this.addressCountry.set(settings.countryName);
           if (settings.currencyCode) this.currencyCode.set(settings.currencyCode);
         }
-      },
-      error: () => {
-        // Fallback gracefully on local preview mode
-      }
-    });
-  }
-
-  /**
-   * Fetches all registered branches from the backend API.
-   */
-  loadBranches() {
-    this.apiService.getBranches().subscribe({
-      next: (branchList: Branch[]) => {
-        // Automatically populated into this.apiService.branches() signal
       },
       error: () => {
         // Fallback gracefully on local preview mode
@@ -325,7 +269,9 @@ export class CompanySettingsComponent implements OnInit {
    * Opens the branch entry modal to create a new branch location.
    */
   openNewBranchModal() {
-    const nextCode = `BR-LOC-${String(this.branches().length + 1).padStart(2, '0')}`;
+    const nextCode = `BR-LOC-${String(this.branchGrid.totalCount() + 1).padStart(2, '0')}`;
+    const defaultCountry = this.countries().find(c => c.code === 'US' || c.code === 'AE') || this.countries()[0];
+
     this.branchForm.set({
       id: 0,
       companyId: this.companyId(),
@@ -335,8 +281,9 @@ export class CompanySettingsComponent implements OnInit {
       phone: '',
       address: '',
       city: '',
-      countryName: 'United States',
-      isMainBranch: this.branches().length === 0,
+      countryId: defaultCountry?.id ?? 1,
+      countryName: defaultCountry?.name ?? 'United States',
+      isMainBranch: this.branchGrid.totalCount() === 0,
       isActive: true
     });
     this.isEditingBranch.set(false);
@@ -348,9 +295,38 @@ export class CompanySettingsComponent implements OnInit {
    * @param branch The branch item to edit.
    */
   editBranch(branch: Branch) {
-    this.branchForm.set({ ...branch });
+    let countryId = branch.countryId;
+    let countryName = branch.countryName;
+
+    if (!countryId && countryName) {
+      const match = this.countries().find(c => c.name.toLowerCase() === countryName?.toLowerCase());
+      if (match) countryId = match.id;
+    } else if (countryId && !countryName) {
+      const match = this.countries().find(c => c.id === countryId);
+      if (match) countryName = match.name;
+    }
+
+    this.branchForm.set({
+      ...branch,
+      countryId: countryId ?? this.countries()[0]?.id,
+      countryName: countryName ?? this.countries()[0]?.name
+    });
     this.isEditingBranch.set(true);
     this.showBranchModal.set(true);
+  }
+
+  /**
+   * Updates country ID and corresponding country name on branch form.
+   * @param countryId Numeric or string country identifier.
+   */
+  onBranchCountryChange(countryId: any) {
+    const id = Number(countryId);
+    const match = this.countries().find(c => c.id === id);
+    this.branchForm.update(f => ({
+      ...f,
+      countryId: id > 0 ? id : f.countryId,
+      countryName: match ? match.name : f.countryName
+    }));
   }
 
   /**
@@ -379,6 +355,7 @@ export class CompanySettingsComponent implements OnInit {
       phone: form.phone.trim(),
       address: form.address.trim(),
       city: form.city.trim(),
+      countryId: form.countryId,
       isMainBranch: form.isMainBranch,
       isActive: form.isActive
     };
@@ -388,6 +365,7 @@ export class CompanySettingsComponent implements OnInit {
         next: () => {
           this.toastService.showSuccess('Branch Updated', `Branch '${form.name}' (${form.code}) has been updated.`);
           this.closeBranchModal();
+          this.branchGrid.load();
         },
         error: (err: any) => {
           this.toastService.showError('Update Failed', err?.error?.detail || 'Failed to update branch facility.');
@@ -398,6 +376,7 @@ export class CompanySettingsComponent implements OnInit {
         next: () => {
           this.toastService.showSuccess('Branch Added', `Branch '${form.name}' (${form.code}) registered successfully.`);
           this.closeBranchModal();
+          this.branchGrid.load();
         },
         error: (err: any) => {
           this.toastService.showError('Registration Failed', err?.error?.detail || 'Failed to register branch facility.');
@@ -428,6 +407,7 @@ export class CompanySettingsComponent implements OnInit {
     this.apiService.updateBranch(branch.id, payload).subscribe({
       next: () => {
         this.toastService.showSuccess('Main Branch Updated', `'${branch.name}' is now designated as the Main Headquarters Branch.`);
+        this.branchGrid.load();
       },
       error: (err: any) => {
         this.toastService.showError('Update Failed', err?.error?.detail || 'Failed to designate branch as main.');
@@ -440,7 +420,7 @@ export class CompanySettingsComponent implements OnInit {
    * @param branch The branch item to remove.
    */
   deleteBranch(branch: Branch) {
-    if (branch.isMainBranch && this.branches().length > 1) {
+    if (branch.isMainBranch && this.branchGrid.totalCount() > 1) {
       this.toastService.showError('Operation Denied', 'Cannot delete the Main Headquarters Branch. Please designate another branch as Main first.');
       return;
     }
@@ -449,6 +429,7 @@ export class CompanySettingsComponent implements OnInit {
       this.apiService.deleteBranch(branch.id).subscribe({
         next: () => {
           this.toastService.showSuccess('Branch Removed', `Branch '${branch.name}' has been deleted.`);
+          this.branchGrid.load();
         },
         error: (err: any) => {
           this.toastService.showError('Delete Failed', err?.error?.detail || 'Failed to delete branch facility.');
@@ -458,65 +439,11 @@ export class CompanySettingsComponent implements OnInit {
   }
 
   /**
-   * Updates an active column filter query for the branch grid.
-   * @param col Column property name.
-   * @param val Query filter string.
-   */
-  updateBranchFilter(col: string, val: string) {
-    this.branchFilters.update(f => ({ ...f, [col]: val }));
-    this.branchCurrentPage.set(1);
-  }
-
-  /**
-   * Toggles column sorting order (asc / desc) on the branch grid.
-   * @param col Column property name to sort by.
-   */
-  toggleBranchSort(col: keyof Branch) {
-    if (this.branchSortColumn() === col) {
-      this.branchSortDirection.set(this.branchSortDirection() === 'asc' ? 'desc' : 'asc');
-    } else {
-      this.branchSortColumn.set(col);
-      this.branchSortDirection.set('asc');
-    }
-  }
-
-  /**
-   * Returns the appropriate PrimeNG sort indicator icon class.
-   * @param col Column property name.
-   */
-  getBranchSortIcon(col: keyof Branch): string {
-    if (this.branchSortColumn() !== col) return 'pi-sort-alt';
-    return this.branchSortDirection() === 'asc' ? 'pi-sort-amount-up-alt text-cyan' : 'pi-sort-amount-down text-cyan';
-  }
-
-  goToBranchPage(p: number) { this.branchCurrentPage.set(p); }
-  prevBranchPage() { if (this.branchCurrentPage() > 1) this.branchCurrentPage.set(this.branchCurrentPage() - 1); }
-  nextBranchPage() { if (this.branchCurrentPage() < this.branchTotalPages()) this.branchCurrentPage.set(this.branchCurrentPage() + 1); }
-
-  /**
-   * Exports the current filtered branch records to CSV file.
+   * Exports the current filtered branch records to CSV file using DataGridState utility.
    */
   exportBranchesToCsv() {
-    const data = this.branchSortedData();
-    const headers = ['Branch Code', 'Branch Name', 'Email', 'Phone', 'City', 'Country', 'Main Branch', 'Status'];
-    const rows = data.map(b => [
-      b.code,
-      `"${b.name}"`,
-      b.email,
-      b.phone,
-      `"${b.city}"`,
-      `"${b.countryName || ''}"`,
-      b.isMainBranch ? 'YES' : 'NO',
-      b.isActive ? 'ACTIVE' : 'INACTIVE'
-    ]);
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `CaliBro_Branches_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    this.toastService.showSuccess('Export Successful', `Exported ${data.length} branch records to CSV.`);
+    this.branchGrid.exportCsv(`CaliBro_Branches_Page_${this.branchGrid.currentPage()}`);
+    this.toastService.showSuccess('Export Successful', `Exported ${this.branchGrid.items().length} branch records to CSV.`);
   }
 
   /**

@@ -1,11 +1,18 @@
 <div class="page-container" (click)="closeActionMenu()">
   <div class="page-header">
     <div>
-      <h2>Calibration Enquiries</h2>
-      <p class="subtitle">Manage Incoming Calibration Inquiries & Service Requests</p>
+      <div class="title-with-badge">
+        <h2>Calibration Enquiries</h2>
+        <div class="benchmark-pill" title="Real-time in-memory benchmark metrics">
+          <i class="pi pi-bolt text-cyan"></i>
+          <span><strong>{{ grid.totalCount().toLocaleString() }}</strong> Records</span>
+          <span class="latency-tag"><i class="pi pi-clock"></i> {{ grid.executionTimeMs() }} ms</span>
+        </div>
+      </div>
+      <p class="subtitle">1-Million Record In-Memory Store • High-Performance Pagination & Per-Column Filtering</p>
     </div>
     <div class="header-actions">
-      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV / Excel">
+      <button class="btn-secondary" (click)="exportToCsv()" title="Export Current Page to CSV / Excel">
         <i class="pi pi-download text-cyan"></i> Export CSV
       </button>
       <button class="btn-primary" (click)="createNewEnquiryPage()">
@@ -19,51 +26,51 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th (click)="toggleSort('enquiryNo')" class="sortable-header">
-              Enquiry No. <i class="pi" [ngClass]="getSortIcon('enquiryNo')"></i>
+            <th (click)="grid.toggleSort('enquiryNo')" class="sortable-header">
+              Enquiry No. <i class="pi" [ngClass]="grid.getSortIcon('enquiryNo')"></i>
             </th>
-            <th (click)="toggleSort('customer')" class="sortable-header">
-              Customer <i class="pi" [ngClass]="getSortIcon('customer')"></i>
+            <th (click)="grid.toggleSort('customer')" class="sortable-header">
+              Customer <i class="pi" [ngClass]="grid.getSortIcon('customer')"></i>
             </th>
-            <th (click)="toggleSort('receivedDate')" class="sortable-header">
-              Received Date <i class="pi" [ngClass]="getSortIcon('receivedDate')"></i>
+            <th (click)="grid.toggleSort('receivedDate')" class="sortable-header">
+              Received Date <i class="pi" [ngClass]="grid.getSortIcon('receivedDate')"></i>
             </th>
-            <th (click)="toggleSort('instrumentsCount')" class="sortable-header">
-              Instruments Count <i class="pi" [ngClass]="getSortIcon('instrumentsCount')"></i>
+            <th (click)="grid.toggleSort('instrumentsCount')" class="sortable-header">
+              Instruments Count <i class="pi" [ngClass]="grid.getSortIcon('instrumentsCount')"></i>
             </th>
-            <th (click)="toggleSort('serviceType')" class="sortable-header">
-              Service Type <i class="pi" [ngClass]="getSortIcon('serviceType')"></i>
+            <th (click)="grid.toggleSort('serviceType')" class="sortable-header">
+              Service Type <i class="pi" [ngClass]="grid.getSortIcon('serviceType')"></i>
             </th>
-            <th (click)="toggleSort('status')" class="sortable-header">
-              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            <th (click)="grid.toggleSort('status')" class="sortable-header">
+              Status <i class="pi" [ngClass]="grid.getSortIcon('status')"></i>
             </th>
             <th class="text-center">Actions</th>
           </tr>
-          <!-- Per-Column Search Filter Inputs Row -->
+          <!-- Per-Column Search Filter Inputs Row (Triggers on Enter Key or Blur / Focus lost) -->
           <tr class="filter-row">
             <td>
-              <input type="text" pInputText [ngModel]="filters()['enquiryNo']" (ngModelChange)="updateFilter('enquiryNo', $event)" placeholder="Search No..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['enquiryNo']" (ngModelChange)="grid.setFilterValue('enquiryNo', $event)" (keydown.enter)="grid.applyFilter()" (blur)="grid.applyFilter()" placeholder="Search No..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['customer']" (ngModelChange)="updateFilter('customer', $event)" placeholder="Filter Customer..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['customer']" (ngModelChange)="grid.setFilterValue('customer', $event)" (keydown.enter)="grid.applyFilter()" (blur)="grid.applyFilter()" placeholder="Filter Customer..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['receivedDate']" (ngModelChange)="updateFilter('receivedDate', $event)" placeholder="Filter Date..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['receivedDate']" (ngModelChange)="grid.setFilterValue('receivedDate', $event)" (keydown.enter)="grid.applyFilter()" (blur)="grid.applyFilter()" placeholder="Filter Date..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['instrumentsCount']" (ngModelChange)="updateFilter('instrumentsCount', $event)" placeholder="Filter Count..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['instrumentsCount']" (ngModelChange)="grid.setFilterValue('instrumentsCount', $event)" (keydown.enter)="grid.applyFilter()" (blur)="grid.applyFilter()" placeholder="Filter Count..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['serviceType']" (ngModelChange)="updateFilter('serviceType', $event)" placeholder="Filter Type..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['serviceType']" (ngModelChange)="grid.setFilterValue('serviceType', $event)" (keydown.enter)="grid.applyFilter()" (blur)="grid.applyFilter()" placeholder="Filter Type..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['status']" (ngModelChange)="grid.setFilterValue('status', $event)" (keydown.enter)="grid.applyFilter()" (blur)="grid.applyFilter()" placeholder="Filter Status..." class="filter-input" />
             </td>
             <td></td>
           </tr>
         </thead>
         <tbody>
-          @for (item of paginatedData(); track item.enquiryNo) {
+          @for (item of grid.items(); track item.enquiryNo) {
             <tr>
               <td><span class="code-badge">{{ item.enquiryNo }}</span></td>
               <td><strong style="color: var(--text-main);">{{ item.customer }}</strong></td>
@@ -77,6 +84,10 @@
                   <span class="p-tag p-tag-warning"><i class="pi pi-file-edit"></i> QUOTED</span>
                 } @else if (item.status === 'APPROVED') {
                   <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> APPROVED</span>
+                } @else if (item.status === 'COMPLETED') {
+                  <span class="p-tag p-tag-success"><i class="pi pi-verified"></i> COMPLETED</span>
+                } @else if (item.status === 'CANCELLED') {
+                  <span class="p-tag p-tag-danger"><i class="pi pi-times-circle"></i> CANCELLED</span>
                 }
               </td>
               <td class="text-center action-col-cell">
@@ -119,29 +130,40 @@
       </table>
     </div>
 
-    <!-- Numbered Pagination Footer Controls Bar (1, 2, 3... 100) -->
+    <!-- Numbered Pagination Footer Controls Bar (1, 2, 3... totalPages) -->
     <div class="table-paginator">
       <div class="paginator-info">
-        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+        Showing {{ grid.showingFrom() }} to {{ grid.showingTo() }} of {{ grid.totalCount().toLocaleString() }} entries (Page {{ grid.currentPage().toLocaleString() }} of {{ grid.totalPages().toLocaleString() }})
       </div>
       <div class="paginator-controls">
-        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+        <select
+          class="page-size-select"
+          [ngModel]="grid.pageSize()"
+          (ngModelChange)="grid.onPageSizeChange($event)"
+          title="Rows per page"
+        >
+          @for (opt of grid.pageSizeOptions(); track opt) {
+            <option [ngValue]="opt">{{ opt }} / page</option>
+          }
+        </select>
+
+        <button class="paginator-btn" [disabled]="grid.currentPage() === 1" (click)="grid.prevPage()" title="Previous Page">
           <i class="pi pi-chevron-left"></i>
         </button>
 
         <div class="page-numbers">
-          @for (p of pageNumbers(); track $index) {
+          @for (p of grid.pageNumbers(); track $index) {
             @if (p === '...') {
               <span class="ellipsis">...</span>
             } @else {
-              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+              <button class="page-number-btn" [class.active]="p === grid.currentPage()" (click)="grid.goToPage(+p)">
                 {{ p }}
               </button>
             }
           }
         </div>
 
-        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+        <button class="paginator-btn" [disabled]="grid.currentPage() === grid.totalPages()" (click)="grid.nextPage()" title="Next Page">
           <i class="pi pi-chevron-right"></i>
         </button>
       </div>
