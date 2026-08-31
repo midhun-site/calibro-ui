@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { LoginRequest, LoginResponse, RefreshTokenResponse, UserSession } from '../models/auth.model';
+import { environment } from '../../environments/environment';
 
 /**
  * Service responsible for JWT-based authentication against the CaliBro API.
@@ -16,7 +17,7 @@ export class AuthService {
   private router = inject(Router);
 
   /** Base URL of the CaliBro API with versioning tag. */
-  private readonly baseUrl = 'https://localhost:7124/api/v1.0';
+  private readonly baseUrl = environment.apiUrl;
 
   /**
    * In-memory access token — never stored in localStorage/sessionStorage to mitigate XSS risks.

@@ -5,6 +5,7 @@ import { TopbarComponent } from './components/layout/topbar.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { ThemeService } from './services/theme.service';
 import { LayoutService } from './services/layout.service';
+import { LoadingService } from './services/loading.service';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,7 @@ export class AppComponent {
   title = 'calibro-ui';
   public themeService = inject(ThemeService);
   public layoutService = inject(LayoutService);
+  public loadingService = inject(LoadingService);
   private router = inject(Router);
 
   isStandalonePage(): boolean {

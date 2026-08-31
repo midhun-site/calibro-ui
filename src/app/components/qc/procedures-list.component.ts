@@ -108,6 +108,11 @@ export class ProceduresListComponent {
     this.currentPage.set(1);
   }
 
+  resetFilters() {
+    this.filters.set({ docNo: '', title: '', discipline: '', standardRef: '', revNo: '', status: '' });
+    this.currentPage.set(1);
+  }
+
   toggleSort(col: string) {
     if (this.sortColumn() === col) {
       this.sortDirection.update(d => d === 'asc' ? 'desc' : 'asc');

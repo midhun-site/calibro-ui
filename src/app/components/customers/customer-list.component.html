@@ -189,6 +189,17 @@
         Showing {{ customerGrid.showingFrom() }} to {{ customerGrid.showingTo() }} of {{ customerGrid.totalCount() }} entries
       </div>
       <div class="paginator-controls">
+        <select
+          class="page-size-select"
+          [ngModel]="customerGrid.pageSize()"
+          (ngModelChange)="customerGrid.onPageSizeChange($event)"
+          title="Rows per page"
+        >
+          @for (opt of customerGrid.pageSizeOptions(); track opt) {
+            <option [ngValue]="opt">{{ opt }} / page</option>
+          }
+        </select>
+
         <button class="paginator-btn" [disabled]="customerGrid.currentPage() === 1" (click)="customerGrid.prevPage()" title="Previous Page">
           <i class="pi pi-chevron-left"></i>
         </button>

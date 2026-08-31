@@ -83,7 +83,25 @@
           }
           @if (paginatedData().length === 0) {
             <tr>
-              <td colspan="7" class="text-center p-4 text-muted">No workorders matching filter criteria.</td>
+              <td colspan="7" class="empty-state-cell">
+                <div class="empty-state-container">
+                  <div class="empty-icon-circle">
+                    <i class="pi pi-briefcase"></i>
+                  </div>
+                  <h4 class="empty-state-title">No Workorders Found</h4>
+                  <p class="empty-state-subtitle">
+                    No calibration workorders match your active search filters or no jobs are currently scheduled.
+                  </p>
+                  <div class="empty-state-actions">
+                    <button class="btn-secondary btn-sm" (click)="resetFilters()">
+                      <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                    </button>
+                    <button class="btn-primary btn-sm" (click)="showCreateModal = true">
+                      <i class="pi pi-plus"></i> New Workorder
+                    </button>
+                  </div>
+                </div>
+              </td>
             </tr>
           }
         </tbody>

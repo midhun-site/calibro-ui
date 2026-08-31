@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { CountryLookup } from '../models/customer.model';
+import { environment } from '../../environments/environment';
 
 /**
  * Dedicated service responsible for country reference data HTTP API operations
@@ -12,7 +13,7 @@ import { CountryLookup } from '../models/customer.model';
 })
 export class CountryService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'https://localhost:7124/api/v1.0';
+  private readonly baseUrl = environment.apiUrl;
 
   /** Default fallback countries if server is cold/offline */
   private readonly defaultCountries: CountryLookup[] = [

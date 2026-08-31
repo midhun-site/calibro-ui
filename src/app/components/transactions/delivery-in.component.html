@@ -77,8 +77,24 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="text-center py-4" style="color: var(--text-muted);">
-                No delivery-in records match the current filters.
+              <td colspan="6" class="empty-state-cell">
+                <div class="empty-state-container">
+                  <div class="empty-icon-circle">
+                    <i class="pi pi-box"></i>
+                  </div>
+                  <h4 class="empty-state-title">No Intake Records Found</h4>
+                  <p class="empty-state-subtitle">
+                    No instrument intake records match your active search filters or no equipment deliveries have been recorded yet.
+                  </p>
+                  <div class="empty-state-actions">
+                    <button class="btn-secondary btn-sm" (click)="resetFilters()">
+                      <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                    </button>
+                    <button class="btn-primary btn-sm" (click)="showCreateModal = true">
+                      <i class="pi pi-plus"></i> Record Intake
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
           }

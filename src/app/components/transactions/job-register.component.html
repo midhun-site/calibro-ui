@@ -88,8 +88,24 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="text-center py-4" style="color: var(--text-muted);">
-                No work orders match the current column filters.
+              <td colspan="7" class="empty-state-cell">
+                <div class="empty-state-container">
+                  <div class="empty-icon-circle">
+                    <i class="pi pi-list-check"></i>
+                  </div>
+                  <h4 class="empty-state-title">No Work Orders Found</h4>
+                  <p class="empty-state-subtitle">
+                    No laboratory job register records match your active search filters or no calibration orders have been registered yet.
+                  </p>
+                  <div class="empty-state-actions">
+                    <button class="btn-secondary btn-sm" (click)="resetFilters()">
+                      <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                    </button>
+                    <button class="btn-primary btn-sm" (click)="showCreateModal = true">
+                      <i class="pi pi-plus"></i> New Work Order
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
           }

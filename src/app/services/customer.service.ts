@@ -10,6 +10,7 @@ import {
   CustomerCategoryLookup
 } from '../models/customer.model';
 import { GridQueryParams, PagedGridResponse } from '../common/grid';
+import { environment } from '../../environments/environment';
 
 /**
  * Service responsible for customer master and category HTTP API operations,
@@ -20,7 +21,7 @@ import { GridQueryParams, PagedGridResponse } from '../common/grid';
 })
 export class CustomerService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'https://localhost:7124/api/v1.0';
+  private readonly baseUrl = environment.apiUrl;
 
   /** Reactive signal containing the list of currently fetched customer records. */
   public customers = signal<Customer[]>([]);

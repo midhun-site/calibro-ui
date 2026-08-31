@@ -33,3 +33,72 @@
     max-width: 100%;
   }
 }
+
+/* Global Top Progress Bar */
+.global-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0, 242, 254, 0.15);
+  z-index: 99999;
+  overflow: hidden;
+}
+
+.progress-indicator {
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #00f2fe, #4facfe, #00f2fe, transparent);
+  box-shadow: 0 0 12px #00f2fe, 0 0 20px #4facfe;
+  animation: indeterminate-loading 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes indeterminate-loading {
+  0% {
+    left: -40%;
+    width: 40%;
+  }
+  50% {
+    left: 40%;
+    width: 60%;
+  }
+  100% {
+    left: 100%;
+    width: 40%;
+  }
+}
+
+/* Global Floating API Sync Badge */
+.global-api-badge {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.9rem;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  border-radius: 20px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #f8fafc;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(0, 242, 254, 0.2);
+  backdrop-filter: blur(8px);
+  z-index: 99998;
+  animation: fadeIn 0.2s ease;
+  pointer-events: none;
+}
+
+.global-api-badge i {
+  font-size: 0.85rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}

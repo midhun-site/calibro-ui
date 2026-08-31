@@ -374,8 +374,24 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="8" class="text-center py-4 text-muted">
-                  No branch facilities found matching the search criteria.
+                <td colspan="8" class="empty-state-cell">
+                  <div class="empty-state-container">
+                    <div class="empty-icon-circle">
+                      <i class="pi pi-sitemap"></i>
+                    </div>
+                    <h4 class="empty-state-title">No Branch Locations Found</h4>
+                    <p class="empty-state-subtitle">
+                      No laboratory branch facilities match your active search filters or no locations have been configured yet.
+                    </p>
+                    <div class="empty-state-actions">
+                      <button class="btn-secondary btn-sm" (click)="branchGrid.clearFilter()">
+                        <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                      </button>
+                      <button class="btn-primary btn-sm" (click)="openNewBranchModal()">
+                        <i class="pi pi-plus"></i> Add New Branch
+                      </button>
+                    </div>
+                  </div>
                 </td>
               </tr>
             }

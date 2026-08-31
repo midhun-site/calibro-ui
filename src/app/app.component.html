@@ -1,5 +1,15 @@
 <app-toast></app-toast>
 
+@if (loadingService.isLoading()) {
+  <div class="global-progress-bar">
+    <div class="progress-indicator"></div>
+  </div>
+  <div class="global-api-badge">
+    <i class="pi pi-spin pi-spinner text-cyan"></i>
+    <span>Syncing...</span>
+  </div>
+}
+
 @if (isStandalonePage()) {
   <router-outlet></router-outlet>
 } @else {

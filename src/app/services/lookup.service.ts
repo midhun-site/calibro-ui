@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { LookupItem, LookupType } from '../models/lookup.model';
+import { environment } from '../../environments/environment';
 
 /**
  * Service managing generic configurable lookup reference datasets from the backend REST API.
@@ -11,7 +12,7 @@ import { LookupItem, LookupType } from '../models/lookup.model';
 })
 export class LookupService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'https://localhost:7124/api/v1.0';
+  private readonly baseUrl = environment.apiUrl;
 
   /** Reactive cached signals for common lookup categories */
   public unitOfMeasures = signal<LookupItem[]>([]);

@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { Item, SaveItemPayload, SaveItemResponse } from '../models/item.model';
 import { GridQueryParams, PagedGridResponse } from '../common/grid';
+import { environment } from '../../environments/environment';
 
 /**
  * Service managing stock items and equipment master REST API interactions.
@@ -12,7 +13,7 @@ import { GridQueryParams, PagedGridResponse } from '../common/grid';
 })
 export class ItemService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'https://localhost:7124/api/v1.0';
+  private readonly baseUrl = environment.apiUrl;
 
   /** Reactive collection of stock items in the active view */
   public items = signal<Item[]>([]);

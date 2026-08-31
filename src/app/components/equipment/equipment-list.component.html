@@ -192,6 +192,17 @@
         Showing {{ itemGrid.showingFrom() }} to {{ itemGrid.showingTo() }} of {{ itemGrid.totalCount() }} entries
       </div>
       <div class="paginator-controls">
+        <select
+          class="page-size-select"
+          [ngModel]="itemGrid.pageSize()"
+          (ngModelChange)="itemGrid.onPageSizeChange($event)"
+          title="Rows per page"
+        >
+          @for (opt of itemGrid.pageSizeOptions(); track opt) {
+            <option [ngValue]="opt">{{ opt }} / page</option>
+          }
+        </select>
+
         <button class="paginator-btn" [disabled]="itemGrid.currentPage() === 1" (click)="itemGrid.prevPage()" title="Previous Page">
           <i class="pi pi-chevron-left"></i>
         </button>

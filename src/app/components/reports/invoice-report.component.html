@@ -86,8 +86,24 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="text-center py-4" style="color: var(--text-muted);">
-                No invoices match the current column filters.
+              <td colspan="7" class="empty-state-cell">
+                <div class="empty-state-container">
+                  <div class="empty-icon-circle">
+                    <i class="pi pi-receipt"></i>
+                  </div>
+                  <h4 class="empty-state-title">No Invoices Found</h4>
+                  <p class="empty-state-subtitle">
+                    No billing invoice records match your active search filters or no invoices have been generated yet.
+                  </p>
+                  <div class="empty-state-actions">
+                    <button class="btn-secondary btn-sm" (click)="resetFilters()">
+                      <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                    </button>
+                    <button class="btn-primary btn-sm" (click)="showCreateModal = true">
+                      <i class="pi pi-plus"></i> Create Invoice
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
           }

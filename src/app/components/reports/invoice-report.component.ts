@@ -114,6 +114,11 @@ export class InvoiceReportComponent {
     this.currentPage.set(1);
   }
 
+  resetFilters() {
+    this.filters.set({ invoiceNo: '', customer: '', issueDate: '', dueDate: '', taxAmount: '', totalAmount: '', status: '' });
+    this.currentPage.set(1);
+  }
+
   toggleSort(col: string) {
     if (this.sortColumn() === col) {
       this.sortDirection.update(d => d === 'asc' ? 'desc' : 'asc');

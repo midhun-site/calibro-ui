@@ -10,6 +10,8 @@ import { EnquiryRow, EnquiryQueryFilter, EnquiryListResponse } from '../models/e
 import { CountryLookup } from '../models/country.model';
 import { GridQueryParams, PagedGridResponse } from '../common/grid';
 
+import { environment } from '../../environments/environment';
+
 export type { Customer, CreateCustomerPayload } from '../models/customer.model';
 export type { CustomerEquipment, CreateEquipmentPayload } from '../models/equipment.model';
 export type { CompanySettings, UpdateCompanySettingsPayload } from '../models/company-settings.model';
@@ -27,7 +29,7 @@ export type { GridQueryParams, PagedGridResponse } from '../common/grid';
 })
 export class ApiService {
   private http = inject(HttpClient);
-  private baseUrl = 'https://localhost:7124/api/v1.0'; // Standard ASP.NET Core HTTPS port with v1.0 API version
+  private readonly baseUrl = environment.apiUrl;
 
   // Signals for reactive store
   public dashboardStats = signal<DashboardStats | null>(null);
