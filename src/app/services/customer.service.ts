@@ -53,6 +53,17 @@ export class CustomerService {
       if (params.sortColumn) httpParams = httpParams.set('sortColumn', params.sortColumn);
       if (params.sortDirection) httpParams = httpParams.set('sortDirection', params.sortDirection);
 
+      // Append any additional direct column filter properties
+      for (const key of Object.keys(params)) {
+        if (!['pageNumber', 'pageSize', 'searchTerm', 'sortColumn', 'sortDirection', 'columnFilters'].includes(key)) {
+          if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+            const val = params[key].toString();
+            httpParams = httpParams.set(key, val);
+            httpParams = httpParams.set(`ColumnFilters[${key}]`, val);
+          }
+        }
+      }
+
       if (params.columnFilters) {
         for (const [col, val] of Object.entries(params.columnFilters)) {
           if (val) {
@@ -152,5 +163,13 @@ export class CustomerService {
         }
       })
     );
+  }
+
+  /**
+   * Retrieves the next auto-generated sequential customer code from the API.
+   * @returns Observable resolving with the next customer code (e.g. CUST0001, CUST0002).
+   */
+  getNextCustomerCode(): Observable<{ customerCode: string }> {
+    return this.http.get<{ customerCode: string }>(`${this.baseUrl}/customers/next-code`);
   }
 }

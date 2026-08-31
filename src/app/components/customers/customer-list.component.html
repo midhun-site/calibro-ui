@@ -6,7 +6,7 @@
       <p class="subtitle">ISO 17025 Calibration Accounts & Client Management</p>
     </div>
     <div class="header-actions">
-      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
+      <button class="btn-secondary" (click)="customerGrid.exportCsv('CaliBro_Customer_Master')" title="Export Grid Data to CSV">
         <i class="pi pi-download text-cyan"></i> Export CSV
       </button>
       <button class="btn-primary" (click)="openAddModal()">
@@ -21,23 +21,23 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th (click)="toggleSort('code')" class="sortable-header">
-              Code <i class="pi" [ngClass]="getSortIcon('code')"></i>
+            <th (click)="customerGrid.toggleSort('code')" class="sortable-header">
+              ID <i class="pi" [ngClass]="customerGrid.getSortIcon('code')"></i>
             </th>
-            <th (click)="toggleSort('companyName')" class="sortable-header">
-              Company Name <i class="pi" [ngClass]="getSortIcon('companyName')"></i>
+            <th (click)="customerGrid.toggleSort('companyName')" class="sortable-header">
+              Company Name <i class="pi" [ngClass]="customerGrid.getSortIcon('companyName')"></i>
             </th>
-            <th (click)="toggleSort('customerCategoryName')" class="sortable-header">
-              Category <i class="pi" [ngClass]="getSortIcon('customerCategoryName')"></i>
+            <th (click)="customerGrid.toggleSort('customerCategoryName')" class="sortable-header">
+              Category <i class="pi" [ngClass]="customerGrid.getSortIcon('customerCategoryName')"></i>
             </th>
-            <th (click)="toggleSort('email')" class="sortable-header">
-              Contact Email <i class="pi" [ngClass]="getSortIcon('email')"></i>
+            <th (click)="customerGrid.toggleSort('email')" class="sortable-header">
+              Contact Email <i class="pi" [ngClass]="customerGrid.getSortIcon('email')"></i>
             </th>
-            <th (click)="toggleSort('phone')" class="sortable-header">
-              Phone <i class="pi" [ngClass]="getSortIcon('phone')"></i>
+            <th (click)="customerGrid.toggleSort('phone')" class="sortable-header">
+              Phone <i class="pi" [ngClass]="customerGrid.getSortIcon('phone')"></i>
             </th>
-            <th (click)="toggleSort('city')" class="sortable-header">
-              City / Country <i class="pi" [ngClass]="getSortIcon('city')"></i>
+            <th (click)="customerGrid.toggleSort('city')" class="sortable-header">
+              City / Country <i class="pi" [ngClass]="customerGrid.getSortIcon('city')"></i>
             </th>
             <th>Contacts</th>
             <th>Actions</th>
@@ -45,29 +45,83 @@
           <!-- Per-Column Search Filter Row -->
           <tr class="filter-row">
             <td>
-              <input type="text" pInputText [ngModel]="filters()['code']" (ngModelChange)="updateFilter('code', $event)" placeholder="Search Code..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="customerGrid.columnFilters()['code'] || ''"
+                (ngModelChange)="customerGrid.updateFilter('code', $event)"
+                (keydown.enter)="customerGrid.applyFilter()"
+                (blur)="customerGrid.applyFilter()"
+                placeholder="Search ID..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['companyName']" (ngModelChange)="updateFilter('companyName', $event)" placeholder="Filter Company..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="customerGrid.columnFilters()['companyName'] || ''"
+                (ngModelChange)="customerGrid.updateFilter('companyName', $event)"
+                (keydown.enter)="customerGrid.applyFilter()"
+                (blur)="customerGrid.applyFilter()"
+                placeholder="Filter Company..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['customerCategoryName']" (ngModelChange)="updateFilter('customerCategoryName', $event)" placeholder="Filter Category..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="customerGrid.columnFilters()['customerCategoryName'] || ''"
+                (ngModelChange)="customerGrid.updateFilter('customerCategoryName', $event)"
+                (keydown.enter)="customerGrid.applyFilter()"
+                (blur)="customerGrid.applyFilter()"
+                placeholder="Filter Category..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['email']" (ngModelChange)="updateFilter('email', $event)" placeholder="Filter Email..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="customerGrid.columnFilters()['email'] || ''"
+                (ngModelChange)="customerGrid.updateFilter('email', $event)"
+                (keydown.enter)="customerGrid.applyFilter()"
+                (blur)="customerGrid.applyFilter()"
+                placeholder="Filter Email..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['phone']" (ngModelChange)="updateFilter('phone', $event)" placeholder="Filter Phone..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="customerGrid.columnFilters()['phone'] || ''"
+                (ngModelChange)="customerGrid.updateFilter('phone', $event)"
+                (keydown.enter)="customerGrid.applyFilter()"
+                (blur)="customerGrid.applyFilter()"
+                placeholder="Filter Phone..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['city']" (ngModelChange)="updateFilter('city', $event)" placeholder="Filter Location..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="customerGrid.columnFilters()['city'] || ''"
+                (ngModelChange)="customerGrid.updateFilter('city', $event)"
+                (keydown.enter)="customerGrid.applyFilter()"
+                (blur)="customerGrid.applyFilter()"
+                placeholder="Filter Location..."
+                class="filter-input"
+              />
             </td>
             <td></td>
             <td></td>
           </tr>
         </thead>
         <tbody>
-          @for (item of paginatedData(); track item.code) {
+          @for (item of customerGrid.items(); track item.code) {
             <tr>
               <td><span class="code-badge">{{ item.code }}</span></td>
               <td>
@@ -104,9 +158,24 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="8" class="text-center py-4 empty-msg">
-                <i class="pi pi-inbox empty-icon"></i>
-                <p>No customer records match the current filters.</p>
+              <td colspan="8" class="empty-state-cell">
+                <div class="empty-state-container">
+                  <div class="empty-icon-circle">
+                    <i class="pi pi-users"></i>
+                  </div>
+                  <h4 class="empty-state-title">No Customer Accounts Found</h4>
+                  <p class="empty-state-subtitle">
+                    No customers match your active search filters or no accounts have been registered yet.
+                  </p>
+                  <div class="empty-state-actions">
+                    <button class="btn-secondary btn-sm" (click)="customerGrid.clearFilter()">
+                      <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                    </button>
+                    <button class="btn-primary btn-sm" (click)="openAddModal()">
+                      <i class="pi pi-plus"></i> Add New Customer
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
           }
@@ -117,224 +186,253 @@
     <!-- Numbered Pagination Footer -->
     <div class="table-paginator">
       <div class="paginator-info">
-        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+        Showing {{ customerGrid.showingFrom() }} to {{ customerGrid.showingTo() }} of {{ customerGrid.totalCount() }} entries
       </div>
       <div class="paginator-controls">
-        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+        <button class="paginator-btn" [disabled]="customerGrid.currentPage() === 1" (click)="customerGrid.prevPage()" title="Previous Page">
           <i class="pi pi-chevron-left"></i>
         </button>
 
         <div class="page-numbers">
-          @for (p of pageNumbers(); track $index) {
+          @for (p of customerGrid.pageNumbers(); track $index) {
             @if (p === '...') {
               <span class="ellipsis">...</span>
             } @else {
-              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+              <button class="page-number-btn" [class.active]="p === customerGrid.currentPage()" (click)="customerGrid.goToPage(p)">
                 {{ p }}
               </button>
             }
           }
         </div>
 
-        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+        <button class="paginator-btn" [disabled]="customerGrid.currentPage() >= customerGrid.totalPages()" (click)="customerGrid.nextPage()" title="Next Page">
           <i class="pi pi-chevron-right"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Create / Edit Customer Modal -->
+  <!-- Create / Edit Customer Modal (Reactive Form) -->
   @if (showModal()) {
-    <div class="modal-overlay" (click)="showModal.set(false)">
+    <div class="modal-overlay" (click)="requestCloseModal()">
       <div class="modal-card customer-modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="modal-title-wrap">
             <i class="pi pi-building text-cyan"></i>
             <h3>{{ isEditMode() ? 'Edit Customer Account' : 'Register New Customer' }}</h3>
           </div>
-          <button class="modal-close-btn" (click)="showModal.set(false)">
+          <button class="modal-close-btn" (click)="requestCloseModal()" title="Close Dialog">
             <i class="pi pi-times"></i>
           </button>
         </div>
 
         <div class="modal-body">
-          <!-- Section 1: Organization Details -->
-          <div class="section-title">
-            <i class="pi pi-id-card"></i> Company Information
-          </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Customer Code <span class="req">*</span></label>
-              <input
-                type="text"
-                pInputText
-                [ngModel]="formCustomer().code"
-                (ngModelChange)="formCustomer().code = $event"
-                (blur)="markFieldTouched('code')"
-                [class.input-invalid]="isFieldInvalid('code')"
-                placeholder="e.g. CUST-1001" />
-              @if (isFieldInvalid('code')) {
-                <div class="validation-label">
-                  <i class="pi pi-exclamation-circle"></i> {{ getFieldError('code') }}
-                </div>
-              }
+          <form [formGroup]="customerForm" (ngSubmit)="saveCustomer()">
+            <!-- Section 1: Organization Details -->
+            <div class="section-title">
+              <i class="pi pi-id-card"></i> Company Information
             </div>
-
-            <div class="form-group">
-              <label>Company Legal Name <span class="req">*</span></label>
-              <input
-                type="text"
-                pInputText
-                [ngModel]="formCustomer().companyName"
-                (ngModelChange)="formCustomer().companyName = $event"
-                (blur)="markFieldTouched('companyName')"
-                [class.input-invalid]="isFieldInvalid('companyName')"
-                placeholder="e.g. PetroChem Refineries LLC" />
-              @if (isFieldInvalid('companyName')) {
-                <div class="validation-label">
-                  <i class="pi pi-exclamation-circle"></i> {{ getFieldError('companyName') }}
-                </div>
-              }
-            </div>
-
-            <div class="form-group">
-              <label>Classification Category</label>
-              <select class="form-select" [ngModel]="formCustomer().customerCategoryId" (ngModelChange)="onCategoryChange($event)">
-                <option [value]="null">-- Select Category --</option>
-                @for (cat of categories(); track cat.id) {
-                  <option [value]="cat.id">{{ cat.name }} ({{ cat.code }})</option>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Customer ID <span class="req">*</span></label>
+                <input
+                  type="text"
+                  pInputText
+                  formControlName="code"
+                  [class.input-invalid]="isFieldInvalid('code')"
+                  placeholder="e.g. CUST0001" />
+                @if (isFieldInvalid('code')) {
+                  <div class="validation-label">
+                    <i class="pi pi-exclamation-circle"></i> {{ getFieldError('code') }}
+                  </div>
                 }
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Tax / TRN Number</label>
-              <input type="text" pInputText [ngModel]="formCustomer().taxNumber" (ngModelChange)="formCustomer().taxNumber = $event" placeholder="e.g. 100293848100003" />
-            </div>
-
-            <div class="form-group">
-              <label>Business Email <span class="req">*</span></label>
-              <input
-                type="email"
-                pInputText
-                [ngModel]="formCustomer().email"
-                (ngModelChange)="formCustomer().email = $event"
-                (blur)="markFieldTouched('email')"
-                [class.input-invalid]="isFieldInvalid('email')"
-                placeholder="info@company.ae" />
-              @if (isFieldInvalid('email')) {
-                <div class="validation-label">
-                  <i class="pi pi-exclamation-circle"></i> {{ getFieldError('email') }}
-                </div>
-              }
-            </div>
-
-            <div class="form-group">
-              <label>Business Phone <span class="req">*</span></label>
-              <input
-                type="text"
-                pInputText
-                [ngModel]="formCustomer().phone"
-                (ngModelChange)="formCustomer().phone = $event"
-                (blur)="markFieldTouched('phone')"
-                [class.input-invalid]="isFieldInvalid('phone')"
-                placeholder="+971 4 881 2233" />
-              @if (isFieldInvalid('phone')) {
-                <div class="validation-label">
-                  <i class="pi pi-exclamation-circle"></i> {{ getFieldError('phone') }}
-                </div>
-              }
-            </div>
-
-            <div class="form-group full-span">
-              <label>Street Address</label>
-              <input type="text" pInputText [ngModel]="formCustomer().address" (ngModelChange)="formCustomer().address = $event" placeholder="e.g. Plot 598, Jebel Ali Industrial Area 1" />
-            </div>
-
-            <div class="form-group">
-              <label>City / Emirate</label>
-              <input type="text" pInputText [ngModel]="formCustomer().city" (ngModelChange)="formCustomer().city = $event" placeholder="e.g. Dubai" />
-            </div>
-
-            <div class="form-group">
-              <label>Country</label>
-              <select class="form-select" [ngModel]="formCustomer().country" (ngModelChange)="onCountryChange($event)">
-                <option [value]="''">-- Select Country --</option>
-                @for (c of countries(); track c.id) {
-                  <option [value]="c.name">{{ c.name }} ({{ c.code }})</option>
-                }
-              </select>
-            </div>
-          </div>
-
-          <!-- Section 2: Contact Persons Sub-form -->
-          <div class="contacts-section">
-            <div class="section-header-flex">
-              <div class="section-title">
-                <i class="pi pi-users"></i> Contact Persons & Representatives
               </div>
-              <button type="button" class="btn-secondary btn-sm" (click)="addContactRow()">
-                <i class="pi pi-plus"></i> Add Contact
-              </button>
+
+              <div class="form-group">
+                <label>Company Legal Name <span class="req">*</span></label>
+                <input
+                  type="text"
+                  pInputText
+                  formControlName="companyName"
+                  [class.input-invalid]="isFieldInvalid('companyName')"
+                  placeholder="e.g. PetroChem Refineries LLC" />
+                @if (isFieldInvalid('companyName')) {
+                  <div class="validation-label">
+                    <i class="pi pi-exclamation-circle"></i> {{ getFieldError('companyName') }}
+                  </div>
+                }
+              </div>
+
+              <div class="form-group">
+                <label>Classification Category</label>
+                <select class="form-select" formControlName="customerCategoryId">
+                  <option [value]="null">-- Select Category --</option>
+                  @for (cat of categories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }} ({{ cat.code }})</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Tax / TRN Number</label>
+                <input type="text" pInputText formControlName="taxNumber" placeholder="e.g. 100293848100003" />
+              </div>
+
+              <div class="form-group">
+                <label>Business Email <span class="req">*</span></label>
+                <input
+                  type="email"
+                  pInputText
+                  formControlName="email"
+                  [class.input-invalid]="isFieldInvalid('email')"
+                  placeholder="info@company.ae" />
+                @if (isFieldInvalid('email')) {
+                  <div class="validation-label">
+                    <i class="pi pi-exclamation-circle"></i> {{ getFieldError('email') }}
+                  </div>
+                }
+              </div>
+
+              <div class="form-group">
+                <label>Business Phone <span class="req">*</span></label>
+                <input
+                  type="text"
+                  pInputText
+                  formControlName="phone"
+                  [class.input-invalid]="isFieldInvalid('phone')"
+                  placeholder="+971 4 881 2233" />
+                @if (isFieldInvalid('phone')) {
+                  <div class="validation-label">
+                    <i class="pi pi-exclamation-circle"></i> {{ getFieldError('phone') }}
+                  </div>
+                }
+              </div>
+
+              <div class="form-group full-span">
+                <label>Street Address</label>
+                <input type="text" pInputText formControlName="address" placeholder="e.g. Plot 598, Jebel Ali Industrial Area 1" />
+              </div>
+
+              <div class="form-group">
+                <label>City / Emirate</label>
+                <input type="text" pInputText formControlName="city" placeholder="e.g. Dubai" />
+              </div>
+
+              <div class="form-group">
+                <label>Country</label>
+                <select class="form-select" formControlName="country">
+                  <option [value]="''">-- Select Country --</option>
+                  @for (c of countries(); track c.id) {
+                    <option [value]="c.name">{{ c.name }} ({{ c.code }})</option>
+                  }
+                </select>
+              </div>
             </div>
 
-            <div class="contacts-table-wrap">
-              <table class="contacts-table">
-                <thead>
-                  <tr>
-                    <th>First Name <span class="req">*</span></th>
-                    <th>Last Name</th>
-                    <th>Email Address</th>
-                    <th>Phone</th>
-                    <th>Designation / Role</th>
-                    <th class="text-center">Primary</th>
-                    <th class="text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (contact of formContacts(); track $index) {
+            <!-- Section 2: Contact Persons Sub-form (FormArray) -->
+            <div class="contacts-section" formArrayName="contacts">
+              <div class="section-header-flex">
+                <div class="section-title">
+                  <i class="pi pi-users"></i> Contact Persons & Representatives
+                </div>
+                <button type="button" class="btn-secondary btn-sm" (click)="addContactRow()">
+                  <i class="pi pi-plus"></i> Add Contact
+                </button>
+              </div>
+
+              <div class="contacts-table-wrap">
+                <table class="contacts-table">
+                  <thead>
                     <tr>
-                      <td>
-                        <input type="text" pInputText [(ngModel)]="contact.firstName" placeholder="First Name" class="sub-input" />
-                      </td>
-                      <td>
-                        <input type="text" pInputText [(ngModel)]="contact.lastName" placeholder="Last Name" class="sub-input" />
-                      </td>
-                      <td>
-                        <input type="email" pInputText [(ngModel)]="contact.email" placeholder="Email" class="sub-input" />
-                      </td>
-                      <td>
-                        <input type="text" pInputText [(ngModel)]="contact.phone" placeholder="Phone" class="sub-input" />
-                      </td>
-                      <td>
-                        <input type="text" pInputText [(ngModel)]="contact.position" placeholder="e.g. QA Lead" class="sub-input" />
-                      </td>
-                      <td class="text-center">
-                        <input type="radio" name="primaryContact" [checked]="contact.isPrimary" (change)="setPrimaryContact($index)" title="Designate Primary Contact" />
-                      </td>
-                      <td class="text-center">
-                        @if (formContacts().length > 1) {
-                          <button type="button" class="btn-icon delete-btn" (click)="removeContactRow($index)" title="Remove Contact">
-                            <i class="pi pi-times"></i>
-                          </button>
-                        }
-                      </td>
+                      <th>First Name <span class="req">*</span></th>
+                      <th>Last Name</th>
+                      <th>Email Address</th>
+                      <th>Phone</th>
+                      <th>Designation / Role</th>
+                      <th class="text-center">Primary</th>
+                      <th class="text-center">Action</th>
                     </tr>
-                  }
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    @for (contactGroup of contactsArray.controls; track $index) {
+                      <tr [formGroupName]="$index">
+                        <td>
+                          <input type="text" pInputText formControlName="firstName" placeholder="First Name" class="sub-input" />
+                        </td>
+                        <td>
+                          <input type="text" pInputText formControlName="lastName" placeholder="Last Name" class="sub-input" />
+                        </td>
+                        <td>
+                          <input type="email" pInputText formControlName="email" placeholder="Email" class="sub-input" />
+                        </td>
+                        <td>
+                          <input type="text" pInputText formControlName="phone" placeholder="Phone" class="sub-input" />
+                        </td>
+                        <td>
+                          <input type="text" pInputText formControlName="position" placeholder="e.g. QA Lead" class="sub-input" />
+                        </td>
+                        <td class="text-center">
+                          <input type="radio" class="primary-radio" name="primaryContactRadio" [checked]="contactGroup.get('isPrimary')?.value" (change)="setPrimaryContact($index)" title="Designate Primary Contact" />
+                        </td>
+                        <td class="text-center">
+                          @if (contactsArray.length > 1) {
+                            <button type="button" class="btn-icon delete-btn" (click)="removeContactRow($index)" title="Remove Contact">
+                              <i class="pi pi-times"></i>
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
 
         <div class="modal-footer">
-          <button class="btn-secondary" (click)="showModal.set(false)">Cancel</button>
+          <button class="btn-secondary" (click)="requestCloseModal()">Cancel</button>
           <button class="btn-primary" [disabled]="isSaving()" (click)="saveCustomer()">
             @if (isSaving()) {
               <i class="pi pi-spin pi-spinner"></i> Saving...
             } @else {
               <i class="pi pi-check"></i> {{ isEditMode() ? 'Update Customer' : 'Save Customer' }}
             }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── Unsaved Changes Confirmation Modal ──────────────────────────────── -->
+  @if (showUnsavedConfirmModal()) {
+    <div class="modal-overlay unsaved-overlay" (click)="keepEditing()">
+      <div class="modal-card unsaved-modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header unsaved-header">
+          <div class="modal-title-wrap">
+            <i class="pi pi-exclamation-triangle text-warning"></i>
+            <h3>Unsaved Changes Detected</h3>
+          </div>
+          <button class="modal-close-btn" (click)="keepEditing()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body unsaved-body">
+          <p>
+            You have unsaved changes in this customer form. Are you sure you want to discard your edits and leave?
+          </p>
+          <div class="unsaved-warning">
+            <i class="pi pi-info-circle"></i> Any modifications entered will be discarded permanently.
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="keepEditing()">
+            Keep Editing
+          </button>
+          <button type="button" class="btn-danger" (click)="discardAndClose()">
+            <i class="pi pi-trash"></i> Discard Changes
           </button>
         </div>
       </div>

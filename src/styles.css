@@ -56,18 +56,17 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6) !important;
-  border-radius: 4px !important;
+  background: transparent !important;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 242, 254, 0.35) !important;
-  border-radius: 4px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-radius: 6px !important;
   transition: background 0.2s ease !important;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-cyan) !important;
+  background: rgba(0, 242, 254, 0.5) !important;
 }
 
 ::-webkit-scrollbar-corner {
@@ -75,7 +74,7 @@
 }
 
 [data-theme="light"] ::-webkit-scrollbar-track {
-  background: #f1f5f9 !important;
+  background: transparent !important;
 }
 
 [data-theme="light"] ::-webkit-scrollbar-thumb {
@@ -240,11 +239,11 @@ body {
   color: var(--text-muted);
 }
 
-.form-group input,
+.form-group input:not([type="checkbox"]):not([type="radio"]),
 .form-group select,
 .form-group textarea,
-input[pInputText],
-.p-inputtext,
+input[pInputText]:not([type="checkbox"]):not([type="radio"]),
+.p-inputtext:not([type="checkbox"]):not([type="radio"]),
 .form-select,
 .form-textarea {
   width: 100%;
@@ -522,11 +521,11 @@ select option:checked,
   opacity: 0.65;
 }
 
-.form-group input:focus,
+.form-group input:not([type="checkbox"]):not([type="radio"]):focus,
 .form-group select:focus,
 .form-group textarea:focus,
-input[pInputText]:focus,
-.p-inputtext:focus {
+input[pInputText]:not([type="checkbox"]):not([type="radio"]):focus,
+.p-inputtext:not([type="checkbox"]):not([type="radio"]):focus {
   border-color: var(--accent-cyan) !important;
   box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.15) !important;
 }
@@ -652,20 +651,48 @@ h1, h2, h3, h4 {
 
 /* Data Tables Styling & Sorting & Filtering */
 .table-card {
-  padding: 0.75rem;
-  overflow: hidden;
+  padding: 1.25rem !important;
+  border-radius: 16px !important;
+  background: var(--card-bg, #111827) !important;
+  border: 1px solid var(--border-color, #1f2937) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .table-responsive {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-color, #1f2937) !important;
+  background: var(--bg-surface, #0b1120) !important;
 }
 
 .data-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.data-table thead tr:first-child th:first-child {
+  border-top-left-radius: 11px !important;
+}
+
+.data-table thead tr:first-child th:last-child {
+  border-top-right-radius: 11px !important;
+}
+
+.data-table tfoot tr:last-child td:first-child,
+.data-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 11px !important;
+}
+
+.data-table tfoot tr:last-child td:last-child,
+.data-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 11px !important;
 }
 
 .data-table th, .data-table td,

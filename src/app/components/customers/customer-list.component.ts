@@ -1,10 +1,12 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { CustomerService } from '../../services/customer.service';
 import { CountryService } from '../../services/country.service';
 import { ToastService } from '../../services/toast.service';
+import { DataGridState } from '../../common/grid';
 import type {
   Customer,
   CustomerContact,
@@ -15,13 +17,13 @@ import type {
 
 /**
  * Customer Master Component managing the laboratory customer directory,
- * contact persons, search filters, sorting, server/client pagination, CSV export, and CRUD modals.
- * Implements lazy API loading pattern for categories, countries, and explicit control-level validation labels.
+ * contact persons, server-side search filters, sorting, server-side pagination, CSV export,
+ * reactive CRUD modal forms, and dirty checking with unsaved changes confirmation.
  */
 @Component({
   selector: 'app-customer-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, InputTextModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, InputTextModule],
   templateUrl: './customer-list.component.html',
   styleUrl: './customer-list.component.css'
 })
@@ -29,36 +31,32 @@ export class CustomerListComponent implements OnInit {
   private customerService = inject(CustomerService);
   private countryService = inject(CountryService);
   private toastService = inject(ToastService);
+  private fb = inject(FormBuilder);
   protected Math = Math;
 
-  // ── Reactive Signals & State ─────────────────────────────────────────────
-  public customers = this.customerService.customers;
-  public categories = this.customerService.categories;
-  public countries = this.countryService.countries;
-  public isLoading = this.customerService.isLoading;
-  public isSaving = signal<boolean>(false);
-
-  // Validation State
-  public formSubmitted = signal<boolean>(false);
-  public touchedFields = signal<{ [key: string]: boolean }>({});
-
-  // Column Filters
-  public filters = signal<{ [key: string]: string }>({
-    code: '',
-    companyName: '',
-    email: '',
-    phone: '',
-    city: '',
-    customerCategoryName: ''
+  // ── Database-Backed Server-Side DataGridState ───────────────────────────
+  public customerGrid = new DataGridState<Customer>({
+    defaultSortColumn: 'code',
+    defaultSortDirection: 'asc',
+    defaultPageSize: 10,
+    pageSizeOptions: [5, 10, 20, 50, 100],
+    columns: [
+      { header: 'Customer ID', field: 'code' },
+      { header: 'Company Name', field: 'companyName' },
+      { header: 'Category', field: (c) => c.customerCategoryName || 'Standard' },
+      { header: 'Contact Email', field: 'email' },
+      { header: 'Phone', field: 'phone' },
+      { header: 'City / Country', field: (c) => `${c.city || ''}, ${c.country || ''}` },
+      { header: 'Tax / TRN', field: 'taxNumber' },
+      { header: 'Contacts', field: (c) => c.totalContacts || 1 }
+    ],
+    fetchFn: (params) => this.customerService.getCustomers(params)
   });
 
-  // Sort State
-  public sortColumn = signal<keyof Customer>('code');
-  public sortDirection = signal<'asc' | 'desc'>('asc');
-
-  // Pagination State
-  public currentPage = signal<number>(1);
-  public pageSize = signal<number>(10);
+  // ── Reactive Signals & State ─────────────────────────────────────────────
+  public categories = this.customerService.categories;
+  public countries = this.countryService.countries;
+  public isSaving = signal<boolean>(false);
 
   // Modal State
   public showModal = signal<boolean>(false);
@@ -66,98 +64,37 @@ export class CustomerListComponent implements OnInit {
   public showDeleteModal = signal<boolean>(false);
   public targetCustomer = signal<Customer | null>(null);
 
-  // Form Model State
-  public formCustomer = signal<SaveCustomerPayload>({
-    id: null,
-    code: '',
-    companyName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    country: '',
-    taxNumber: '',
-    customerCategoryId: null,
-    contacts: []
+  // Validation & Dirty State Tracking
+  public formSubmitted = signal<boolean>(false);
+  public showUnsavedConfirmModal = signal<boolean>(false);
+  private initialFormSnapshot: string = '';
+
+  // ── Complex Reactive Form Definition ─────────────────────────────────────
+  public customerForm: FormGroup = this.fb.group({
+    id: [null],
+    code: ['', [Validators.required, Validators.maxLength(50)]],
+    companyName: ['', [Validators.required, Validators.maxLength(200)]],
+    customerCategoryId: [null],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
+    phone: ['', [Validators.required, Validators.maxLength(50)]],
+    taxNumber: ['', [Validators.maxLength(50)]],
+    address: ['', [Validators.maxLength(500)]],
+    city: ['Dubai', [Validators.maxLength(100)]],
+    country: ['United Arab Emirates', [Validators.maxLength(100)]],
+    contacts: this.fb.array([])
   });
-
-  public formContacts = signal<CustomerContact[]>([]);
-
-  // ── Computed Filtered, Sorted & Paginated Data ───────────────────────────
-  public filteredData = computed(() => {
-    const list = this.customers();
-    const f = this.filters();
-
-    return list.filter(item => {
-      const matchCode = !f['code'] || item.code.toLowerCase().includes(f['code'].toLowerCase());
-      const matchCompany = !f['companyName'] || item.companyName.toLowerCase().includes(f['companyName'].toLowerCase());
-      const matchEmail = !f['email'] || item.email.toLowerCase().includes(f['email'].toLowerCase());
-      const matchPhone = !f['phone'] || item.phone.toLowerCase().includes(f['phone'].toLowerCase());
-      const matchCity = !f['city'] || ((item.city || '') + ' ' + (item.country || '')).toLowerCase().includes(f['city'].toLowerCase());
-      const matchCategory = !f['customerCategoryName'] || (item.customerCategoryName || '').toLowerCase().includes(f['customerCategoryName'].toLowerCase());
-
-      return matchCode && matchCompany && matchEmail && matchPhone && matchCity && matchCategory;
-    });
-  });
-
-  public sortedData = computed(() => {
-    const data = [...this.filteredData()];
-    const col = this.sortColumn();
-    const dir = this.sortDirection();
-
-    return data.sort((a, b) => {
-      const valA = String((a as any)[col] ?? '').toLowerCase();
-      const valB = String((b as any)[col] ?? '').toLowerCase();
-      if (valA < valB) return dir === 'asc' ? -1 : 1;
-      if (valA > valB) return dir === 'asc' ? 1 : -1;
-      return 0;
-    });
-  });
-
-  public totalPages = computed(() => Math.ceil(this.sortedData().length / this.pageSize()) || 1);
-
-  public paginatedData = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.sortedData().slice(start, start + this.pageSize());
-  });
-
-  public pageNumbers = computed(() => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: (number | string)[] = [];
-
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (current > 3) pages.push('...');
-      const start = Math.max(2, current - 1);
-      const end = Math.min(total - 1, current + 1);
-      for (let i = start; i <= end; i++) pages.push(i);
-      if (current < total - 2) pages.push('...');
-      pages.push(total);
-    }
-    return pages;
-  });
-
-  // ── Lifecycle & API Integration ──────────────────────────────────────────
-  ngOnInit(): void {
-    // Only load the primary customer directory on page init (Lazy Loading standard)
-    this.loadCustomers();
-  }
 
   /**
-   * Fetches customer list from backend database.
+   * Helper accessor for contact persons FormArray.
    */
-  public loadCustomers(): void {
-    this.customerService.getCustomers().subscribe({
-      next: res => {
-        if (res && res.items) {
-          this.customerService.customers.set(res.items);
-        }
-      },
-      error: () => {}
-    });
+  public get contactsArray(): FormArray {
+    return this.customerForm.get('contacts') as FormArray;
+  }
+
+  // ── Lifecycle ────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    // Initial server-side grid load
+    this.customerGrid.load();
   }
 
   /**
@@ -208,151 +145,172 @@ export class CustomerListComponent implements OnInit {
     });
   }
 
+  // ── Dirty State & Unsaved Confirmation Tracking ──────────────────────────
+  /**
+   * Captures a normalized snapshot of the form state to detect subsequent edits.
+   */
+  private captureInitialSnapshot(): void {
+    this.initialFormSnapshot = JSON.stringify(this.customerForm.getRawValue());
+  }
+
+  /**
+   * Determines if the user has modified any form field or contact row.
+   */
+  public isFormDirty(): boolean {
+    if (!this.initialFormSnapshot) return false;
+    return this.initialFormSnapshot !== JSON.stringify(this.customerForm.getRawValue());
+  }
+
+  /**
+   * Requests modal closure, intercepting with a confirmation dialog if dirty.
+   */
+  public requestCloseModal(): void {
+    if (this.isFormDirty()) {
+      this.showUnsavedConfirmModal.set(true);
+    } else {
+      this.forceCloseModal();
+    }
+  }
+
+  /**
+   * Confirms discarding unsaved changes and closes the modal.
+   */
+  public discardAndClose(): void {
+    this.showUnsavedConfirmModal.set(false);
+    this.forceCloseModal();
+  }
+
+  /**
+   * Dismisses the unsaved changes warning dialog to continue editing.
+   */
+  public keepEditing(): void {
+    this.showUnsavedConfirmModal.set(false);
+  }
+
+  /**
+   * Closes the modal and resets dirty and validation tracking flags.
+   */
+  private forceCloseModal(): void {
+    this.showModal.set(false);
+    this.formSubmitted.set(false);
+    this.customerForm.reset();
+    this.contactsArray.clear();
+    this.initialFormSnapshot = '';
+  }
+
   // ── Control-Level Validation Helpers ─────────────────────────────────────
   /**
-   * Flags a field as visited by the user.
+   * Checks whether a form control is invalid and touched/submitted.
    */
-  public markFieldTouched(fieldName: string): void {
-    this.touchedFields.update(t => ({ ...t, [fieldName]: true }));
+  public isFieldInvalid(controlName: string): boolean {
+    const control = this.customerForm.get(controlName);
+    if (!control) return false;
+    return control.invalid && (control.touched || control.dirty || this.formSubmitted());
   }
 
   /**
-   * Validates if a specific field has unmet validation constraints.
+   * Returns human-readable validation error message for a given control.
    */
-  public isFieldInvalid(fieldName: string): boolean {
-    const isTouched = this.touchedFields()[fieldName] || this.formSubmitted();
-    if (!isTouched) return false;
+  public getFieldError(controlName: string): string {
+    const control = this.customerForm.get(controlName);
+    if (!control || !control.errors) return '';
 
-    const form = this.formCustomer();
-    switch (fieldName) {
-      case 'code':
-        return !form.code || !form.code.trim();
-      case 'companyName':
-        return !form.companyName || !form.companyName.trim();
-      case 'email':
-        return !form.email || !form.email.trim() || !this.isValidEmail(form.email);
-      case 'phone':
-        return !form.phone || !form.phone.trim();
-      default:
-        return false;
+    if (control.errors['required']) {
+      switch (controlName) {
+        case 'code': return 'Customer ID is required.';
+        case 'companyName': return 'Company Legal Name is required.';
+        case 'email': return 'Business Email is required.';
+        case 'phone': return 'Business Phone is required.';
+        default: return 'This field is required.';
+      }
     }
-  }
-
-  /**
-   * Returns human-readable validation error message for a given field.
-   */
-  public getFieldError(fieldName: string): string {
-    const form = this.formCustomer();
-    switch (fieldName) {
-      case 'code':
-        return (!form.code || !form.code.trim()) ? 'Customer Code is required.' : '';
-      case 'companyName':
-        return (!form.companyName || !form.companyName.trim()) ? 'Company Legal Name is required.' : '';
-      case 'email':
-        if (!form.email || !form.email.trim()) return 'Business Email is required.';
-        if (!this.isValidEmail(form.email)) return 'Please enter a valid email address (e.g. name@company.ae).';
-        return '';
-      case 'phone':
-        return (!form.phone || !form.phone.trim()) ? 'Business Phone is required.' : '';
-      default:
-        return '';
+    if (control.errors['email']) {
+      return 'Please enter a valid email address (e.g. name@company.ae).';
     }
+    return '';
+  }
+
+  // ── Contact Sub-form Helpers ─────────────────────────────────────────────
+  /**
+   * Creates a FormGroup for a single customer contact person.
+   */
+  private createContactGroup(contact?: Partial<CustomerContact>): FormGroup {
+    return this.fb.group({
+      firstName: [contact?.firstName || '', Validators.required],
+      lastName: [contact?.lastName || ''],
+      email: [contact?.email || ''],
+      phone: [contact?.phone || ''],
+      position: [contact?.position || 'Primary Contact'],
+      isPrimary: [contact?.isPrimary ?? (this.contactsArray.length === 0)]
+    });
   }
 
   /**
-   * Validates email format pattern.
+   * Adds a new contact person row to the FormArray.
    */
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email.trim());
-  }
-
-  // ── Grid Filtering & Sorting Handlers ────────────────────────────────────
-  public updateFilter(col: string, val: string): void {
-    this.filters.update(f => ({ ...f, [col]: val }));
-    this.currentPage.set(1);
-  }
-
-  public toggleSort(col: keyof Customer): void {
-    if (this.sortColumn() === col) {
-      this.sortDirection.update(d => (d === 'asc' ? 'desc' : 'asc'));
-    } else {
-      this.sortColumn.set(col);
-      this.sortDirection.set('asc');
-    }
-  }
-
-  public getSortIcon(col: keyof Customer): string {
-    if (this.sortColumn() !== col) return 'pi-sort-alt';
-    return this.sortDirection() === 'asc'
-      ? 'pi-sort-amount-up-alt text-cyan'
-      : 'pi-sort-amount-down text-cyan';
-  }
-
-  public goToPage(p: number): void {
-    if (p >= 1 && p <= this.totalPages()) this.currentPage.set(p);
-  }
-
-  public prevPage(): void {
-    if (this.currentPage() > 1) this.currentPage.update(p => p - 1);
-  }
-
-  public nextPage(): void {
-    if (this.currentPage() < this.totalPages()) this.currentPage.update(p => p + 1);
-  }
-
-  // ── CRUD Modal Handlers ──────────────────────────────────────────────────
-  /**
-   * Handles Category Dropdown change event.
-   */
-  public onCategoryChange(val: any): void {
-    const numVal = (val !== null && val !== undefined && val !== '' && val !== 'null') ? parseInt(val, 10) : null;
-    this.formCustomer.update(c => ({
-      ...c,
-      customerCategoryId: numVal
+  public addContactRow(): void {
+    this.contactsArray.push(this.createContactGroup({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      position: '',
+      isPrimary: this.contactsArray.length === 0
     }));
   }
 
   /**
-   * Handles Country Dropdown change event.
+   * Removes a contact person row by index.
    */
-  public onCountryChange(val: string): void {
-    this.formCustomer.update(c => ({
-      ...c,
-      country: val || ''
-    }));
+  public removeContactRow(index: number): void {
+    if (this.contactsArray.length > 1) {
+      this.contactsArray.removeAt(index);
+    }
   }
 
   /**
-   * Computes the next unique customer identifier code based on highest numeric suffix.
+   * Designates a specific contact row as the primary representative.
    */
+  public setPrimaryContact(index: number): void {
+    for (let i = 0; i < this.contactsArray.length; i++) {
+      const grp = this.contactsArray.at(i) as FormGroup;
+      grp.patchValue({ isPrimary: i === index });
+    }
+  }
+
+  // ── Sequential Code Generation ───────────────────────────────────────────
   private generateNextCustomerCode(): string {
-    let maxNumber = 1000;
-    for (const c of this.customers()) {
-      if (c.code && c.code.toUpperCase().startsWith('CUST-')) {
-        const num = parseInt(c.code.replace(/CUST-/i, ''), 10);
-        if (!isNaN(num) && num > maxNumber) {
-          maxNumber = num;
+    let maxNumber = 0;
+    for (const c of this.customerGrid.items()) {
+      if (c.code) {
+        const match = c.code.match(/\d+/);
+        if (match) {
+          const num = parseInt(match[0], 10);
+          if (!isNaN(num) && num > maxNumber) {
+            maxNumber = num;
+          }
         }
       }
     }
-    return `CUST-${maxNumber + 1}`;
+    const next = maxNumber + 1;
+    return `CUST${next.toString().padStart(4, '0')}`;
   }
 
+  // ── CRUD Handlers ────────────────────────────────────────────────────────
   /**
-   * Opens modal in Create mode with clean initial state and auto-generated customer code.
-   * Lazily loads category and country lookups on demand.
+   * Opens modal in Create mode with clean initial state and retrieves next sequential customer code.
    */
   public openAddModal(): void {
     this.isEditMode.set(false);
     this.formSubmitted.set(false);
-    this.touchedFields.set({});
+    this.customerForm.reset();
+    this.contactsArray.clear();
 
-    const generatedCode = this.generateNextCustomerCode();
+    const initialCode = this.generateNextCustomerCode();
 
-    this.formCustomer.set({
+    this.customerForm.patchValue({
       id: null,
-      code: generatedCode,
+      code: initialCode,
       companyName: '',
       email: '',
       phone: '',
@@ -360,21 +318,37 @@ export class CustomerListComponent implements OnInit {
       city: 'Dubai',
       country: 'United Arab Emirates',
       taxNumber: '',
-      customerCategoryId: this.categories().length > 0 ? this.categories()[0].id : null,
-      contacts: []
+      customerCategoryId: this.categories().length > 0 ? this.categories()[0].id : null
     });
 
-    this.formContacts.set([
-      { firstName: '', lastName: '', email: '', phone: '', position: 'Primary Contact', isPrimary: true }
-    ]);
+    this.contactsArray.push(this.createContactGroup({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      position: 'Primary Contact',
+      isPrimary: true
+    }));
+
+    this.captureInitialSnapshot();
+
+    // Fetch authoritative sequential customer code from API
+    this.customerService.getNextCustomerCode().subscribe({
+      next: res => {
+        if (res && res.customerCode) {
+          this.customerForm.patchValue({ code: res.customerCode });
+          this.captureInitialSnapshot();
+        }
+      },
+      error: () => {}
+    });
 
     // Lazy load categories only upon modal trigger
     this.ensureCategoriesLoaded(() => {
-      if (!this.formCustomer().customerCategoryId && this.categories().length > 0) {
-        this.formCustomer.update(c => ({
-          ...c,
-          customerCategoryId: this.categories()[0].id
-        }));
+      const currentCat = this.customerForm.get('customerCategoryId')?.value;
+      if (!currentCat && this.categories().length > 0) {
+        this.customerForm.patchValue({ customerCategoryId: this.categories()[0].id });
+        this.captureInitialSnapshot();
       }
     });
 
@@ -386,12 +360,12 @@ export class CustomerListComponent implements OnInit {
 
   /**
    * Opens modal in Edit mode, pre-populating customer attributes and fetching full contact details.
-   * Lazily loads category and country lookups on demand.
    */
   public openEditModal(customer: Customer): void {
     this.isEditMode.set(true);
     this.formSubmitted.set(false);
-    this.touchedFields.set({});
+    this.customerForm.reset();
+    this.contactsArray.clear();
     this.targetCustomer.set(customer);
 
     const custId = typeof customer.id === 'string' ? parseInt(customer.id, 10) : customer.id;
@@ -406,7 +380,7 @@ export class CustomerListComponent implements OnInit {
       if (match) catId = match.id;
     }
 
-    this.formCustomer.set({
+    this.customerForm.patchValue({
       id: custId,
       code: customer.code,
       companyName: customer.companyName,
@@ -416,91 +390,67 @@ export class CustomerListComponent implements OnInit {
       city: customer.city || '',
       country: customer.country || 'United Arab Emirates',
       taxNumber: customer.taxNumber || '',
-      customerCategoryId: catId,
-      contacts: []
+      customerCategoryId: catId
     });
+
+    // Initial contact row before full details arrive
+    this.contactsArray.push(this.createContactGroup({
+      firstName: '',
+      lastName: '',
+      email: customer.email,
+      phone: customer.phone,
+      position: 'Primary Contact',
+      isPrimary: true
+    }));
+
+    this.captureInitialSnapshot();
 
     // Lazy load categories upon opening edit modal
     this.ensureCategoriesLoaded(() => {
-      if (!this.formCustomer().customerCategoryId && customer.customerCategoryName) {
+      if (!this.customerForm.get('customerCategoryId')?.value && customer.customerCategoryName) {
         const match = this.categories().find(c =>
           c.name.toLowerCase().includes(customer.customerCategoryName!.toLowerCase()) ||
           customer.customerCategoryName!.toLowerCase().includes(c.name.toLowerCase())
         );
         if (match) {
-          this.formCustomer.update(c => ({ ...c, customerCategoryId: match.id }));
+          this.customerForm.patchValue({ customerCategoryId: match.id });
+          this.captureInitialSnapshot();
         }
       }
     });
 
-    // Lazy load countries upon opening edit modal
+    // Lazy load countries
     this.ensureCountriesLoaded();
 
-    // Lazy fetch full customer details including contacts
+    // Fetch full customer details including contacts
     if (custId && custId > 0) {
       this.customerService.getCustomerById(custId).subscribe({
         next: details => {
           if (details && details.contacts && details.contacts.length > 0) {
-            this.formContacts.set(details.contacts);
-          } else {
-            this.formContacts.set([
-              { firstName: '', lastName: '', email: customer.email, phone: customer.phone, position: 'Primary Contact', isPrimary: true }
-            ]);
+            this.contactsArray.clear();
+            for (const c of details.contacts) {
+              this.contactsArray.push(this.createContactGroup(c));
+            }
           }
+          this.captureInitialSnapshot();
         },
         error: () => {
-          this.formContacts.set([
-            { firstName: '', lastName: '', email: customer.email, phone: customer.phone, position: 'Primary Contact', isPrimary: true }
-          ]);
+          this.captureInitialSnapshot();
         }
       });
-    } else {
-      this.formContacts.set([
-        { firstName: '', lastName: '', email: customer.email, phone: customer.phone, position: 'Primary Contact', isPrimary: true }
-      ]);
     }
 
     this.showModal.set(true);
   }
 
   /**
-   * Adds a new contact person row to the dynamic sub-form.
-   */
-  public addContactRow(): void {
-    this.formContacts.update(list => [
-      ...list,
-      { firstName: '', lastName: '', email: '', phone: '', position: '', isPrimary: list.length === 0 }
-    ]);
-  }
-
-  /**
-   * Removes a contact person row by index.
-   */
-  public removeContactRow(index: number): void {
-    this.formContacts.update(list => list.filter((_, i) => i !== index));
-  }
-
-  /**
-   * Designates a specific contact row as the primary representative.
-   */
-  public setPrimaryContact(index: number): void {
-    this.formContacts.update(list =>
-      list.map((c, i) => ({ ...c, isPrimary: i === index }))
-    );
-  }
-
-  /**
-   * Validates and persists customer creation or modification.
+   * Persists customer creation or modification using Reactive Form value.
    */
   public saveCustomer(): void {
     this.formSubmitted.set(true);
 
-    if (
-      this.isFieldInvalid('code') ||
-      this.isFieldInvalid('companyName') ||
-      this.isFieldInvalid('email') ||
-      this.isFieldInvalid('phone')
-    ) {
+    if (this.customerForm.invalid) {
+      this.customerForm.markAllAsTouched();
       this.toastService.showWarning(
         'Validation Required',
         'Please correct the highlighted errors before saving.'
@@ -508,14 +458,25 @@ export class CustomerListComponent implements OnInit {
       return;
     }
 
-    const form = this.formCustomer();
+    const formVal = this.customerForm.getRawValue();
 
     // Filter valid contact rows
-    const validContacts = this.formContacts().filter(c => c.firstName.trim().length > 0);
+    const contacts: CustomerContact[] = (formVal.contacts || []).filter(
+      (c: any) => c.firstName && c.firstName.trim().length > 0
+    );
 
     const payload: SaveCustomerPayload = {
-      ...form,
-      contacts: validContacts
+      id: formVal.id,
+      code: formVal.code,
+      companyName: formVal.companyName,
+      email: formVal.email,
+      phone: formVal.phone,
+      address: formVal.address,
+      city: formVal.city,
+      country: formVal.country,
+      taxNumber: formVal.taxNumber,
+      customerCategoryId: formVal.customerCategoryId ? parseInt(formVal.customerCategoryId, 10) : null,
+      contacts
     };
 
     this.isSaving.set(true);
@@ -523,12 +484,12 @@ export class CustomerListComponent implements OnInit {
     this.customerService.saveCustomer(payload).subscribe({
       next: res => {
         this.isSaving.set(false);
-        this.showModal.set(false);
+        this.forceCloseModal();
         this.toastService.showSuccess(
           this.isEditMode() ? 'Customer Updated' : 'Customer Created',
-          res.message || `${form.companyName} saved successfully.`
+          res.message || `${payload.companyName} saved successfully.`
         );
-        this.loadCustomers();
+        this.customerGrid.load();
       },
       error: err => {
         this.isSaving.set(false);
@@ -539,7 +500,7 @@ export class CustomerListComponent implements OnInit {
   }
 
   /**
-   * Prompts user with delete confirmation modal.
+   * Prompts delete confirmation modal.
    */
   public promptDelete(customer: Customer): void {
     this.targetCustomer.set(customer);
@@ -547,7 +508,7 @@ export class CustomerListComponent implements OnInit {
   }
 
   /**
-   * Executes customer soft-delete upon confirmation.
+   * Executes customer soft-delete.
    */
   public executeDelete(): void {
     const customer = this.targetCustomer();
@@ -556,7 +517,7 @@ export class CustomerListComponent implements OnInit {
     const custId = typeof customer.id === 'string' ? parseInt(customer.id, 10) : customer.id;
 
     if (!custId || custId <= 0) {
-      this.customerService.customers.update(list => list.filter(c => c.code !== customer.code));
+      this.customerGrid.load();
       this.showDeleteModal.set(false);
       this.toastService.showSuccess('Customer Deleted', `${customer.companyName} removed.`);
       return;
@@ -568,7 +529,7 @@ export class CustomerListComponent implements OnInit {
         this.isSaving.set(false);
         this.showDeleteModal.set(false);
         this.toastService.showSuccess('Customer Deleted', res.message || `${customer.companyName} soft-deleted.`);
-        this.loadCustomers();
+        this.customerGrid.load();
       },
       error: err => {
         this.isSaving.set(false);
@@ -576,56 +537,5 @@ export class CustomerListComponent implements OnInit {
         this.toastService.showError('Delete Failed', errMsg);
       }
     });
-  }
-
-  /**
-   * Exports filtered & sorted customer directory to CSV.
-   */
-  public exportToCsv(): void {
-    const data = this.sortedData();
-    if (data.length === 0) {
-      this.toastService.showWarning('Export Warning', 'No customer records available to export.');
-      return;
-    }
-
-    const headers = [
-      'Customer Code',
-      'Company Name',
-      'Category',
-      'Email',
-      'Phone',
-      'City',
-      'Country',
-      'Tax / TRN Number',
-      'Total Contacts',
-      'Total Equipments',
-      'Active Work Orders'
-    ];
-
-    const rows = data.map(d => [
-      `"${d.code}"`,
-      `"${d.companyName}"`,
-      `"${d.customerCategoryName || 'Standard'}"`,
-      `"${d.email}"`,
-      `"${d.phone}"`,
-      `"${d.city}"`,
-      `"${d.country}"`,
-      `"${d.taxNumber || ''}"`,
-      d.totalContacts || 0,
-      d.totalEquipments || 0,
-      d.activeWorkOrders || 0
-    ]);
-
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `CaliBro_Customer_Master_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    this.toastService.showSuccess('Export Successful', `Exported ${data.length} customer records to CSV.`);
   }
 }

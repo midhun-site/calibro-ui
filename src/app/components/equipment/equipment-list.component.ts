@@ -1,11 +1,19 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
-import { ApiService } from '../../services/api.service';
-import { CustomerEquipment, EquipmentStatus } from '../../models/equipment.model';
+import { ItemService } from '../../services/item.service';
+import { LookupService } from '../../services/lookup.service';
 import { ToastService } from '../../services/toast.service';
+import { DataGridState } from '../../common/grid';
+import type { Item, SaveItemPayload } from '../../models/item.model';
+import type { LookupItem } from '../../models/lookup.model';
 
+/**
+ * Item Master (Stock Item) Component managing laboratory master instruments,
+ * spare parts, tools, server-side data grid, per-column filtering, sorting,
+ * numbered pagination, CSV export, and creation/editing modals with dirty state confirmation.
+ */
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
@@ -14,172 +22,286 @@ import { ToastService } from '../../services/toast.service';
   styleUrl: './equipment-list.component.css'
 })
 export class EquipmentListComponent implements OnInit {
-  private api = inject(ApiService);
+  private itemService = inject(ItemService);
+  private lookupService = inject(LookupService);
   private toastService = inject(ToastService);
-  public showCreateModal = false;
-  public Math = Math;
+  protected Math = Math;
 
-  public initialMockEquipments: CustomerEquipment[] = [
-    { id: '1', customerId: '1', customerName: 'EMARAT ALOULA CONTRACTING CO', assetTag: 'EQ-TEMP-002', name: 'Precision Temp Calibrator', serialNumber: 'SN-994012', category: 'Temperature', manufacturer: 'Fluke Calibration', model: 'Model-9142', location: 'Lab A - Dry Well', accuracySpec: '±0.05°C', measurementRange: '-25 to 660°C', calibrationIntervalMonths: 12, status: EquipmentStatus.Active, isOverdue: true },
-    { id: '2', customerId: '2', customerName: 'AeroSpace Tech LLC', assetTag: 'EQ-PRESS-005', name: 'Digital Pressure Gauge', serialNumber: 'SN-884100', category: 'Pressure', manufacturer: 'WIKA', model: 'CPG1500', location: 'Bench 3', accuracySpec: '0.025% FS', measurementRange: '0 to 10,000 PSI', calibrationIntervalMonths: 12, status: EquipmentStatus.Active, isOverdue: false },
-    { id: '3', customerId: '3', customerName: 'BioPharm Solutions', assetTag: 'EQ-TORQ-012', name: 'Digital Torque Wrench', serialNumber: 'SN-774911', category: 'Torque', manufacturer: 'Sturtevant Richmont', model: 'System4', location: 'Lab B', accuracySpec: '±1%', measurementRange: '10 to 1000 Nm', calibrationIntervalMonths: 6, status: EquipmentStatus.Active, isOverdue: false },
-    { id: '4', customerId: '4', customerName: 'Global Energy Ltd', assetTag: 'EQ-ELEC-018', name: 'Fluke 87V Industrial Multimeter', serialNumber: 'SN-665022', category: 'Electrical', manufacturer: 'Fluke', model: '87V', location: 'Mobile Bench', accuracySpec: '0.05%', measurementRange: '0 to 1000V AC/DC', calibrationIntervalMonths: 12, status: EquipmentStatus.Active, isOverdue: false },
-    { id: '5', customerId: '5', customerName: 'Precision Eng Co', assetTag: 'EQ-FLOW-009', name: 'Ultrasonic Flowmeter', serialNumber: 'SN-554109', category: 'Flow', manufacturer: 'Fuji Electric', model: 'FSC-2', location: 'Flow Rig', accuracySpec: '±0.5%', measurementRange: '0.1 to 30 m/s', calibrationIntervalMonths: 12, status: EquipmentStatus.Active, isOverdue: false },
-    { id: '6', customerId: '6', customerName: 'Gulf Marine Services', assetTag: 'EQ-MASS-003', name: 'Analytical Balance (0.01mg)', serialNumber: 'SN-443180', category: 'Mass', manufacturer: 'Mettler Toledo', model: 'XPR205', location: 'Balance Room', accuracySpec: '0.01 mg', measurementRange: '0 to 220g', calibrationIntervalMonths: 6, status: EquipmentStatus.Active, isOverdue: false },
-    { id: '7', customerId: '7', customerName: 'Apex Medical Labs', assetTag: 'EQ-DIM-014', name: 'Vernier Height Gauge (600mm)', serialNumber: 'SN-332901', category: 'Dimensional', manufacturer: 'Mitutoyo', model: '570-312', location: 'Inspection Room', accuracySpec: '±0.03mm', measurementRange: '0 to 600mm', calibrationIntervalMonths: 12, status: EquipmentStatus.Active, isOverdue: false },
-    { id: '8', customerId: '8', customerName: 'PetroChem Refineries', assetTag: 'EQ-GAS-022', name: '4-Gas Personal Monitor', serialNumber: 'SN-221094', category: 'Gas Safety', manufacturer: 'BW Honeywell', model: 'MicroClip XL', location: 'Safety Lab', accuracySpec: '±2% FS', measurementRange: 'O2, H2S, CO, LEL', calibrationIntervalMonths: 6, status: EquipmentStatus.InCalibration, isOverdue: false }
-  ];
-
-  public equipments = signal<CustomerEquipment[]>(this.initialMockEquipments);
-
-  public filters = signal<{ [key: string]: string }>({
-    assetTag: '', name: '', customerName: '', category: '', makeModel: '', serialNumber: '', interval: '', status: ''
+  // ── Database-Backed Server-Side DataGridState ───────────────────────────
+  public itemGrid = new DataGridState<Item>({
+    defaultSortColumn: 'itemCode',
+    defaultSortDirection: 'asc',
+    defaultPageSize: 10,
+    pageSizeOptions: [5, 10, 20, 50, 100],
+    columns: [
+      { header: 'Item Code', field: 'itemCode' },
+      { header: 'Item Name', field: 'itemName' },
+      { header: 'Model No', field: 'modelNo' },
+      { header: 'Units', field: 'unit' },
+      { header: 'Supplier', field: 'supplier' },
+      { header: 'Remarks', field: 'remarks' },
+      { header: 'Status', field: (i) => i.isActive ? 'ACTIVE' : 'INACTIVE' }
+    ],
+    fetchFn: (params) => this.itemService.getItems(params)
   });
 
-  public sortColumn = signal<string>('assetTag');
-  public sortDirection = signal<'asc' | 'desc'>('asc');
+  // Dynamic Units of measurement from Database Lookups API
+  public unitOfMeasures = this.lookupService.unitOfMeasures;
 
-  public currentPage = signal<number>(1);
-  public pageSize = signal<number>(5);
+  // Supplier reference list
+  public supplierOptions = signal<string[]>([
+    'SNAP-ON TOOLS INTERNATIONAL',
+    'Fluke Calibration',
+    'WIKA Instruments',
+    'Mitutoyo Corporation',
+    'Mettler Toledo',
+    'Fuji Electric',
+    'BW Honeywell',
+    'Sturtevant Richmont'
+  ]);
 
-  public filteredData = computed(() => {
-    const data = this.equipments();
-    const f = this.filters();
-    return data.filter(item => {
-      const makeModel = `${item.manufacturer} ${item.model}`.toLowerCase();
-      return (
-        (!f['assetTag'] || item.assetTag.toLowerCase().includes(f['assetTag'].toLowerCase())) &&
-        (!f['name'] || item.name.toLowerCase().includes(f['name'].toLowerCase())) &&
-        (!f['customerName'] || item.customerName.toLowerCase().includes(f['customerName'].toLowerCase())) &&
-        (!f['category'] || item.category.toLowerCase().includes(f['category'].toLowerCase())) &&
-        (!f['makeModel'] || makeModel.includes(f['makeModel'].toLowerCase())) &&
-        (!f['serialNumber'] || item.serialNumber.toLowerCase().includes(f['serialNumber'].toLowerCase())) &&
-        (!f['interval'] || item.calibrationIntervalMonths.toString().includes(f['interval']))
-      );
-    });
+  // Modal State
+  public showModal = signal<boolean>(false);
+  public isEditMode = signal<boolean>(false);
+  public showDeleteModal = signal<boolean>(false);
+  public targetItem = signal<Item | null>(null);
+  public isSaving = signal<boolean>(false);
+
+  // Validation & Dirty State Tracking
+  public formSubmitted = signal<boolean>(false);
+  public touchedFields = signal<{ [key: string]: boolean }>({});
+  public showUnsavedConfirmModal = signal<boolean>(false);
+  private initialFormSnapshot: string = '';
+
+  // Form Model State
+  public formItem = signal<SaveItemPayload>({
+    id: null,
+    itemCode: '',
+    itemName: '',
+    modelNo: '',
+    unit: 'No',
+    supplier: 'SNAP-ON TOOLS INTERNATIONAL',
+    remarks: '',
+    isActive: true
   });
 
-  public sortedData = computed(() => {
-    const data = [...this.filteredData()];
-    const col = this.sortColumn();
-    const dir = this.sortDirection();
-    return data.sort((a, b) => {
-      const valA = (a as any)[col] ?? '';
-      const valB = (b as any)[col] ?? '';
-      if (valA < valB) return dir === 'asc' ? -1 : 1;
-      if (valA > valB) return dir === 'asc' ? 1 : -1;
-      return 0;
-    });
-  });
+  // ── Lifecycle ────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.itemGrid.load();
+  }
 
-  public totalPages = computed(() => Math.ceil(this.sortedData().length / this.pageSize()) || 1);
+  // ── Dirty State & Confirmation Dialog ────────────────────────────────────
+  /**
+   * Captures snapshot of active form data to detect unsaved changes.
+   */
+  private captureInitialSnapshot(): void {
+    this.initialFormSnapshot = JSON.stringify(this.formItem());
+  }
 
-  public paginatedData = computed(() => {
-    const page = this.currentPage();
-    const size = this.pageSize();
-    const start = (page - 1) * size;
-    return this.sortedData().slice(start, start + size);
-  });
+  /**
+   * Checks whether form data has been altered.
+   */
+  public isFormDirty(): boolean {
+    if (!this.initialFormSnapshot) return false;
+    return this.initialFormSnapshot !== JSON.stringify(this.formItem());
+  }
 
-  public pageNumbers = computed(() => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: (number | string)[] = [];
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
+  /**
+   * Intercepts modal close to prompt confirmation if unsaved changes exist.
+   */
+  public requestCloseModal(): void {
+    if (this.isFormDirty()) {
+      this.showUnsavedConfirmModal.set(true);
     } else {
-      pages.push(1);
-      if (current > 3) pages.push('...');
-      const start = Math.max(2, current - 1);
-      const end = Math.min(total - 1, current + 1);
-      for (let i = start; i <= end; i++) pages.push(i);
-      if (current < total - 2) pages.push('...');
-      pages.push(total);
+      this.forceCloseModal();
     }
-    return pages;
-  });
+  }
 
-  public newEq: CustomerEquipment = {
-    id: '0', customerId: '1', customerName: 'AeroSpace Tech LLC', assetTag: '', name: '', serialNumber: '', category: 'Pressure', manufacturer: '', model: '', location: 'Lab A', accuracySpec: '', measurementRange: '', calibrationIntervalMonths: 12, status: EquipmentStatus.Active, isOverdue: false
-  };
+  /**
+   * Discards changes and closes modal.
+   */
+  public discardAndClose(): void {
+    this.showUnsavedConfirmModal.set(false);
+    this.forceCloseModal();
+  }
 
-  ngOnInit() {
-    this.api.getEquipments().subscribe({
-      next: data => {
-        if (data && data.length > 0) this.equipments.set(data);
+  /**
+   * Dismisses unsaved confirmation dialog to continue editing.
+   */
+  public keepEditing(): void {
+    this.showUnsavedConfirmModal.set(false);
+  }
+
+  /**
+   * Resets form state and closes modal.
+   */
+  private forceCloseModal(): void {
+    this.showModal.set(false);
+    this.formSubmitted.set(false);
+    this.touchedFields.set({});
+    this.initialFormSnapshot = '';
+  }
+
+  // ── Validation Helpers ───────────────────────────────────────────────────
+  public markFieldTouched(fieldName: string): void {
+    this.touchedFields.update(t => ({ ...t, [fieldName]: true }));
+  }
+
+  public isFieldInvalid(fieldName: string): boolean {
+    const isTouched = this.touchedFields()[fieldName] || this.formSubmitted();
+    if (!isTouched) return false;
+
+    const form = this.formItem();
+    switch (fieldName) {
+      case 'itemName':
+        return !form.itemName || !form.itemName.trim();
+      default:
+        return false;
+    }
+  }
+
+  public getFieldError(fieldName: string): string {
+    const form = this.formItem();
+    switch (fieldName) {
+      case 'itemName':
+        return (!form.itemName || !form.itemName.trim()) ? 'Item Name is required.' : '';
+      default:
+        return '';
+    }
+  }
+
+  // ── CRUD Handlers ────────────────────────────────────────────────────────
+  /**
+   * Opens modal to create a new stock item.
+   */
+  public openAddModal(): void {
+    this.isEditMode.set(false);
+    this.formSubmitted.set(false);
+    this.touchedFields.set({});
+
+    this.formItem.set({
+      id: null,
+      itemCode: '',
+      itemName: '',
+      modelNo: '',
+      unit: 'No',
+      supplier: 'SNAP-ON TOOLS INTERNATIONAL',
+      remarks: '',
+      isActive: true
+    });
+
+    this.captureInitialSnapshot();
+
+    // Lazy load Units of Measure from Lookup API
+    this.lookupService.ensureUnitOfMeasuresLoaded(units => {
+      if (units && units.length > 0 && !this.formItem().unit) {
+        this.formItem.update(f => ({ ...f, unit: units[0].name }));
+        this.captureInitialSnapshot();
+      }
+    });
+
+    // Fetch next sequential code from API
+    this.itemService.getNextItemCode().subscribe({
+      next: res => {
+        if (res && res.itemCode) {
+          this.formItem.update(f => ({ ...f, itemCode: res.itemCode }));
+          this.captureInitialSnapshot();
+        }
       },
       error: () => {}
     });
+
+    this.showModal.set(true);
   }
 
-  updateFilter(col: string, val: string) {
-    this.filters.update(f => ({ ...f, [col]: val }));
-    this.currentPage.set(1);
-  }
+  /**
+   * Opens modal to edit an existing stock item.
+   */
+  public openEditModal(item: Item): void {
+    this.isEditMode.set(true);
+    this.formSubmitted.set(false);
+    this.touchedFields.set({});
+    this.targetItem.set(item);
 
-  toggleSort(col: string) {
-    if (this.sortColumn() === col) {
-      this.sortDirection.update(d => d === 'asc' ? 'desc' : 'asc');
-    } else {
-      this.sortColumn.set(col);
-      this.sortDirection.set('asc');
-    }
-  }
-
-  getSortIcon(col: string): string {
-    if (this.sortColumn() !== col) return 'pi-sort-alt';
-    return this.sortDirection() === 'asc' ? 'pi-sort-amount-up-alt text-cyan' : 'pi-sort-amount-down text-cyan';
-  }
-
-  goToPage(p: number) {
-    if (p >= 1 && p <= this.totalPages()) this.currentPage.set(p);
-  }
-
-  prevPage() {
-    if (this.currentPage() > 1) this.currentPage.update(p => p - 1);
-  }
-
-  nextPage() {
-    if (this.currentPage() < this.totalPages()) this.currentPage.update(p => p + 1);
-  }
-
-  exportToCsv() {
-    const data = this.sortedData();
-    if (data.length === 0) {
-      this.toastService.showWarning('Export Error', 'No data available to export.');
-      return;
-    }
-    let csvContent = 'Asset Tag,Instrument Name,Customer,Category,Manufacturer,Model,Serial No,Interval Months,Is Overdue\n';
-    data.forEach(row => {
-      csvContent += `"${row.assetTag}","${row.name}","${row.customerName}","${row.category}","${row.manufacturer}","${row.model}","${row.serialNumber}","${row.calibrationIntervalMonths}","${row.isOverdue}"\n`;
+    this.formItem.set({
+      id: item.id,
+      itemCode: item.itemCode,
+      itemName: item.itemName,
+      modelNo: item.modelNo || '',
+      unit: item.unit || 'No',
+      supplier: item.supplier || 'SNAP-ON TOOLS INTERNATIONAL',
+      remarks: item.remarks || '',
+      isActive: item.isActive
     });
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `CaliBro_Equipment_Inventory_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    this.toastService.showSuccess('Export Successful', `Exported ${data.length} records to CSV.`);
+
+    this.captureInitialSnapshot();
+
+    // Lazy load Units of Measure from Lookup API
+    this.lookupService.ensureUnitOfMeasuresLoaded();
+
+    this.showModal.set(true);
   }
 
-  saveEquipment() {
-    if (!this.newEq.assetTag || !this.newEq.name) {
-      this.toastService.showWarning('Validation Warning', 'Please provide Asset Tag and Instrument Name.');
+  /**
+   * Persists new or modified item to PostgreSQL database.
+   */
+  public saveItem(): void {
+    this.formSubmitted.set(true);
+
+    if (this.isFieldInvalid('itemName')) {
+      this.toastService.showWarning('Validation Required', 'Please provide an Item Name.');
       return;
     }
 
-    const created: CustomerEquipment = { ...this.newEq, id: String(Date.now()) };
-    this.equipments.update(list => [created, ...list]);
-    this.showCreateModal = false;
-    this.toastService.showSuccess('Instrument Registered', `Asset ${this.newEq.assetTag} saved to calibration inventory.`);
-    this.resetForm();
+    const payload = this.formItem();
+    this.isSaving.set(true);
+
+    this.itemService.saveItem(payload).subscribe({
+      next: res => {
+        this.isSaving.set(false);
+        this.forceCloseModal();
+        this.toastService.showSuccess(
+          this.isEditMode() ? 'Stock Item Updated' : 'Stock Item Created',
+          res.message || `${payload.itemName} saved successfully.`
+        );
+        this.itemGrid.load();
+      },
+      error: err => {
+        this.isSaving.set(false);
+        const msg = err.error?.detail || err.error?.message || err.message || 'Failed to save stock item.';
+        this.toastService.showError('Save Failed', msg);
+      }
+    });
   }
 
-  resetForm() {
-    this.newEq = {
-      id: '0', customerId: '1', customerName: 'AeroSpace Tech LLC', assetTag: '', name: '', serialNumber: '', category: 'Pressure', manufacturer: '', model: '', location: 'Lab A', accuracySpec: '', measurementRange: '', calibrationIntervalMonths: 12, status: EquipmentStatus.Active, isOverdue: false
-    };
+  /**
+   * Prompts delete confirmation modal.
+   */
+  public promptDelete(item: Item): void {
+    this.targetItem.set(item);
+    this.showDeleteModal.set(true);
+  }
+
+  /**
+   * Executes soft-delete on the target item.
+   */
+  public executeDelete(): void {
+    const item = this.targetItem();
+    if (!item) return;
+
+    this.isSaving.set(true);
+    this.itemService.deleteItem(item.id).subscribe({
+      next: () => {
+        this.isSaving.set(false);
+        this.showDeleteModal.set(false);
+        this.toastService.showSuccess('Stock Item Deleted', `${item.itemName} removed.`);
+        this.itemGrid.load();
+      },
+      error: err => {
+        this.isSaving.set(false);
+        const msg = err.error?.detail || err.error?.message || 'Failed to delete stock item.';
+        this.toastService.showError('Delete Failed', msg);
+      }
+    });
   }
 }

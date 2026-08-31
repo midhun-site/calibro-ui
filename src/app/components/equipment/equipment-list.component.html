@@ -1,100 +1,184 @@
 <div class="page-container">
+  <!-- Page Header -->
   <div class="page-header">
     <div>
-      <h2>Customer Equipments & Master Assets</h2>
-      <p class="subtitle">Track Equipment Inventory & ISO 17025 Calibration Schedules</p>
+      <h2>Item Master</h2>
+      <p class="subtitle">Inventory Stock Items, Master Calibration Standards & Consumables</p>
     </div>
     <div class="header-actions">
-      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
+      <button class="btn-secondary" (click)="itemGrid.exportCsv('CaliBro_Stock_Items')" title="Export Grid Data to CSV">
         <i class="pi pi-download text-cyan"></i> Export CSV
       </button>
-      <button class="btn-primary" (click)="showCreateModal = true">
-        <i class="pi pi-plus"></i> Register Instrument
+      <button class="btn-primary" (click)="openAddModal()">
+        <i class="pi pi-plus"></i> New Stock Item
       </button>
     </div>
   </div>
 
+  <!-- Data Grid Card -->
   <div class="glass-card table-card">
     <div class="table-responsive">
       <table class="data-table">
         <thead>
           <tr>
-            <th (click)="toggleSort('assetTag')" class="sortable-header">
-              Asset Tag <i class="pi" [ngClass]="getSortIcon('assetTag')"></i>
+            <th (click)="itemGrid.toggleSort('itemCode')" class="sortable-header">
+              Item Code <i class="pi" [ngClass]="itemGrid.getSortIcon('itemCode')"></i>
             </th>
-            <th (click)="toggleSort('name')" class="sortable-header">
-              Instrument Name <i class="pi" [ngClass]="getSortIcon('name')"></i>
+            <th (click)="itemGrid.toggleSort('itemName')" class="sortable-header">
+              Item Name <i class="pi" [ngClass]="itemGrid.getSortIcon('itemName')"></i>
             </th>
-            <th (click)="toggleSort('customerName')" class="sortable-header">
-              Customer <i class="pi" [ngClass]="getSortIcon('customerName')"></i>
+            <th (click)="itemGrid.toggleSort('modelNo')" class="sortable-header">
+              Model No <i class="pi" [ngClass]="itemGrid.getSortIcon('modelNo')"></i>
             </th>
-            <th (click)="toggleSort('category')" class="sortable-header">
-              Category <i class="pi" [ngClass]="getSortIcon('category')"></i>
+            <th (click)="itemGrid.toggleSort('unit')" class="sortable-header">
+              Units <i class="pi" [ngClass]="itemGrid.getSortIcon('unit')"></i>
             </th>
-            <th (click)="toggleSort('manufacturer')" class="sortable-header">
-              Make / Model <i class="pi" [ngClass]="getSortIcon('manufacturer')"></i>
+            <th (click)="itemGrid.toggleSort('supplier')" class="sortable-header">
+              Supplier <i class="pi" [ngClass]="itemGrid.getSortIcon('supplier')"></i>
             </th>
-            <th (click)="toggleSort('serialNumber')" class="sortable-header">
-              Serial No <i class="pi" [ngClass]="getSortIcon('serialNumber')"></i>
+            <th (click)="itemGrid.toggleSort('remarks')" class="sortable-header">
+              Remarks <i class="pi" [ngClass]="itemGrid.getSortIcon('remarks')"></i>
             </th>
-            <th (click)="toggleSort('calibrationIntervalMonths')" class="sortable-header">
-              Interval <i class="pi" [ngClass]="getSortIcon('calibrationIntervalMonths')"></i>
-            </th>
-            <th (click)="toggleSort('status')" class="sortable-header">
-              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
-            </th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Actions</th>
           </tr>
+          <!-- Per-Column Search Filter Row -->
           <tr class="filter-row">
             <td>
-              <input type="text" pInputText [ngModel]="filters()['assetTag']" (ngModelChange)="updateFilter('assetTag', $event)" placeholder="Search Tag..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="itemGrid.columnFilters()['itemCode'] || ''"
+                (ngModelChange)="itemGrid.updateFilter('itemCode', $event)"
+                (keydown.enter)="itemGrid.applyFilter()"
+                (blur)="itemGrid.applyFilter()"
+                placeholder="Search Code..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['name']" (ngModelChange)="updateFilter('name', $event)" placeholder="Filter Name..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="itemGrid.columnFilters()['itemName'] || ''"
+                (ngModelChange)="itemGrid.updateFilter('itemName', $event)"
+                (keydown.enter)="itemGrid.applyFilter()"
+                (blur)="itemGrid.applyFilter()"
+                placeholder="Filter Name..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['customerName']" (ngModelChange)="updateFilter('customerName', $event)" placeholder="Filter Customer..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="itemGrid.columnFilters()['modelNo'] || ''"
+                (ngModelChange)="itemGrid.updateFilter('modelNo', $event)"
+                (keydown.enter)="itemGrid.applyFilter()"
+                (blur)="itemGrid.applyFilter()"
+                placeholder="Filter Model..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['category']" (ngModelChange)="updateFilter('category', $event)" placeholder="Filter Category..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="itemGrid.columnFilters()['unit'] || ''"
+                (ngModelChange)="itemGrid.updateFilter('unit', $event)"
+                (keydown.enter)="itemGrid.applyFilter()"
+                (blur)="itemGrid.applyFilter()"
+                placeholder="Filter Unit..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['makeModel']" (ngModelChange)="updateFilter('makeModel', $event)" placeholder="Filter Make/Model..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="itemGrid.columnFilters()['supplier'] || ''"
+                (ngModelChange)="itemGrid.updateFilter('supplier', $event)"
+                (keydown.enter)="itemGrid.applyFilter()"
+                (blur)="itemGrid.applyFilter()"
+                placeholder="Filter Supplier..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['serialNumber']" (ngModelChange)="updateFilter('serialNumber', $event)" placeholder="Filter Serial..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="itemGrid.columnFilters()['remarks'] || ''"
+                (ngModelChange)="itemGrid.updateFilter('remarks', $event)"
+                (keydown.enter)="itemGrid.applyFilter()"
+                (blur)="itemGrid.applyFilter()"
+                placeholder="Filter Remarks..."
+                class="filter-input"
+              />
             </td>
-            <td>
-              <input type="text" pInputText [ngModel]="filters()['interval']" (ngModelChange)="updateFilter('interval', $event)" placeholder="Filter Months..." class="filter-input" />
-            </td>
-            <td>
-              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
-            </td>
+            <td></td>
+            <td></td>
           </tr>
         </thead>
         <tbody>
-          @for (item of paginatedData(); track item.assetTag) {
+          @for (item of itemGrid.items(); track item.id) {
             <tr>
-              <td><span class="code-badge">{{ item.assetTag }}</span></td>
-              <td><strong style="color: var(--text-main);">{{ item.name }}</strong></td>
-              <td>{{ item.customerName }}</td>
-              <td><span class="code-badge" style="color: var(--accent-cyan);">{{ item.category }}</span></td>
-              <td>{{ item.manufacturer }} {{ item.model }}</td>
-              <td>{{ item.serialNumber }}</td>
-              <td>{{ item.calibrationIntervalMonths }} Months</td>
               <td>
-                @if (item.isOverdue) {
-                  <span class="p-tag p-tag-danger"><i class="pi pi-exclamation-triangle"></i> OVERDUE</span>
-                } @else if (item.status === 1) {
-                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> ACTIVE</span>
+                <span class="code-badge">{{ item.itemCode }}</span>
+              </td>
+              <td>
+                <strong class="item-title">{{ item.itemName }}</strong>
+              </td>
+              <td>
+                {{ item.modelNo || '-' }}
+              </td>
+              <td>
+                <span class="unit-pill">{{ item.unit || '-' }}</span>
+              </td>
+              <td>
+                <span class="supplier-text"><i class="pi pi-building text-cyan"></i> {{ item.supplier || '-' }}</span>
+              </td>
+              <td>
+                <span class="remarks-text" [title]="item.remarks || ''">{{ item.remarks || '-' }}</span>
+              </td>
+              <td class="text-center">
+                @if (item.isActive) {
+                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> Active</span>
                 } @else {
-                  <span class="p-tag p-tag-warning"><i class="pi pi-spin pi-cog"></i> IN CALIBRATION</span>
+                  <span class="p-tag p-tag-danger"><i class="pi pi-ban"></i> Inactive</span>
                 }
+              </td>
+              <td class="text-center">
+                <div class="action-buttons">
+                  <button class="btn-icon edit-btn" (click)="openEditModal(item)" title="Edit Stock Item">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn-icon delete-btn" (click)="promptDelete(item)" title="Delete Stock Item">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="8" class="text-center py-4" style="color: var(--text-muted);">
-                No equipment records match the current filters.
+              <td colspan="8" class="empty-state-cell">
+                <div class="empty-state-container">
+                  <div class="empty-icon-circle">
+                    <i class="pi pi-box"></i>
+                  </div>
+                  <h4 class="empty-state-title">No Stock Items Found</h4>
+                  <p class="empty-state-subtitle">
+                    No items match your active search filters or no stock records have been added yet.
+                  </p>
+                  <div class="empty-state-actions">
+                    <button class="btn-secondary btn-sm" (click)="itemGrid.clearFilter()">
+                      <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                    </button>
+                    <button class="btn-primary btn-sm" (click)="openAddModal()">
+                      <i class="pi pi-plus"></i> Add New Item
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
           }
@@ -105,79 +189,217 @@
     <!-- Numbered Pagination Footer -->
     <div class="table-paginator">
       <div class="paginator-info">
-        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+        Showing {{ itemGrid.showingFrom() }} to {{ itemGrid.showingTo() }} of {{ itemGrid.totalCount() }} entries
       </div>
       <div class="paginator-controls">
-        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+        <button class="paginator-btn" [disabled]="itemGrid.currentPage() === 1" (click)="itemGrid.prevPage()" title="Previous Page">
           <i class="pi pi-chevron-left"></i>
         </button>
 
         <div class="page-numbers">
-          @for (p of pageNumbers(); track $index) {
+          @for (p of itemGrid.pageNumbers(); track $index) {
             @if (p === '...') {
               <span class="ellipsis">...</span>
             } @else {
-              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+              <button class="page-number-btn" [class.active]="p === itemGrid.currentPage()" (click)="itemGrid.goToPage(p)">
                 {{ p }}
               </button>
             }
           }
         </div>
 
-        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+        <button class="paginator-btn" [disabled]="itemGrid.currentPage() >= itemGrid.totalPages()" (click)="itemGrid.nextPage()" title="Next Page">
           <i class="pi pi-chevron-right"></i>
         </button>
       </div>
     </div>
   </div>
 
-  @if (showCreateModal) {
-    <div class="modal-overlay" (click)="showCreateModal = false">
-      <div class="modal-card" (click)="$event.stopPropagation()">
+  <!-- Create / Edit Stock Item Modal (CaliBro Theme) -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="requestCloseModal()">
+      <div class="modal-card stock-item-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Register New Customer Equipment</h3>
-          <button class="modal-close-btn" (click)="showCreateModal = false">
+          <div class="modal-title-wrap">
+            <i class="pi pi-cog text-cyan"></i>
+            <h3>{{ isEditMode() ? 'Update Stock Item' : 'Register New Stock Item' }}</h3>
+          </div>
+          <button class="modal-close-btn" (click)="requestCloseModal()" title="Close Dialog">
             <i class="pi pi-times"></i>
           </button>
         </div>
+
         <div class="modal-body">
+          <div class="section-title">
+            <i class="pi pi-box"></i> Item Specification
+          </div>
+
           <div class="form-grid">
+            <!-- ItemCode -->
             <div class="form-group">
-              <label>Asset Tag</label>
-              <input type="text" pInputText [(ngModel)]="newEq.assetTag" placeholder="e.g. EQ-TEMP-009" />
+              <label>Item Code</label>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="formItem().itemCode"
+                placeholder="e.g. QRS2750388"
+                (blur)="markFieldTouched('itemCode')"
+              />
             </div>
+
+            <!-- ItemName -->
             <div class="form-group">
-              <label>Instrument Name</label>
-              <input type="text" pInputText [(ngModel)]="newEq.name" placeholder="e.g. Precision Temp Calibrator" />
+              <label>Item Name <span class="req">*</span></label>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="formItem().itemName"
+                placeholder="e.g. Rivet, Indicator"
+                [class.input-invalid]="isFieldInvalid('itemName')"
+                (blur)="markFieldTouched('itemName')"
+              />
+              @if (isFieldInvalid('itemName')) {
+                <div class="validation-label">
+                  <i class="pi pi-exclamation-circle"></i> {{ getFieldError('itemName') }}
+                </div>
+              }
             </div>
+
+            <!-- Model No -->
             <div class="form-group">
-              <label>Category</label>
-              <select class="form-select" [(ngModel)]="newEq.category">
-                <option value="Pressure">Pressure</option>
-                <option value="Temperature">Temperature</option>
-                <option value="Electrical">Electrical</option>
-                <option value="Dimensional">Dimensional</option>
-                <option value="Torque">Torque</option>
-                <option value="Mass">Mass</option>
+              <label>Model No</label>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="formItem().modelNo"
+                placeholder="e.g. IND-RIV-01"
+              />
+            </div>
+
+            <!-- Units -->
+            <div class="form-group">
+              <label>Units</label>
+              <select
+                class="form-select"
+                [(ngModel)]="formItem().unit"
+              >
+                <option [value]="''">-- Select Unit --</option>
+                @for (u of unitOfMeasures(); track u.id) {
+                  <option [value]="u.name">{{ u.name }}</option>
+                }
               </select>
             </div>
-            <div class="form-group">
-              <label>Manufacturer</label>
-              <input type="text" pInputText [(ngModel)]="newEq.manufacturer" placeholder="e.g. Fluke Calibration" />
+
+            <!-- Supplier -->
+            <div class="form-group full-span">
+              <label>Supplier / Manufacturer</label>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="formItem().supplier"
+                list="supplierListOptions"
+                placeholder="e.g. SNAP-ON TOOLS INTERNATIONAL"
+              />
+              <datalist id="supplierListOptions">
+                @for (s of supplierOptions(); track s) {
+                  <option [value]="s"></option>
+                }
+              </datalist>
             </div>
-            <div class="form-group">
-              <label>Model Number</label>
-              <input type="text" pInputText [(ngModel)]="newEq.model" placeholder="e.g. Model-9142" />
+
+            <!-- Remarks -->
+            <div class="form-group full-span">
+              <label>Remarks</label>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="formItem().remarks"
+                placeholder="Additional notes or specifications..."
+              />
             </div>
-            <div class="form-group">
-              <label>Serial Number</label>
-              <input type="text" pInputText [(ngModel)]="newEq.serialNumber" placeholder="SN-994012" />
+
+            <!-- Active Checkbox -->
+            <div class="full-span checkbox-row">
+              <label class="checkbox-inline">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="formItem().isActive"
+                />
+                <span>Active Stock Item</span>
+              </label>
             </div>
           </div>
         </div>
+
         <div class="modal-footer">
-          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
-          <button class="btn-primary" (click)="saveEquipment()">Save Instrument</button>
+          <button class="btn-secondary" (click)="requestCloseModal()">
+            Cancel
+          </button>
+          <button
+            class="btn-primary"
+            [disabled]="isSaving()"
+            (click)="saveItem()"
+          >
+            @if (isSaving()) {
+              <i class="pi pi-spin pi-spinner"></i> Saving...
+            } @else {
+              <i class="pi pi-check"></i> {{ isEditMode() ? 'Update Item' : 'Save Item' }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Unsaved Changes Confirmation Modal -->
+  @if (showUnsavedConfirmModal()) {
+    <div class="modal-overlay confirm-overlay" (click)="keepEditing()">
+      <div class="modal-card unsaved-modal-card" (click)="$event.stopPropagation()">
+        <div class="confirm-header">
+          <div class="warning-icon-badge">
+            <i class="pi pi-exclamation-triangle"></i>
+          </div>
+          <div class="confirm-title-box">
+            <h4>Unsaved Changes</h4>
+            <p>You have unsaved changes in this form. Are you sure you want to discard them?</p>
+          </div>
+        </div>
+        <div class="confirm-footer">
+          <button class="btn-secondary" (click)="keepEditing()">
+            Keep Editing
+          </button>
+          <button class="btn-danger" (click)="discardAndClose()">
+            Discard Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Delete Confirmation Modal -->
+  @if (showDeleteModal()) {
+    <div class="modal-overlay confirm-overlay" (click)="showDeleteModal.set(false)">
+      <div class="modal-card unsaved-modal-card" (click)="$event.stopPropagation()">
+        <div class="confirm-header">
+          <div class="danger-icon-badge">
+            <i class="pi pi-trash"></i>
+          </div>
+          <div class="confirm-title-box">
+            <h4>Delete Stock Item</h4>
+            <p>Are you sure you want to delete <strong>{{ targetItem()?.itemName }}</strong> ({{ targetItem()?.itemCode }})? This action will soft-delete the record.</p>
+          </div>
+        </div>
+        <div class="confirm-footer">
+          <button class="btn-secondary" (click)="showDeleteModal.set(false)">
+            Cancel
+          </button>
+          <button class="btn-danger" [disabled]="isSaving()" (click)="executeDelete()">
+            @if (isSaving()) {
+              <i class="pi pi-spin pi-spinner"></i> Deleting...
+            } @else {
+              Delete Item
+            }
+          </button>
         </div>
       </div>
     </div>

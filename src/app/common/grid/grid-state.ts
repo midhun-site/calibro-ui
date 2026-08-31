@@ -276,7 +276,8 @@ export class DataGridState<T> {
   public getQueryParams(): GridQueryParams {
     const params: GridQueryParams = {
       pageNumber: this.currentPage(),
-      pageSize: this.pageSize()
+      pageSize: this.pageSize(),
+      columnFilters: { ...this.columnFilters() }
     };
 
     if (this.searchTerm()) params.searchTerm = this.searchTerm();
@@ -287,7 +288,7 @@ export class DataGridState<T> {
 
     const filters = this.columnFilters();
     for (const key of Object.keys(filters)) {
-      if (filters[key]) {
+      if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') {
         params[key] = filters[key];
       }
     }
