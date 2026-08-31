@@ -32,7 +32,7 @@ export class DataGridState<T> {
   public sortDirection = signal<'asc' | 'desc'>('asc');
   public searchTerm = signal<string>('');
   public columnFilters = signal<Record<string, string>>({});
-  public isLoading = signal<boolean>(false);
+  public isLoading = signal<boolean>(true);
   public executionTimeMs = signal<number>(0);
 
   // Configuration

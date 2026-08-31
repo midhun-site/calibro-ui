@@ -70,77 +70,88 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of grid.items(); track item.enquiryNo) {
+          @if (grid.isLoading()) {
             <tr>
-              <td><span class="code-badge">{{ item.enquiryNo }}</span></td>
-              <td><strong style="color: var(--text-main);">{{ item.customer }}</strong></td>
-              <td>{{ item.receivedDate }}</td>
-              <td>{{ item.instrumentsCount }}</td>
-              <td>{{ item.serviceType }}</td>
-              <td>
-                @if (item.status === 'OPEN') {
-                  <span class="p-tag p-tag-info"><i class="pi pi-clock"></i> OPEN</span>
-                } @else if (item.status === 'QUOTED') {
-                  <span class="p-tag p-tag-warning"><i class="pi pi-file-edit"></i> QUOTED</span>
-                } @else if (item.status === 'APPROVED') {
-                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> APPROVED</span>
-                } @else if (item.status === 'COMPLETED') {
-                  <span class="p-tag p-tag-success"><i class="pi pi-verified"></i> COMPLETED</span>
-                } @else if (item.status === 'CANCELLED') {
-                  <span class="p-tag p-tag-danger"><i class="pi pi-times-circle"></i> CANCELLED</span>
-                }
+              <td colspan="7" class="grid-loading-cell">
+                <div class="grid-loading-container">
+                  <i class="pi pi-spin pi-spinner grid-loading-spinner"></i>
+                  <span class="grid-loading-text">Loading calibration enquiries...</span>
+                </div>
               </td>
-              <td class="text-center action-col-cell">
-                <div class="actions-dropdown-wrapper">
-                  <button class="action-dropdown-btn" (click)="toggleActionMenu(item.enquiryNo, $event)" title="Click for options">
-                    <i class="pi pi-ellipsis-v"></i> Actions <i class="pi pi-chevron-down text-xs"></i>
-                  </button>
+            </tr>
+          } @else {
+            @for (item of grid.items(); track item.enquiryNo) {
+              <tr>
+                <td><span class="code-badge">{{ item.enquiryNo }}</span></td>
+                <td><strong style="color: var(--text-main);">{{ item.customer }}</strong></td>
+                <td>{{ item.receivedDate }}</td>
+                <td>{{ item.instrumentsCount }}</td>
+                <td>{{ item.serviceType }}</td>
+                <td>
+                  @if (item.status === 'OPEN') {
+                    <span class="p-tag p-tag-info"><i class="pi pi-clock"></i> OPEN</span>
+                  } @else if (item.status === 'QUOTED') {
+                    <span class="p-tag p-tag-warning"><i class="pi pi-file-edit"></i> QUOTED</span>
+                  } @else if (item.status === 'APPROVED') {
+                    <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> APPROVED</span>
+                  } @else if (item.status === 'COMPLETED') {
+                    <span class="p-tag p-tag-success"><i class="pi pi-verified"></i> COMPLETED</span>
+                  } @else if (item.status === 'CANCELLED') {
+                    <span class="p-tag p-tag-danger"><i class="pi pi-times-circle"></i> CANCELLED</span>
+                  }
+                </td>
+                <td class="text-center action-col-cell">
+                  <div class="actions-dropdown-wrapper">
+                    <button class="action-dropdown-btn" (click)="toggleActionMenu(item.enquiryNo, $event)" title="Click for options">
+                      <i class="pi pi-ellipsis-v"></i> Actions <i class="pi pi-chevron-down text-xs"></i>
+                    </button>
 
-                  @if (activeActionMenu() === item.enquiryNo) {
-                    <div class="action-popover-menu" (click)="$event.stopPropagation()">
-                      <button class="action-menu-item" (click)="viewEnquiry(item)">
-                        <i class="pi pi-eye text-blue"></i> View Details
+                    @if (activeActionMenu() === item.enquiryNo) {
+                      <div class="action-popover-menu" (click)="$event.stopPropagation()">
+                        <button class="action-menu-item" (click)="viewEnquiry(item)">
+                          <i class="pi pi-eye text-blue"></i> View Details
+                        </button>
+                        <button class="action-menu-item" (click)="editEnquiry(item)">
+                          <i class="pi pi-pencil text-amber"></i> Edit Enquiry
+                        </button>
+                        <button class="action-menu-item" (click)="printEnquiry(item)">
+                          <i class="pi pi-print text-cyan"></i> Print Preview
+                        </button>
+                        <button class="action-menu-item" (click)="openHistory(item)">
+                          <i class="pi pi-history text-cyan"></i> History & Audit
+                        </button>
+                        <div class="menu-divider"></div>
+                        <button class="action-menu-item danger" (click)="deleteEnquiry(item)">
+                          <i class="pi pi-trash"></i> Delete Enquiry
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty-state-cell">
+                  <div class="empty-state-container">
+                    <div class="empty-icon-circle">
+                      <i class="pi pi-envelope"></i>
+                    </div>
+                    <h4 class="empty-state-title">No Calibration Enquiries Found</h4>
+                    <p class="empty-state-subtitle">
+                      No customer enquiry records match your active search filters or no enquiries have been logged yet.
+                    </p>
+                    <div class="empty-state-actions">
+                      <button class="btn-secondary btn-sm" (click)="grid.clearFilter()">
+                        <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
                       </button>
-                      <button class="action-menu-item" (click)="editEnquiry(item)">
-                        <i class="pi pi-pencil text-amber"></i> Edit Enquiry
-                      </button>
-                      <button class="action-menu-item" (click)="printEnquiry(item)">
-                        <i class="pi pi-print text-cyan"></i> Print Preview
-                      </button>
-                      <button class="action-menu-item" (click)="openHistory(item)">
-                        <i class="pi pi-history text-cyan"></i> History & Audit
-                      </button>
-                      <div class="menu-divider"></div>
-                      <button class="action-menu-item danger" (click)="deleteEnquiry(item)">
-                        <i class="pi pi-trash"></i> Delete Enquiry
+                      <button class="btn-primary btn-sm" (click)="createNewEnquiryPage()">
+                        <i class="pi pi-plus"></i> New Enquiry
                       </button>
                     </div>
-                  }
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="7" class="empty-state-cell">
-                <div class="empty-state-container">
-                  <div class="empty-icon-circle">
-                    <i class="pi pi-envelope"></i>
                   </div>
-                  <h4 class="empty-state-title">No Calibration Enquiries Found</h4>
-                  <p class="empty-state-subtitle">
-                    No customer enquiry records match your active search filters or no enquiries have been logged yet.
-                  </p>
-                  <div class="empty-state-actions">
-                    <button class="btn-secondary btn-sm" (click)="grid.clearFilter()">
-                      <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
-                    </button>
-                    <button class="btn-primary btn-sm" (click)="createNewEnquiryPage()">
-                      <i class="pi pi-plus"></i> New Enquiry
-                    </button>
-                  </div>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>

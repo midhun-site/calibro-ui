@@ -121,66 +121,77 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of itemGrid.items(); track item.id) {
+          @if (itemGrid.isLoading()) {
             <tr>
-              <td>
-                <span class="code-badge">{{ item.itemCode }}</span>
-              </td>
-              <td>
-                <strong class="item-title">{{ item.itemName }}</strong>
-              </td>
-              <td>
-                {{ item.modelNo || '-' }}
-              </td>
-              <td>
-                <span class="unit-pill">{{ item.unit || '-' }}</span>
-              </td>
-              <td>
-                <span class="supplier-text"><i class="pi pi-building text-cyan"></i> {{ item.supplier || '-' }}</span>
-              </td>
-              <td>
-                <span class="remarks-text" [title]="item.remarks || ''">{{ item.remarks || '-' }}</span>
-              </td>
-              <td class="text-center">
-                @if (item.isActive) {
-                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> Active</span>
-                } @else {
-                  <span class="p-tag p-tag-danger"><i class="pi pi-ban"></i> Inactive</span>
-                }
-              </td>
-              <td class="text-center">
-                <div class="action-buttons">
-                  <button class="btn-icon edit-btn" (click)="openEditModal(item)" title="Edit Stock Item">
-                    <i class="pi pi-pencil"></i>
-                  </button>
-                  <button class="btn-icon delete-btn" (click)="promptDelete(item)" title="Delete Stock Item">
-                    <i class="pi pi-trash"></i>
-                  </button>
+              <td colspan="8" class="grid-loading-cell">
+                <div class="grid-loading-container">
+                  <i class="pi pi-spin pi-spinner grid-loading-spinner"></i>
+                  <span class="grid-loading-text">Loading stock items...</span>
                 </div>
               </td>
             </tr>
-          } @empty {
-            <tr>
-              <td colspan="8" class="empty-state-cell">
-                <div class="empty-state-container">
-                  <div class="empty-icon-circle">
-                    <i class="pi pi-box"></i>
-                  </div>
-                  <h4 class="empty-state-title">No Stock Items Found</h4>
-                  <p class="empty-state-subtitle">
-                    No items match your active search filters or no stock records have been added yet.
-                  </p>
-                  <div class="empty-state-actions">
-                    <button class="btn-secondary btn-sm" (click)="itemGrid.clearFilter()">
-                      <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+          } @else {
+            @for (item of itemGrid.items(); track item.id) {
+              <tr>
+                <td>
+                  <span class="code-badge">{{ item.itemCode }}</span>
+                </td>
+                <td>
+                  <strong class="item-title">{{ item.itemName }}</strong>
+                </td>
+                <td>
+                  {{ item.modelNo || '-' }}
+                </td>
+                <td>
+                  <span class="unit-pill">{{ item.unit || '-' }}</span>
+                </td>
+                <td>
+                  <span class="supplier-text"><i class="pi pi-building text-cyan"></i> {{ item.supplier || '-' }}</span>
+                </td>
+                <td>
+                  <span class="remarks-text" [title]="item.remarks || ''">{{ item.remarks || '-' }}</span>
+                </td>
+                <td class="text-center">
+                  @if (item.isActive) {
+                    <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> Active</span>
+                  } @else {
+                    <span class="p-tag p-tag-danger"><i class="pi pi-ban"></i> Inactive</span>
+                  }
+                </td>
+                <td class="text-center">
+                  <div class="action-buttons">
+                    <button class="btn-icon edit-btn" (click)="openEditModal(item)" title="Edit Stock Item">
+                      <i class="pi pi-pencil"></i>
                     </button>
-                    <button class="btn-primary btn-sm" (click)="openAddModal()">
-                      <i class="pi pi-plus"></i> Add New Item
+                    <button class="btn-icon delete-btn" (click)="promptDelete(item)" title="Delete Stock Item">
+                      <i class="pi pi-trash"></i>
                     </button>
                   </div>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="empty-state-cell">
+                  <div class="empty-state-container">
+                    <div class="empty-icon-circle">
+                      <i class="pi pi-box"></i>
+                    </div>
+                    <h4 class="empty-state-title">No Stock Items Found</h4>
+                    <p class="empty-state-subtitle">
+                      No items match your active search filters or no stock records have been added yet.
+                    </p>
+                    <div class="empty-state-actions">
+                      <button class="btn-secondary btn-sm" (click)="itemGrid.clearFilter()">
+                        <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                      </button>
+                      <button class="btn-primary btn-sm" (click)="openAddModal()">
+                        <i class="pi pi-plus"></i> Add New Item
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>
