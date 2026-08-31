@@ -1,19 +1,21 @@
 <div class="page-container">
+  <!-- Page Header -->
   <div class="page-header">
     <div>
       <h2>Customer Directory</h2>
-      <p class="subtitle">Manage Calibration Accounts & Site Locations</p>
+      <p class="subtitle">ISO 17025 Calibration Accounts & Client Management</p>
     </div>
     <div class="header-actions">
       <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
         <i class="pi pi-download text-cyan"></i> Export CSV
       </button>
-      <button class="btn-primary" (click)="showCreateModal = true">
+      <button class="btn-primary" (click)="openAddModal()">
         <i class="pi pi-plus"></i> Add New Customer
       </button>
     </div>
   </div>
 
+  <!-- Data Grid Card -->
   <div class="glass-card table-card">
     <div class="table-responsive">
       <table class="data-table">
@@ -25,6 +27,9 @@
             <th (click)="toggleSort('companyName')" class="sortable-header">
               Company Name <i class="pi" [ngClass]="getSortIcon('companyName')"></i>
             </th>
+            <th (click)="toggleSort('customerCategoryName')" class="sortable-header">
+              Category <i class="pi" [ngClass]="getSortIcon('customerCategoryName')"></i>
+            </th>
             <th (click)="toggleSort('email')" class="sortable-header">
               Contact Email <i class="pi" [ngClass]="getSortIcon('email')"></i>
             </th>
@@ -34,13 +39,10 @@
             <th (click)="toggleSort('city')" class="sortable-header">
               City / Country <i class="pi" [ngClass]="getSortIcon('city')"></i>
             </th>
-            <th (click)="toggleSort('totalEquipments')" class="sortable-header">
-              Equipments <i class="pi" [ngClass]="getSortIcon('totalEquipments')"></i>
-            </th>
-            <th (click)="toggleSort('activeWorkOrders')" class="sortable-header">
-              Active Work Orders <i class="pi" [ngClass]="getSortIcon('activeWorkOrders')"></i>
-            </th>
+            <th>Contacts</th>
+            <th>Actions</th>
           </tr>
+          <!-- Per-Column Search Filter Row -->
           <tr class="filter-row">
             <td>
               <input type="text" pInputText [ngModel]="filters()['code']" (ngModelChange)="updateFilter('code', $event)" placeholder="Search Code..." class="filter-input" />
@@ -49,37 +51,62 @@
               <input type="text" pInputText [ngModel]="filters()['companyName']" (ngModelChange)="updateFilter('companyName', $event)" placeholder="Filter Company..." class="filter-input" />
             </td>
             <td>
+              <input type="text" pInputText [ngModel]="filters()['customerCategoryName']" (ngModelChange)="updateFilter('customerCategoryName', $event)" placeholder="Filter Category..." class="filter-input" />
+            </td>
+            <td>
               <input type="text" pInputText [ngModel]="filters()['email']" (ngModelChange)="updateFilter('email', $event)" placeholder="Filter Email..." class="filter-input" />
             </td>
             <td>
               <input type="text" pInputText [ngModel]="filters()['phone']" (ngModelChange)="updateFilter('phone', $event)" placeholder="Filter Phone..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['city']" (ngModelChange)="updateFilter('city', $event)" placeholder="Filter City..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="filters()['city']" (ngModelChange)="updateFilter('city', $event)" placeholder="Filter Location..." class="filter-input" />
             </td>
-            <td>
-              <input type="text" pInputText [ngModel]="filters()['totalEquipments']" (ngModelChange)="updateFilter('totalEquipments', $event)" placeholder="Filter Equip..." class="filter-input" />
-            </td>
-            <td>
-              <input type="text" pInputText [ngModel]="filters()['activeWorkOrders']" (ngModelChange)="updateFilter('activeWorkOrders', $event)" placeholder="Filter Orders..." class="filter-input" />
-            </td>
+            <td></td>
+            <td></td>
           </tr>
         </thead>
         <tbody>
           @for (item of paginatedData(); track item.code) {
             <tr>
               <td><span class="code-badge">{{ item.code }}</span></td>
-              <td><strong style="color: var(--text-main);">{{ item.companyName }}</strong></td>
+              <td>
+                <div class="company-cell">
+                  <strong class="company-name">{{ item.companyName }}</strong>
+                  @if (item.taxNumber) {
+                    <span class="tax-badge"><i class="pi pi-id-card"></i> {{ item.taxNumber }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <span class="p-tag p-tag-info">
+                  <i class="pi pi-tag"></i> {{ item.customerCategoryName || 'Standard' }}
+                </span>
+              </td>
               <td>{{ item.email }}</td>
               <td>{{ item.phone }}</td>
               <td>{{ item.city }}, {{ item.country }}</td>
-              <td><span class="code-badge" style="color: var(--accent-cyan);">{{ item.totalEquipments }} Assets</span></td>
-              <td><span class="p-tag p-tag-info">{{ item.activeWorkOrders }} Active</span></td>
+              <td>
+                <span class="contact-pill" title="Registered Contact Representatives">
+                  <i class="pi pi-users text-cyan"></i> {{ item.totalContacts || 1 }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn-icon edit-btn" (click)="openEditModal(item)" title="Edit Customer">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn-icon delete-btn" (click)="promptDelete(item)" title="Delete Customer">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="text-center py-4" style="color: var(--text-muted);">
-                No customer records match the current filters.
+              <td colspan="8" class="text-center py-4 empty-msg">
+                <i class="pi pi-inbox empty-icon"></i>
+                <p>No customer records match the current filters.</p>
               </td>
             </tr>
           }
@@ -116,46 +143,237 @@
     </div>
   </div>
 
-  @if (showCreateModal) {
-    <div class="modal-overlay" (click)="showCreateModal = false">
-      <div class="modal-card" (click)="$event.stopPropagation()">
+  <!-- Create / Edit Customer Modal -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="showModal.set(false)">
+      <div class="modal-card customer-modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Register New Customer Account</h3>
-          <button class="modal-close-btn" (click)="showCreateModal = false">
+          <div class="modal-title-wrap">
+            <i class="pi pi-building text-cyan"></i>
+            <h3>{{ isEditMode() ? 'Edit Customer Account' : 'Register New Customer' }}</h3>
+          </div>
+          <button class="modal-close-btn" (click)="showModal.set(false)">
             <i class="pi pi-times"></i>
           </button>
         </div>
+
         <div class="modal-body">
+          <!-- Section 1: Organization Details -->
+          <div class="section-title">
+            <i class="pi pi-id-card"></i> Company Information
+          </div>
           <div class="form-grid">
             <div class="form-group">
-              <label>Customer Code</label>
-              <input type="text" pInputText [(ngModel)]="newCust.code" placeholder="e.g. CUST-1011" />
+              <label>Customer Code <span class="req">*</span></label>
+              <input
+                type="text"
+                pInputText
+                [ngModel]="formCustomer().code"
+                (ngModelChange)="formCustomer().code = $event"
+                (blur)="markFieldTouched('code')"
+                [class.input-invalid]="isFieldInvalid('code')"
+                placeholder="e.g. CUST-1001" />
+              @if (isFieldInvalid('code')) {
+                <div class="validation-label">
+                  <i class="pi pi-exclamation-circle"></i> {{ getFieldError('code') }}
+                </div>
+              }
             </div>
+
             <div class="form-group">
-              <label>Company Name</label>
-              <input type="text" pInputText [(ngModel)]="newCust.companyName" placeholder="e.g. Apex Precision Labs" />
+              <label>Company Legal Name <span class="req">*</span></label>
+              <input
+                type="text"
+                pInputText
+                [ngModel]="formCustomer().companyName"
+                (ngModelChange)="formCustomer().companyName = $event"
+                (blur)="markFieldTouched('companyName')"
+                [class.input-invalid]="isFieldInvalid('companyName')"
+                placeholder="e.g. PetroChem Refineries LLC" />
+              @if (isFieldInvalid('companyName')) {
+                <div class="validation-label">
+                  <i class="pi pi-exclamation-circle"></i> {{ getFieldError('companyName') }}
+                </div>
+              }
             </div>
+
             <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" pInputText [(ngModel)]="newCust.email" placeholder="contact@apex.com" />
+              <label>Classification Category</label>
+              <select class="form-select" [ngModel]="formCustomer().customerCategoryId" (ngModelChange)="onCategoryChange($event)">
+                <option [value]="null">-- Select Category --</option>
+                @for (cat of categories(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.name }} ({{ cat.code }})</option>
+                }
+              </select>
             </div>
+
             <div class="form-group">
-              <label>Phone</label>
-              <input type="text" pInputText [(ngModel)]="newCust.phone" placeholder="+971 4 555-0199" />
+              <label>Tax / TRN Number</label>
+              <input type="text" pInputText [ngModel]="formCustomer().taxNumber" (ngModelChange)="formCustomer().taxNumber = $event" placeholder="e.g. 100293848100003" />
             </div>
+
             <div class="form-group">
-              <label>Address</label>
-              <input type="text" pInputText [(ngModel)]="newCust.address" placeholder="100 Tech Blvd" />
+              <label>Business Email <span class="req">*</span></label>
+              <input
+                type="email"
+                pInputText
+                [ngModel]="formCustomer().email"
+                (ngModelChange)="formCustomer().email = $event"
+                (blur)="markFieldTouched('email')"
+                [class.input-invalid]="isFieldInvalid('email')"
+                placeholder="info@company.ae" />
+              @if (isFieldInvalid('email')) {
+                <div class="validation-label">
+                  <i class="pi pi-exclamation-circle"></i> {{ getFieldError('email') }}
+                </div>
+              }
             </div>
+
             <div class="form-group">
-              <label>City / Country</label>
-              <input type="text" pInputText [(ngModel)]="newCust.city" placeholder="Dubai, UAE" />
+              <label>Business Phone <span class="req">*</span></label>
+              <input
+                type="text"
+                pInputText
+                [ngModel]="formCustomer().phone"
+                (ngModelChange)="formCustomer().phone = $event"
+                (blur)="markFieldTouched('phone')"
+                [class.input-invalid]="isFieldInvalid('phone')"
+                placeholder="+971 4 881 2233" />
+              @if (isFieldInvalid('phone')) {
+                <div class="validation-label">
+                  <i class="pi pi-exclamation-circle"></i> {{ getFieldError('phone') }}
+                </div>
+              }
+            </div>
+
+            <div class="form-group full-span">
+              <label>Street Address</label>
+              <input type="text" pInputText [ngModel]="formCustomer().address" (ngModelChange)="formCustomer().address = $event" placeholder="e.g. Plot 598, Jebel Ali Industrial Area 1" />
+            </div>
+
+            <div class="form-group">
+              <label>City / Emirate</label>
+              <input type="text" pInputText [ngModel]="formCustomer().city" (ngModelChange)="formCustomer().city = $event" placeholder="e.g. Dubai" />
+            </div>
+
+            <div class="form-group">
+              <label>Country</label>
+              <select class="form-select" [ngModel]="formCustomer().country" (ngModelChange)="onCountryChange($event)">
+                <option [value]="''">-- Select Country --</option>
+                @for (c of countries(); track c.id) {
+                  <option [value]="c.name">{{ c.name }} ({{ c.code }})</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Section 2: Contact Persons Sub-form -->
+          <div class="contacts-section">
+            <div class="section-header-flex">
+              <div class="section-title">
+                <i class="pi pi-users"></i> Contact Persons & Representatives
+              </div>
+              <button type="button" class="btn-secondary btn-sm" (click)="addContactRow()">
+                <i class="pi pi-plus"></i> Add Contact
+              </button>
+            </div>
+
+            <div class="contacts-table-wrap">
+              <table class="contacts-table">
+                <thead>
+                  <tr>
+                    <th>First Name <span class="req">*</span></th>
+                    <th>Last Name</th>
+                    <th>Email Address</th>
+                    <th>Phone</th>
+                    <th>Designation / Role</th>
+                    <th class="text-center">Primary</th>
+                    <th class="text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (contact of formContacts(); track $index) {
+                    <tr>
+                      <td>
+                        <input type="text" pInputText [(ngModel)]="contact.firstName" placeholder="First Name" class="sub-input" />
+                      </td>
+                      <td>
+                        <input type="text" pInputText [(ngModel)]="contact.lastName" placeholder="Last Name" class="sub-input" />
+                      </td>
+                      <td>
+                        <input type="email" pInputText [(ngModel)]="contact.email" placeholder="Email" class="sub-input" />
+                      </td>
+                      <td>
+                        <input type="text" pInputText [(ngModel)]="contact.phone" placeholder="Phone" class="sub-input" />
+                      </td>
+                      <td>
+                        <input type="text" pInputText [(ngModel)]="contact.position" placeholder="e.g. QA Lead" class="sub-input" />
+                      </td>
+                      <td class="text-center">
+                        <input type="radio" name="primaryContact" [checked]="contact.isPrimary" (change)="setPrimaryContact($index)" title="Designate Primary Contact" />
+                      </td>
+                      <td class="text-center">
+                        @if (formContacts().length > 1) {
+                          <button type="button" class="btn-icon delete-btn" (click)="removeContactRow($index)" title="Remove Contact">
+                            <i class="pi pi-times"></i>
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
+
         <div class="modal-footer">
-          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
-          <button class="btn-primary" (click)="saveCustomer()">Save Customer</button>
+          <button class="btn-secondary" (click)="showModal.set(false)">Cancel</button>
+          <button class="btn-primary" [disabled]="isSaving()" (click)="saveCustomer()">
+            @if (isSaving()) {
+              <i class="pi pi-spin pi-spinner"></i> Saving...
+            } @else {
+              <i class="pi pi-check"></i> {{ isEditMode() ? 'Update Customer' : 'Save Customer' }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Delete Confirmation Modal -->
+  @if (showDeleteModal()) {
+    <div class="modal-overlay" (click)="showDeleteModal.set(false)">
+      <div class="modal-card delete-modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header delete-header">
+          <div class="modal-title-wrap">
+            <i class="pi pi-exclamation-triangle text-danger"></i>
+            <h3>Confirm Customer Deletion</h3>
+          </div>
+          <button class="modal-close-btn" (click)="showDeleteModal.set(false)">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body delete-body">
+          <p>
+            Are you sure you want to delete customer
+            <strong>{{ targetCustomer()?.companyName }}</strong> (<span class="code-badge">{{ targetCustomer()?.code }}</span>)?
+          </p>
+          <p class="delete-warning">
+            This action will soft-delete the customer organization and all associated contact records in compliance with ISO 17025 audit trail guidelines.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showDeleteModal.set(false)">Cancel</button>
+          <button class="btn-danger" [disabled]="isSaving()" (click)="executeDelete()">
+            @if (isSaving()) {
+              <i class="pi pi-spin pi-spinner"></i> Deleting...
+            } @else {
+              <i class="pi pi-trash"></i> Delete Customer
+            }
+          </button>
         </div>
       </div>
     </div>

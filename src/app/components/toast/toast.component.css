@@ -2,12 +2,12 @@
   position: fixed;
   top: 80px;
   right: 24px;
-  z-index: 9999;
+  z-index: 100000;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
   pointer-events: none;
-  max-width: 380px;
+  max-width: 400px;
   width: 90vw;
 }
 
