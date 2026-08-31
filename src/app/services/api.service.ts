@@ -9,6 +9,7 @@ import { Branch, SaveBranchPayload, DeleteBranchResponse, BranchPrefixResponse, 
 import { EnquiryRow, EnquiryQueryFilter, EnquiryListResponse } from '../models/enquiry.model';
 import { CountryLookup } from '../models/country.model';
 import { CurrencyLookup } from '../models/currency.model';
+import { DepartmentLookup, DesignationLookup } from '../models/department.model';
 import { GridQueryParams, PagedGridResponse } from '../common/grid';
 
 import { environment } from '../../environments/environment';
@@ -20,6 +21,7 @@ export type { Branch, SaveBranchPayload, DeleteBranchResponse, BranchPrefixRespo
 export type { EnquiryRow, EnquiryQueryFilter, EnquiryListResponse } from '../models/enquiry.model';
 export type { CountryLookup } from '../models/country.model';
 export type { CurrencyLookup } from '../models/currency.model';
+export type { DepartmentLookup, DesignationLookup } from '../models/department.model';
 export type { GridQueryParams, PagedGridResponse } from '../common/grid';
 
 /**
@@ -41,6 +43,8 @@ export class ApiService {
   public branches = signal<Branch[]>([]);
   public countries = signal<CountryLookup[]>([]);
   public currencies = signal<CurrencyLookup[]>([]);
+  public departments = signal<DepartmentLookup[]>([]);
+  public designations = signal<DesignationLookup[]>([]);
 
   // -------------------------------------------------------------
   // Dashboard & Statistics
@@ -225,6 +229,31 @@ export class ApiService {
   getCurrencies(): Observable<CurrencyLookup[]> {
     return this.http.get<CurrencyLookup[]>(`${this.baseUrl}/currencies`).pipe(
       tap(list => this.currencies.set(list))
+    );
+  }
+
+  // -------------------------------------------------------------
+  // Departments & Designations Reference Endpoints
+  // -------------------------------------------------------------
+  /**
+   * Retrieves all active organizational departments from the database.
+   */
+  getDepartments(): Observable<DepartmentLookup[]> {
+    return this.http.get<DepartmentLookup[]>(`${this.baseUrl}/departments`).pipe(
+      tap(list => this.departments.set(list))
+    );
+  }
+
+  /**
+   * Retrieves all active job title designations, optionally filtered by department.
+   */
+  getDesignations(departmentId?: number): Observable<DesignationLookup[]> {
+    let params = new HttpParams();
+    if (departmentId && departmentId > 0) {
+      params = params.set('departmentId', departmentId.toString());
+    }
+    return this.http.get<DesignationLookup[]>(`${this.baseUrl}/designations`, { params }).pipe(
+      tap(list => this.designations.set(list))
     );
   }
 
