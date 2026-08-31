@@ -6,7 +6,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ToastService } from '../../services/toast.service';
-import { ApiService, Branch, CompanySettings, CountryLookup } from '../../services/api.service';
+import { ApiService, Branch, CompanySettings, CountryLookup, CurrencyLookup } from '../../services/api.service';
 import { DataGridState } from '../../common/grid';
 
 /**
@@ -74,16 +74,23 @@ export class CompanySettingsComponent implements OnInit {
   public metrologistSealUrl = signal<string>('https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=AlexRiveraSeal');
   public qaManagerSealUrl = signal<string>('https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=DrMarcusVanceSeal');
 
-  // Tab 3: System Defaults & Numbering Prefixes Signals
+  // Tab 3: System Defaults & Numbering Prefixes Signals (Branch-Scoped)
+  public allBranchesList = signal<Branch[]>([]);
+  public selectedBranchId = signal<number | null>(null);
+  public isPrefixLocked = signal<boolean>(false);
+  public prefixConfiguredAt = signal<string | null>(null);
+  public isSavingPrefix = signal<boolean>(false);
+  public isSavingDefaults = signal<boolean>(false);
+
   public currencyCode = signal<string>('AED');
   public defaultVatRate = signal<number>(5.0);
   public defaultCalibPeriodMonths = signal<number>(12);
-  public prefixEnquiry = signal<string>('ENQ-');
-  public prefixQuotation = signal<string>('QT-');
-  public prefixWorkorder = signal<string>('WO-');
-  public prefixCertificate = signal<string>('CERT-');
-  public prefixDeliveryTicket = signal<string>('DT-');
-  public prefixInvoice = signal<string>('INV-');
+  public prefixEnquiry = signal<string>('');
+  public prefixQuotation = signal<string>('');
+  public prefixWorkorder = signal<string>('');
+  public prefixCertificate = signal<string>('');
+  public prefixDeliveryTicket = signal<string>('');
+  public prefixInvoice = signal<string>('');
   public defaultTemp = signal<string>('23.0 ± 2.0 °C');
   public defaultPress = signal<string>('1013.2 ± 10 mbar');
   public defaultHumidity = signal<string>('50 ± 10 %rh');
@@ -136,6 +143,21 @@ export class CompanySettingsComponent implements OnInit {
     { id: 13, code: 'AU', name: 'Australia', phoneCode: '+61' }
   ]);
 
+  /** Master list of available ISO 4217 currencies dynamically loaded from database. */
+  public currencies = signal<CurrencyLookup[]>([
+    { id: 1, code: 'AED', name: 'UAE Dirham', symbol: 'AED', decimalPlaces: 2, isDefault: true },
+    { id: 2, code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2, isDefault: false },
+    { id: 3, code: 'EUR', name: 'Euro', symbol: '€', decimalPlaces: 2, isDefault: false },
+    { id: 4, code: 'GBP', name: 'British Pound', symbol: '£', decimalPlaces: 2, isDefault: false },
+    { id: 5, code: 'SAR', name: 'Saudi Riyal', symbol: 'SAR', decimalPlaces: 2, isDefault: false },
+    { id: 6, code: 'QAR', name: 'Qatari Riyal', symbol: 'QAR', decimalPlaces: 2, isDefault: false },
+    { id: 7, code: 'OMR', name: 'Omani Rial', symbol: 'OMR', decimalPlaces: 3, isDefault: false },
+    { id: 8, code: 'KWD', name: 'Kuwaiti Dinar', symbol: 'KWD', decimalPlaces: 3, isDefault: false },
+    { id: 9, code: 'BHD', name: 'Bahraini Dinar', symbol: 'BHD', decimalPlaces: 3, isDefault: false },
+    { id: 10, code: 'INR', name: 'Indian Rupee', symbol: '₹', decimalPlaces: 2, isDefault: false },
+    { id: 11, code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', decimalPlaces: 2, isDefault: false }
+  ]);
+
   // Branch Modal State
   public showBranchModal = signal<boolean>(false);
   public isEditingBranch = signal<boolean>(false);
@@ -158,6 +180,8 @@ export class CompanySettingsComponent implements OnInit {
   ngOnInit() {
     this.loadCompanySettings();
     this.loadCountries();
+    this.loadCurrencies();
+    this.loadAllBranches();
     this.branchGrid.load();
   }
 
@@ -169,6 +193,22 @@ export class CompanySettingsComponent implements OnInit {
       next: (list: CountryLookup[]) => {
         if (list && list.length > 0) {
           this.countries.set(list);
+        }
+      },
+      error: () => {
+        // Keeps the default fallback reference list
+      }
+    });
+  }
+
+  /**
+   * Fetches the ISO 4217 currency master reference list from the backend API.
+   */
+  loadCurrencies() {
+    this.apiService.getCurrencies().subscribe({
+      next: (list: CurrencyLookup[]) => {
+        if (list && list.length > 0) {
+          this.currencies.set(list);
         }
       },
       error: () => {
@@ -245,10 +285,186 @@ export class CompanySettingsComponent implements OnInit {
   }
 
   /**
-   * Persists transaction prefixes, VAT rate, and environmental baseline tolerances.
+   * Loads all branch facilities for the branch selector dropdown.
    */
-  saveDefaults() {
-    this.toastService.showSuccess('Defaults Saved', 'Document numbering prefixes and environmental standards updated.');
+  loadAllBranches() {
+    this.apiService.getBranches({ pageNumber: 1, pageSize: 100 }).subscribe({
+      next: (res: any) => {
+        if (res && res.items && res.items.length > 0) {
+          this.allBranchesList.set(res.items);
+          if (!this.selectedBranchId()) {
+            const main = res.items.find((b: Branch) => b.isMainBranch) || res.items[0];
+            this.onBranchSelected(main.id);
+          }
+        }
+      },
+      error: () => {
+        // Keeps the fallback default branch selection
+      }
+    });
+  }
+
+  /**
+   * Handles branch selection switch in Tab 4 to load that branch's defaults and 1-time prefix status.
+   * @param branchId Selected branch ID.
+   */
+  onBranchSelected(branchId: any) {
+    const id = Number(branchId);
+    if (!id || id <= 0) return;
+    this.selectedBranchId.set(id);
+
+    const branch = this.allBranchesList().find(b => b.id === id);
+    if (branch) {
+      if (branch.defaultCurrency) this.currencyCode.set(branch.defaultCurrency);
+      if (branch.defaultVatRate !== undefined && branch.defaultVatRate !== null) this.defaultVatRate.set(branch.defaultVatRate);
+      if (branch.defaultCalibPeriodMonths !== undefined && branch.defaultCalibPeriodMonths !== null) this.defaultCalibPeriodMonths.set(branch.defaultCalibPeriodMonths);
+      if (branch.defaultTemp) this.defaultTemp.set(branch.defaultTemp);
+      if (branch.defaultPress) this.defaultPress.set(branch.defaultPress);
+      if (branch.defaultHumidity) this.defaultHumidity.set(branch.defaultHumidity);
+    }
+
+    // Load 1-time document prefix status from API
+    this.apiService.getBranchPrefix(id).subscribe({
+      next: (res: any) => {
+        if (res && res.isConfigured) {
+          this.isPrefixLocked.set(true);
+          this.prefixConfiguredAt.set(res.configuredAt || null);
+          if (res.prefixEnquiry) this.prefixEnquiry.set(res.prefixEnquiry);
+          if (res.prefixQuotation) this.prefixQuotation.set(res.prefixQuotation);
+          if (res.prefixWorkorder) this.prefixWorkorder.set(res.prefixWorkorder);
+          if (res.prefixCertificate) this.prefixCertificate.set(res.prefixCertificate);
+          if (res.prefixDeliveryTicket) this.prefixDeliveryTicket.set(res.prefixDeliveryTicket);
+          if (res.prefixInvoice) this.prefixInvoice.set(res.prefixInvoice);
+        } else {
+          this.isPrefixLocked.set(false);
+          this.prefixConfiguredAt.set(null);
+          this.prefixEnquiry.set('');
+          this.prefixQuotation.set('');
+          this.prefixWorkorder.set('');
+          this.prefixCertificate.set('');
+          this.prefixDeliveryTicket.set('');
+          this.prefixInvoice.set('');
+        }
+      },
+      error: () => {
+        this.isPrefixLocked.set(false);
+        this.prefixConfiguredAt.set(null);
+        this.prefixEnquiry.set('');
+        this.prefixQuotation.set('');
+        this.prefixWorkorder.set('');
+        this.prefixCertificate.set('');
+        this.prefixDeliveryTicket.set('');
+        this.prefixInvoice.set('');
+      }
+    });
+  }
+
+  /**
+   * Persists 1-time immutable document numbering prefixes for the currently selected branch facility.
+   */
+  saveBranchPrefix() {
+    const branchId = this.selectedBranchId();
+    if (!branchId) {
+      this.toastService.showError('Branch Required', 'Please select a laboratory branch facility.');
+      return;
+    }
+
+    if (this.isPrefixLocked()) {
+      this.toastService.showWarning('Prefixes Locked', 'Prefixes for this branch have already been permanently configured.');
+      return;
+    }
+
+    const enq = this.prefixEnquiry().trim();
+    const quo = this.prefixQuotation().trim();
+    const wo = this.prefixWorkorder().trim();
+    const cert = this.prefixCertificate().trim();
+    const dt = this.prefixDeliveryTicket().trim();
+    const inv = this.prefixInvoice().trim();
+
+    if (!enq || !quo || !wo || !cert || !dt || !inv) {
+      this.toastService.showError('Validation Error', 'All 6 document prefixes are required for 1-time initialization.');
+      return;
+    }
+
+    if (enq.length > 5 || quo.length > 5 || wo.length > 5 || cert.length > 5 || dt.length > 5 || inv.length > 5) {
+      this.toastService.showError('Validation Error', 'Document prefixes cannot exceed 5 characters.');
+      return;
+    }
+
+    this.isSavingPrefix.set(true);
+    const payload = {
+      branchId,
+      prefixEnquiry: enq,
+      prefixQuotation: quo,
+      prefixWorkorder: wo,
+      prefixCertificate: cert,
+      prefixDeliveryTicket: dt,
+      prefixInvoice: inv
+    };
+
+    this.apiService.createBranchPrefix(payload).subscribe({
+      next: (res: any) => {
+        this.isSavingPrefix.set(false);
+        this.isPrefixLocked.set(true);
+        this.prefixConfiguredAt.set(new Date().toISOString());
+        this.toastService.showSuccess('Prefixes Locked', res.message || 'Branch document prefixes permanently saved and locked.');
+        this.loadAllBranches();
+      },
+      error: (err: any) => {
+        this.isSavingPrefix.set(false);
+        this.toastService.showError('Prefix Save Failed', err?.error?.detail || 'Failed to save branch prefixes.');
+      }
+    });
+  }
+
+  /**
+   * Persists branch-specific environmental tolerances, tax rate, and recall period.
+   */
+  saveBranchDefaults() {
+    const branchId = this.selectedBranchId();
+    if (!branchId) {
+      this.toastService.showError('Branch Required', 'Please select a laboratory branch facility.');
+      return;
+    }
+
+    const branch = this.allBranchesList().find(b => b.id === branchId);
+    if (!branch) {
+      this.toastService.showError('Error', 'Selected branch details not found.');
+      return;
+    }
+
+    this.isSavingDefaults.set(true);
+    const payload = {
+      id: branch.id,
+      companyId: branch.companyId,
+      code: branch.code,
+      name: branch.name,
+      email: branch.email,
+      phone: branch.phone,
+      address: branch.address,
+      city: branch.city,
+      countryId: branch.countryId,
+      isMainBranch: branch.isMainBranch,
+      isActive: branch.isActive,
+      defaultCurrency: this.currencyCode().trim(),
+      defaultVatRate: this.defaultVatRate(),
+      defaultCalibPeriodMonths: this.defaultCalibPeriodMonths(),
+      defaultTemp: this.defaultTemp().trim(),
+      defaultPress: this.defaultPress().trim(),
+      defaultHumidity: this.defaultHumidity().trim()
+    };
+
+    this.apiService.updateBranch(branch.id, payload).subscribe({
+      next: () => {
+        this.isSavingDefaults.set(false);
+        this.toastService.showSuccess('Defaults Saved', `Environmental standards & operating defaults for '${branch.name}' updated.`);
+        this.loadAllBranches();
+      },
+      error: (err: any) => {
+        this.isSavingDefaults.set(false);
+        this.toastService.showError('Save Failed', err?.error?.detail || 'Failed to update branch defaults.');
+      }
+    });
   }
 
   /**

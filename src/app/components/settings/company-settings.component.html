@@ -449,9 +449,26 @@
   <!-- TAB 3: Header, Footer & Logo Image Uploads -->
   @if (activeTab() === 'branding') {
     <div class="glass-card main-card">
-      <div class="card-section-title mb-4">
-        <h3><i class="pi pi-images text-cyan"></i> Document Branding & Image Upload Manager</h3>
-        <p>Upload official laboratory logos, ISO accreditation seals, report header banners, and signature stamps.</p>
+      <div class="section-split-header mb-4">
+        <div>
+          <h3><i class="pi pi-images text-cyan"></i> Document Branding & Image Upload Manager</h3>
+          <p>Upload official laboratory logos, ISO accreditation seals, report header/footer banners, and signature stamps scoped by branch.</p>
+        </div>
+        <!-- Branch Selector Toolbar -->
+        <div class="branch-select-toolbar">
+          <label class="branch-select-label"><i class="pi pi-sitemap text-cyan"></i> Operating Branch:</label>
+          <select
+            class="form-select branch-dropdown"
+            [ngModel]="selectedBranchId()"
+            (ngModelChange)="onBranchSelected($event)"
+          >
+            @for (b of allBranchesList(); track b.id) {
+              <option [value]="b.id">
+                {{ b.name }} ({{ b.code }}) {{ b.isMainBranch ? '★ Main HQ' : '' }}
+              </option>
+            }
+          </select>
+        </div>
       </div>
 
       <div class="uploads-grid">
@@ -560,152 +577,253 @@
     </div>
   }
 
-  <!-- TAB 4: System Defaults & Numbering Prefixes -->
+  <!-- TAB 4: System Defaults & Numbering Prefixes (Branch-Scoped) -->
   @if (activeTab() === 'defaults') {
     <div class="glass-card main-card">
-      <div class="card-section-title mb-4">
-        <h3><i class="pi pi-cog text-cyan"></i> Transaction Prefixes, Tax & Environmental Tolerances</h3>
-        <p>Set automated document numbering sequences, VAT rates, and default environmental laboratory limits.</p>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="font-bold">Customer Enquiry Prefix:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full code-font"
-            [value]="prefixEnquiry()"
-            (input)="prefixEnquiry.set($any($event.target).value)"
-          />
+      <div class="section-split-header mb-3">
+        <div>
+          <h3><i class="pi pi-cog text-cyan"></i> Branch Prefixes, Tax & Environmental Tolerances</h3>
+          <p>Configure branch-specific document numbering prefixes and ambient laboratory operating standards.</p>
         </div>
-
-        <div class="form-group">
-          <label class="font-bold">Quotation Prefix:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full code-font"
-            [value]="prefixQuotation()"
-            (input)="prefixQuotation.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">Workorder Job Prefix:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full code-font"
-            [value]="prefixWorkorder()"
-            (input)="prefixWorkorder.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">Calibration Certificate Prefix:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full code-font text-cyan"
-            [value]="prefixCertificate()"
-            (input)="prefixCertificate.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">Delivery Ticket Prefix:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full code-font"
-            [value]="prefixDeliveryTicket()"
-            (input)="prefixDeliveryTicket.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">Tax Invoice Prefix:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full code-font"
-            [value]="prefixInvoice()"
-            (input)="prefixInvoice.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">System Default Currency:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full code-font"
-            [value]="currencyCode()"
-            (input)="currencyCode.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">Default VAT Tax Rate (%):</label>
-          <input
-            type="number"
-            pInputText
-            class="w-full"
-            [value]="defaultVatRate()"
-            (input)="defaultVatRate.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">Default Calibration Cycle (Months):</label>
-          <input
-            type="number"
-            pInputText
-            class="w-full"
-            [value]="defaultCalibPeriodMonths()"
-            (input)="defaultCalibPeriodMonths.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">Standard Lab Temperature Default:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full"
-            [value]="defaultTemp()"
-            (input)="defaultTemp.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">Standard Lab Pressure Default:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full"
-            [value]="defaultPress()"
-            (input)="defaultPress.set($any($event.target).value)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="font-bold">Standard Lab Humidity Default:</label>
-          <input
-            type="text"
-            pInputText
-            class="w-full"
-            [value]="defaultHumidity()"
-            (input)="defaultHumidity.set($any($event.target).value)"
-          />
+        <!-- Branch Selector Toolbar -->
+        <div class="branch-select-toolbar">
+          <label class="branch-select-label"><i class="pi pi-sitemap text-cyan"></i> Operating Branch:</label>
+          <select
+            class="form-select branch-dropdown"
+            [ngModel]="selectedBranchId()"
+            (ngModelChange)="onBranchSelected($event)"
+          >
+            @for (b of allBranchesList(); track b.id) {
+              <option [value]="b.id">
+                {{ b.name }} ({{ b.code }}) {{ b.isMainBranch ? '★ Main HQ' : '' }}
+              </option>
+            }
+          </select>
         </div>
       </div>
 
-      <div class="mt-4 text-right">
-        <button class="btn-primary" (click)="saveDefaults()">
-          <i class="pi pi-save"></i> Save System Defaults
-        </button>
+      <!-- Section 1: Document Numbering Prefixes (1-Time Setup) -->
+      <div class="sub-section-card mb-4">
+        <div class="sub-section-header">
+          <div class="header-left">
+            <h4 class="sub-title"><i class="pi pi-hashtag text-cyan"></i> Document Numbering Prefixes</h4>
+            <span class="sub-note">ISO 17025 document sequencing prefixes for this facility.</span>
+          </div>
+          <div class="header-right">
+            @if (isPrefixLocked()) {
+              <span class="badge-locked">
+                <i class="pi pi-lock"></i> Locked & Immutable
+              </span>
+            } @else {
+              <span class="badge-pending">
+                <i class="pi pi-exclamation-circle"></i> 1-Time Setup Required
+              </span>
+            }
+          </div>
+        </div>
+
+        @if (isPrefixLocked()) {
+          <div class="prefix-alert info mb-3">
+            <i class="pi pi-shield"></i>
+            <span><strong>Permanent Configuration:</strong> Prefixes for this branch were initialized and locked to prevent document audit trail corruption. Editing is permanently disabled.</span>
+          </div>
+        } @else {
+          <div class="prefix-alert warning mb-3">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span><strong>One-Time Entry Notice:</strong> Document prefixes can only be configured <strong>once</strong> per branch. Review carefully before locking.</span>
+          </div>
+        }
+
+        <div class="form-grid grid-compact">
+          <div class="form-group">
+            <label>Customer Enquiry Prefix (Max 5):</label>
+            <input
+              type="text"
+              pInputText
+              maxlength="5"
+              class="w-full code-font"
+              [disabled]="isPrefixLocked()"
+              [value]="prefixEnquiry()"
+              (input)="prefixEnquiry.set($any($event.target).value)"
+              placeholder="e.g. ENQ"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Quotation Prefix (Max 5):</label>
+            <input
+              type="text"
+              pInputText
+              maxlength="5"
+              class="w-full code-font"
+              [disabled]="isPrefixLocked()"
+              [value]="prefixQuotation()"
+              (input)="prefixQuotation.set($any($event.target).value)"
+              placeholder="e.g. QT"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Workorder Job Prefix (Max 5):</label>
+            <input
+              type="text"
+              pInputText
+              maxlength="5"
+              class="w-full code-font"
+              [disabled]="isPrefixLocked()"
+              [value]="prefixWorkorder()"
+              (input)="prefixWorkorder.set($any($event.target).value)"
+              placeholder="e.g. WO"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Calibration Certificate Prefix (Max 5):</label>
+            <input
+              type="text"
+              pInputText
+              maxlength="5"
+              class="w-full code-font text-cyan"
+              [disabled]="isPrefixLocked()"
+              [value]="prefixCertificate()"
+              (input)="prefixCertificate.set($any($event.target).value)"
+              placeholder="e.g. CERT"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Delivery Ticket Prefix (Max 5):</label>
+            <input
+              type="text"
+              pInputText
+              maxlength="5"
+              class="w-full code-font"
+              [disabled]="isPrefixLocked()"
+              [value]="prefixDeliveryTicket()"
+              (input)="prefixDeliveryTicket.set($any($event.target).value)"
+              placeholder="e.g. DT"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Tax Invoice Prefix (Max 5):</label>
+            <input
+              type="text"
+              pInputText
+              maxlength="5"
+              class="w-full code-font"
+              [disabled]="isPrefixLocked()"
+              [value]="prefixInvoice()"
+              (input)="prefixInvoice.set($any($event.target).value)"
+              placeholder="e.g. INV"
+            />
+          </div>
+        </div>
+
+        <div class="mt-3 text-right">
+          @if (!isPrefixLocked()) {
+            <button class="btn-primary" (click)="saveBranchPrefix()" [disabled]="isSavingPrefix()">
+              <i class="pi" [ngClass]="isSavingPrefix() ? 'pi-spin pi-spinner' : 'pi-lock'"></i> Lock & Save Branch Prefixes
+            </button>
+          } @else {
+            <button class="btn-action btn-locked-state" disabled>
+              <i class="pi pi-check-circle text-cyan"></i> Prefixes Configured & Locked
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Section 2: Environmental Tolerances & Operational Defaults -->
+      <div class="sub-section-card">
+        <div class="sub-section-header">
+          <div class="header-left">
+            <h4 class="sub-title"><i class="pi pi-compass text-cyan"></i> Environmental Baseline & Operating Tolerances</h4>
+            <span class="sub-note">Operating currency, tax rates, and laboratory ambient limits for this branch facility.</span>
+          </div>
+        </div>
+
+        <div class="form-grid grid-compact">
+          <div class="form-group">
+            <label>Default Currency:</label>
+            <select
+              class="form-select w-full code-font"
+              [ngModel]="currencyCode()"
+              (ngModelChange)="currencyCode.set($event)"
+            >
+              @for (c of currencies(); track c.id) {
+                <option [value]="c.code">
+                  {{ c.code }} - {{ c.name }} ({{ c.symbol }})
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Default VAT Tax Rate (%):</label>
+            <input
+              type="number"
+              pInputText
+              class="w-full"
+              [value]="defaultVatRate()"
+              (input)="defaultVatRate.set($any($event.target).value)"
+              placeholder="5.0"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Calibration Cycle (Months):</label>
+            <input
+              type="number"
+              pInputText
+              class="w-full"
+              [value]="defaultCalibPeriodMonths()"
+              (input)="defaultCalibPeriodMonths.set($any($event.target).value)"
+              placeholder="12"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Standard Lab Temperature:</label>
+            <input
+              type="text"
+              pInputText
+              class="w-full"
+              [value]="defaultTemp()"
+              (input)="defaultTemp.set($any($event.target).value)"
+              placeholder="23.0 ± 2.0 °C"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Standard Lab Pressure:</label>
+            <input
+              type="text"
+              pInputText
+              class="w-full"
+              [value]="defaultPress()"
+              (input)="defaultPress.set($any($event.target).value)"
+              placeholder="1013.2 ± 10 mbar"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Standard Lab Humidity:</label>
+            <input
+              type="text"
+              pInputText
+              class="w-full"
+              [value]="defaultHumidity()"
+              (input)="defaultHumidity.set($any($event.target).value)"
+              placeholder="50 ± 10 %rh"
+            />
+          </div>
+        </div>
+
+        <div class="mt-3 text-right">
+          <button class="btn-primary" (click)="saveBranchDefaults()" [disabled]="isSavingDefaults()">
+            <i class="pi" [ngClass]="isSavingDefaults() ? 'pi-spin pi-spinner' : 'pi-save'"></i> Save Environmental Defaults
+          </button>
+        </div>
       </div>
     </div>
   }
@@ -713,9 +831,26 @@
   <!-- TAB 5: SMTP Email Server & Dispatch Rules -->
   @if (activeTab() === 'smtp') {
     <div class="glass-card main-card">
-      <div class="card-section-title mb-4">
-        <h3><i class="pi pi-envelope text-cyan"></i> SMTP Server Details & Dispatch Rules</h3>
-        <p>Configure mail server host, credentials, and automated email dispatches.</p>
+      <div class="section-split-header mb-4">
+        <div>
+          <h3><i class="pi pi-envelope text-cyan"></i> SMTP Server Details & Dispatch Rules</h3>
+          <p>Configure mail server host, credentials, and automated email dispatches scoped by branch.</p>
+        </div>
+        <!-- Branch Selector Toolbar -->
+        <div class="branch-select-toolbar">
+          <label class="branch-select-label"><i class="pi pi-sitemap text-cyan"></i> Operating Branch:</label>
+          <select
+            class="form-select branch-dropdown"
+            [ngModel]="selectedBranchId()"
+            (ngModelChange)="onBranchSelected($event)"
+          >
+            @for (b of allBranchesList(); track b.id) {
+              <option [value]="b.id">
+                {{ b.name }} ({{ b.code }}) {{ b.isMainBranch ? '★ Main HQ' : '' }}
+              </option>
+            }
+          </select>
+        </div>
       </div>
 
       <div class="form-grid">

@@ -88,7 +88,7 @@
 .form-select,
 .form-textarea {
   width: 100%;
-  background: var(--input-bg);
+  background-color: var(--input-bg);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.35rem 0.6rem !important;

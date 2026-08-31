@@ -5,9 +5,10 @@ import { Customer, CreateCustomerPayload } from '../models/customer.model';
 import { CustomerEquipment, CreateEquipmentPayload } from '../models/equipment.model';
 import { DashboardStats } from '../models/dashboard.model';
 import { CompanySettings, UpdateCompanySettingsPayload } from '../models/company-settings.model';
-import { Branch, SaveBranchPayload, DeleteBranchResponse } from '../models/branch.model';
+import { Branch, SaveBranchPayload, DeleteBranchResponse, BranchPrefixResponse, CreateBranchPrefixPayload, CreateBranchPrefixResponse } from '../models/branch.model';
 import { EnquiryRow, EnquiryQueryFilter, EnquiryListResponse } from '../models/enquiry.model';
 import { CountryLookup } from '../models/country.model';
+import { CurrencyLookup } from '../models/currency.model';
 import { GridQueryParams, PagedGridResponse } from '../common/grid';
 
 import { environment } from '../../environments/environment';
@@ -15,9 +16,10 @@ import { environment } from '../../environments/environment';
 export type { Customer, CreateCustomerPayload } from '../models/customer.model';
 export type { CustomerEquipment, CreateEquipmentPayload } from '../models/equipment.model';
 export type { CompanySettings, UpdateCompanySettingsPayload } from '../models/company-settings.model';
-export type { Branch, SaveBranchPayload, DeleteBranchResponse } from '../models/branch.model';
+export type { Branch, SaveBranchPayload, DeleteBranchResponse, BranchPrefixResponse, CreateBranchPrefixPayload, CreateBranchPrefixResponse } from '../models/branch.model';
 export type { EnquiryRow, EnquiryQueryFilter, EnquiryListResponse } from '../models/enquiry.model';
 export type { CountryLookup } from '../models/country.model';
+export type { CurrencyLookup } from '../models/currency.model';
 export type { GridQueryParams, PagedGridResponse } from '../common/grid';
 
 /**
@@ -38,6 +40,7 @@ export class ApiService {
   public companySettings = signal<CompanySettings | null>(null);
   public branches = signal<Branch[]>([]);
   public countries = signal<CountryLookup[]>([]);
+  public currencies = signal<CurrencyLookup[]>([]);
 
   // -------------------------------------------------------------
   // Dashboard & Statistics
@@ -183,6 +186,25 @@ export class ApiService {
   }
 
   // -------------------------------------------------------------
+  // Branch Document Prefixes (1-Time Immutable Configuration)
+  // -------------------------------------------------------------
+  /**
+   * Retrieves document numbering prefixes configured for a specific branch facility.
+   * @param branchId Branch numeric identifier.
+   */
+  getBranchPrefix(branchId: number): Observable<BranchPrefixResponse> {
+    return this.http.get<BranchPrefixResponse>(`${this.baseUrl}/prefixes/by-branch/${branchId}`);
+  }
+
+  /**
+   * Configures 1-time immutable document numbering prefixes for a branch facility.
+   * @param payload Create branch prefix payload.
+   */
+  createBranchPrefix(payload: CreateBranchPrefixPayload): Observable<CreateBranchPrefixResponse> {
+    return this.http.post<CreateBranchPrefixResponse>(`${this.baseUrl}/prefixes`, payload);
+  }
+
+  // -------------------------------------------------------------
   // Countries Reference Endpoint
   // -------------------------------------------------------------
   /**
@@ -191,6 +213,18 @@ export class ApiService {
   getCountries(): Observable<CountryLookup[]> {
     return this.http.get<CountryLookup[]>(`${this.baseUrl}/countries`).pipe(
       tap(list => this.countries.set(list))
+    );
+  }
+
+  // -------------------------------------------------------------
+  // Currencies Reference Endpoint
+  // -------------------------------------------------------------
+  /**
+   * Retrieves all active ISO 4217 currencies for lookup dropdowns and reference data.
+   */
+  getCurrencies(): Observable<CurrencyLookup[]> {
+    return this.http.get<CurrencyLookup[]>(`${this.baseUrl}/currencies`).pipe(
+      tap(list => this.currencies.set(list))
     );
   }
 

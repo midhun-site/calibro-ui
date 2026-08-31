@@ -474,7 +474,7 @@
   padding: 0.4rem 0.7rem;
   font-size: 0.80rem;
   border-radius: 6px;
-  background: #141e33;
+  background-color: #141e33;
   border: 1px solid #283750;
   color: #f8fafc;
   box-sizing: border-box;
@@ -485,26 +485,28 @@
 .form-group input:hover,
 .form-select:hover {
   border-color: #3b4f70;
-  background: #18233a;
+  background-color: #18233a;
 }
 
 .form-group input:focus,
 .form-select:focus {
   border-color: var(--accent-cyan, #00f2fe);
-  background: #111a2e;
+  background-color: #111a2e;
   box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.15);
   outline: none;
 }
 
 .form-select {
   cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.65rem center;
-  background-repeat: no-repeat;
-  background-size: 1.1em 1.1em;
-  padding-right: 2rem;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-color: #141e33 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2300f2fe' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-position: right 0.75rem center !important;
+  background-repeat: no-repeat !important;
+  background-size: 14px 14px !important;
+  padding-right: 2.2rem !important;
 }
 
 .full-span {

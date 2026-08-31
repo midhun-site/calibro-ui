@@ -16,6 +16,22 @@ export interface Branch {
   countryName?: string;
   isMainBranch: boolean;
   isActive: boolean;
+
+  // Branch-Level Document Prefixes
+  prefixEnquiry?: string;
+  prefixQuotation?: string;
+  prefixWorkorder?: string;
+  prefixCertificate?: string;
+  prefixDeliveryTicket?: string;
+  prefixInvoice?: string;
+
+  // Branch-Level Environmental Defaults & Operating Tolerances
+  defaultCurrency?: string;
+  defaultVatRate?: number;
+  defaultCalibPeriodMonths?: number;
+  defaultTemp?: string;
+  defaultPress?: string;
+  defaultHumidity?: string;
 }
 
 /**
@@ -33,6 +49,62 @@ export interface SaveBranchPayload {
   countryId?: number;
   isMainBranch: boolean;
   isActive: boolean;
+
+  prefixEnquiry?: string;
+  prefixQuotation?: string;
+  prefixWorkorder?: string;
+  prefixCertificate?: string;
+  prefixDeliveryTicket?: string;
+  prefixInvoice?: string;
+
+  defaultCurrency?: string;
+  defaultVatRate?: number;
+  defaultCalibPeriodMonths?: number;
+  defaultTemp?: string;
+  defaultPress?: string;
+  defaultHumidity?: string;
+}
+
+/**
+ * Interface representing 1-time immutable document prefixes for a branch.
+ */
+export interface BranchPrefixResponse {
+  id: number;
+  branchId: number;
+  branchCode: string;
+  branchName: string;
+  prefixEnquiry?: string;
+  prefixQuotation?: string;
+  prefixWorkorder?: string;
+  prefixCertificate?: string;
+  prefixDeliveryTicket?: string;
+  prefixInvoice?: string;
+  isConfigured: boolean;
+  isLocked: boolean;
+  configuredAt?: string;
+}
+
+/**
+ * Command payload for 1-time creation of branch document numbering prefixes.
+ */
+export interface CreateBranchPrefixPayload {
+  branchId: number;
+  prefixEnquiry: string;
+  prefixQuotation: string;
+  prefixWorkorder: string;
+  prefixCertificate: string;
+  prefixDeliveryTicket: string;
+  prefixInvoice: string;
+}
+
+/**
+ * Response interface after creating branch prefixes.
+ */
+export interface CreateBranchPrefixResponse {
+  id: number;
+  branchId: number;
+  message: string;
+  isLocked: boolean;
 }
 
 /**
