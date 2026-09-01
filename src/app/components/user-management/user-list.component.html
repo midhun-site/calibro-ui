@@ -2,13 +2,13 @@
   <div class="page-header">
     <div>
       <h2>System Users & Metrology Staff</h2>
-      <p class="subtitle">User Accounts, Access Roles & Departmental Signatories</p>
+      <p class="subtitle">Laboratory Personnel, Departmental Assignments & ISO 17025 Signatories</p>
     </div>
     <div class="header-actions">
       <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
         <i class="pi pi-download text-cyan"></i> Export CSV
       </button>
-      <button class="btn-primary" (click)="showCreateModal = true">
+      <button class="btn-primary" (click)="openCreateModal()">
         <i class="pi pi-plus"></i> Add New User
       </button>
     </div>
@@ -19,61 +19,138 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th (click)="toggleSort('userId')" class="sortable-header">
-              User ID <i class="pi" [ngClass]="getSortIcon('userId')"></i>
+            <th (click)="grid.toggleSort('employeeCode')" class="sortable-header" style="width: 110px;">
+              Emp Code <i class="pi" [ngClass]="grid.getSortIcon('employeeCode')"></i>
             </th>
-            <th (click)="toggleSort('fullName')" class="sortable-header">
-              Full Name <i class="pi" [ngClass]="getSortIcon('fullName')"></i>
+            <th (click)="grid.toggleSort('fullName')" class="sortable-header">
+              Full Name <i class="pi" [ngClass]="grid.getSortIcon('fullName')"></i>
             </th>
-            <th (click)="toggleSort('email')" class="sortable-header">
-              Email Address <i class="pi" [ngClass]="getSortIcon('email')"></i>
+            <th (click)="grid.toggleSort('username')" class="sortable-header">
+              Username <i class="pi" [ngClass]="grid.getSortIcon('username')"></i>
             </th>
-            <th (click)="toggleSort('role')" class="sortable-header">
-              System Role <i class="pi" [ngClass]="getSortIcon('role')"></i>
+            <th (click)="grid.toggleSort('emailAddress')" class="sortable-header">
+              Email Address <i class="pi" [ngClass]="grid.getSortIcon('emailAddress')"></i>
             </th>
-            <th (click)="toggleSort('department')" class="sortable-header">
-              Department <i class="pi" [ngClass]="getSortIcon('department')"></i>
+            <th (click)="grid.toggleSort('departmentName')" class="sortable-header">
+              Department <i class="pi" [ngClass]="grid.getSortIcon('departmentName')"></i>
             </th>
-            <th (click)="toggleSort('status')" class="sortable-header">
-              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            <th (click)="grid.toggleSort('designationName')" class="sortable-header">
+              Designation <i class="pi" [ngClass]="grid.getSortIcon('designationName')"></i>
             </th>
+            <th (click)="grid.toggleSort('branchName')" class="sortable-header">
+              Branch <i class="pi" [ngClass]="grid.getSortIcon('branchName')"></i>
+            </th>
+            <th>
+              System Roles
+            </th>
+            <th (click)="grid.toggleSort('isActive')" class="sortable-header" style="width: 100px;">
+              Status <i class="pi" [ngClass]="grid.getSortIcon('isActive')"></i>
+            </th>
+            <th style="width: 80px; text-align: center;">Actions</th>
           </tr>
           <tr class="filter-row">
             <td>
-              <input type="text" pInputText [ngModel]="filters()['userId']" (ngModelChange)="updateFilter('userId', $event)" placeholder="Search ID..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['employeeCode'] || ''" (ngModelChange)="grid.updateFilter('employeeCode', $event)" placeholder="Search Code..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['fullName']" (ngModelChange)="updateFilter('fullName', $event)" placeholder="Filter Name..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['fullName'] || ''" (ngModelChange)="grid.updateFilter('fullName', $event)" placeholder="Filter Name..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['email']" (ngModelChange)="updateFilter('email', $event)" placeholder="Filter Email..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['username'] || ''" (ngModelChange)="grid.updateFilter('username', $event)" placeholder="Filter User..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['role']" (ngModelChange)="updateFilter('role', $event)" placeholder="Filter Role..." class="filter-input" />
+              <input type="text" pInputText [ngModel]="grid.columnFilters()['emailAddress'] || ''" (ngModelChange)="grid.updateFilter('emailAddress', $event)" placeholder="Filter Email..." class="filter-input" />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['department']" (ngModelChange)="updateFilter('department', $event)" placeholder="Filter Dept..." class="filter-input" />
+              <select class="form-select filter-select" [ngModel]="grid.columnFilters()['departmentId'] || ''" (ngModelChange)="grid.updateFilter('departmentId', $event)">
+                <option value="">All Depts</option>
+                @for (dept of departments(); track dept.id) {
+                  <option [value]="dept.id">{{ dept.name }}</option>
+                }
+              </select>
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
+              <select class="form-select filter-select" [ngModel]="grid.columnFilters()['designationId'] || ''" (ngModelChange)="grid.updateFilter('designationId', $event)">
+                <option value="">All Designations</option>
+                @for (desig of allDesignations(); track desig.id) {
+                  <option [value]="desig.id">{{ desig.name }}</option>
+                }
+              </select>
+            </td>
+            <td>
+              <select class="form-select filter-select" [ngModel]="grid.columnFilters()['branchId'] || ''" (ngModelChange)="grid.updateFilter('branchId', $event)">
+                <option value="">All Branches</option>
+                @for (br of branches(); track br.id) {
+                  <option [value]="br.id">{{ br.name }}</option>
+                }
+              </select>
+            </td>
+            <td>
+              <!-- Role filter spacer -->
+            </td>
+            <td>
+              <select class="form-select filter-select" [ngModel]="grid.columnFilters()['isActive'] || ''" (ngModelChange)="grid.updateFilter('isActive', $event)">
+                <option value="">All</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </td>
+            <td>
+              <!-- Actions filter spacer -->
             </td>
           </tr>
         </thead>
         <tbody>
-          @for (item of paginatedData(); track item.userId) {
+          @for (item of grid.items(); track item.id) {
             <tr>
-              <td><span class="code-badge">{{ item.userId }}</span></td>
+              <td><span class="code-badge">{{ item.employeeCode || ('USR-' + item.id) }}</span></td>
               <td><strong style="color: var(--text-main);">{{ item.fullName }}</strong></td>
-              <td>{{ item.email }}</td>
-              <td><span class="code-badge" style="color: var(--accent-cyan);">{{ item.role }}</span></td>
-              <td>{{ item.department }}</td>
+              <td><span class="user-handle"><i class="pi pi-user text-cyan"></i> {{ item.username }}</span></td>
+              <td>{{ item.emailAddress }}</td>
               <td>
-                <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> ACTIVE</span>
+                @if (item.departmentName) {
+                  <span class="dept-badge">{{ item.departmentName }}</span>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+              <td>
+                @if (item.designationName) {
+                  <strong style="color: var(--text-main); font-size: 0.82rem;">{{ item.designationName }}</strong>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+              <td>
+                @if (item.branchName) {
+                  <span class="branch-pill"><i class="pi pi-building"></i> {{ item.branchName }}</span>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+              <td>
+                @if (item.roleNames) {
+                  <span class="role-pill">{{ item.roleNames }}</span>
+                } @else {
+                  <span class="text-muted">Standard</span>
+                }
+              </td>
+              <td>
+                @if (item.isActive) {
+                  <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> ACTIVE</span>
+                } @else {
+                  <span class="p-tag p-tag-danger"><i class="pi pi-times-circle"></i> INACTIVE</span>
+                }
+              </td>
+              <td class="action-cell">
+                <button class="grid-action-btn edit-btn" (click)="openEditModal(item)" title="Edit User">
+                  <i class="pi pi-pencil"></i>
+                </button>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="empty-state-cell">
+              <td colspan="10" class="empty-state-cell">
                 <div class="empty-state-container">
                   <div class="empty-icon-circle">
                     <i class="pi pi-users"></i>
@@ -83,10 +160,10 @@
                     No staff accounts match your active search filters or no users have been registered yet.
                   </p>
                   <div class="empty-state-actions">
-                    <button class="btn-secondary btn-sm" (click)="resetFilters()">
+                    <button class="btn-secondary btn-sm" (click)="grid.clearFilter()">
                       <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
                     </button>
-                    <button class="btn-primary btn-sm" (click)="showCreateModal = true">
+                    <button class="btn-primary btn-sm" (click)="openCreateModal()">
                       <i class="pi pi-plus"></i> Add New User
                     </button>
                   </div>
@@ -101,64 +178,221 @@
     <!-- Numbered Pagination Footer Controls Bar (1, 2, 3... 100) -->
     <div class="table-paginator">
       <div class="paginator-info">
-        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+        Showing {{ grid.showingFrom() }} to {{ grid.showingTo() }} of {{ grid.totalCount() }} entries
       </div>
       <div class="paginator-controls">
-        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+        <select
+          class="page-size-select"
+          [ngModel]="grid.pageSize()"
+          (ngModelChange)="grid.onPageSizeChange($event)"
+          title="Rows per page"
+        >
+          @for (opt of grid.pageSizeOptions(); track opt) {
+            <option [value]="opt">{{ opt }} / page</option>
+          }
+        </select>
+
+        <button class="paginator-btn" [disabled]="grid.currentPage() === 1" (click)="grid.prevPage()" title="Previous Page">
           <i class="pi pi-chevron-left"></i>
         </button>
 
         <div class="page-numbers">
-          @for (p of pageNumbers(); track $index) {
+          @for (p of grid.pageNumbers(); track $index) {
             @if (p === '...') {
               <span class="ellipsis">...</span>
             } @else {
-              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+              <button class="page-number-btn" [class.active]="p === grid.currentPage()" (click)="grid.goToPage(p)">
                 {{ p }}
               </button>
             }
           }
         </div>
 
-        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+        <button class="paginator-btn" [disabled]="grid.currentPage() === grid.totalPages()" (click)="grid.nextPage()" title="Next Page">
           <i class="pi pi-chevron-right"></i>
         </button>
       </div>
     </div>
   </div>
 
+  <!-- User Registration & Edit Dialog Modal -->
   @if (showCreateModal) {
-    <div class="modal-overlay" (click)="showCreateModal = false">
-      <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeCreateModal()">
+      <div class="modal-card user-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Register System User</h3>
-          <button class="modal-close-btn" (click)="showCreateModal = false">
+          <div class="modal-title-wrap">
+            <div class="modal-icon-badge">
+              <i class="pi" [ngClass]="isEditMode() ? 'pi-user-edit text-cyan' : 'pi-user-plus text-cyan'"></i>
+            </div>
+            <div>
+              <h3>{{ isEditMode() ? 'Edit Laboratory User' : 'Register Laboratory User' }}</h3>
+              <p class="modal-subtitle">
+                {{ isEditMode() ? 'Update staff credentials, departmental assignments & security roles' : 'Create system credentials, assign department, designation & security roles' }}
+              </p>
+            </div>
+          </div>
+          <button class="modal-close-btn" (click)="closeCreateModal()" [disabled]="isSavingUser()">
             <i class="pi pi-times"></i>
           </button>
         </div>
+
         <div class="modal-body">
-          <div class="form-grid">
+          <!-- Section 1: Basic Identity & Credentials -->
+          <div class="form-section-header">
+            <i class="pi pi-id-card text-cyan"></i> Personal Identity & Login Credentials
+          </div>
+          <div class="form-grid grid-3">
             <div class="form-group">
-              <label>Full Name</label>
-              <input type="text" pInputText [(ngModel)]="newUser.fullName" placeholder="e.g. Alex Rivera" />
+              <label>First Name <span class="req">*</span></label>
+              <input type="text" pInputText [(ngModel)]="newUserForm.firstName" placeholder="e.g. Marcus" />
             </div>
             <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" pInputText [(ngModel)]="newUser.email" placeholder="alex.rivera@calibro.com" />
+              <label>Last Name <span class="req">*</span></label>
+              <input type="text" pInputText [(ngModel)]="newUserForm.lastName" placeholder="e.g. Vance" />
             </div>
             <div class="form-group">
-              <label>System Role</label>
-              <input type="text" pInputText [(ngModel)]="newUser.role" placeholder="Metrologist / Technical Signatory" />
+              <label>Employee Code <span class="auto-tag">(Auto)</span></label>
+              <input type="text" pInputText [(ngModel)]="newUserForm.employeeCode" placeholder="Auto-generated (e.g. EMP-0001)" class="code-input" />
+            </div>
+
+            <div class="form-group">
+              <label>Username <span class="req">*</span></label>
+              <input type="text" pInputText [(ngModel)]="newUserForm.username" placeholder="e.g. marcus.vance" autocomplete="off" />
             </div>
             <div class="form-group">
-              <label>Department</label>
-              <input type="text" pInputText [(ngModel)]="newUser.department" placeholder="Lab Operations" />
+              <div class="label-with-action">
+                <label>
+                  Password 
+                  @if (!isEditMode()) {
+                    <span class="req">*</span>
+                  } @else {
+                    <span class="optional-tag">(Optional)</span>
+                  }
+                </label>
+                <button type="button" class="btn-link-action" (click)="generatePassword()" title="Auto-generate secure password">
+                  <i class="pi pi-key text-cyan"></i> Auto Generate
+                </button>
+              </div>
+              <div class="password-input-wrap">
+                <input 
+                  [type]="showPassword() ? 'text' : 'password'" 
+                  pInputText 
+                  [(ngModel)]="newUserForm.password" 
+                  [placeholder]="isEditMode() ? 'Leave blank to keep existing password' : 'Min 6 characters'" 
+                  autocomplete="new-password" 
+                  class="password-input" 
+                />
+                <div class="input-actions-inner">
+                  @if (newUserForm.password) {
+                    <button type="button" class="inner-icon-btn" (click)="copyPassword()" title="Copy password">
+                      <i class="pi pi-copy"></i>
+                    </button>
+                  }
+                  <button type="button" class="inner-icon-btn" (click)="togglePasswordVisibility()" title="Toggle visibility">
+                    <i class="pi" [ngClass]="showPassword() ? 'pi-eye-slash' : 'pi-eye'"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email Address <span class="req">*</span></label>
+              <input type="email" pInputText [(ngModel)]="newUserForm.emailAddress" placeholder="e.g. marcus@calibro.com" />
+            </div>
+
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" pInputText [(ngModel)]="newUserForm.phoneNumber" placeholder="+971 50 123 4567" />
+            </div>
+            <div class="form-group">
+              <label>Passport No</label>
+              <input type="text" pInputText [(ngModel)]="newUserForm.passportNo" placeholder="Passport number" />
+            </div>
+            <div class="form-group">
+              <label>National / Emirates ID</label>
+              <input type="text" pInputText [(ngModel)]="newUserForm.nationalId" placeholder="784-1985-1234567-1" />
             </div>
           </div>
+
+          <!-- Section 2: Laboratory Assignment & Hierarchy -->
+          <div class="form-section-header" style="margin-top: 1rem;">
+            <i class="pi pi-sitemap text-cyan"></i> Organization & Facility Assignment
+          </div>
+          <div class="form-grid grid-3">
+            <div class="form-group">
+              <label>Operating Branch <span class="req">*</span></label>
+              <select class="form-select" [(ngModel)]="newUserForm.branchId">
+                <option [ngValue]="undefined">-- Select Laboratory Branch --</option>
+                @for (br of branches(); track br.id) {
+                  <option [ngValue]="br.id">{{ br.name }} ({{ br.code }})</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Department</label>
+              <select class="form-select" [ngModel]="newUserForm.departmentId" (ngModelChange)="onDepartmentChange($event)">
+                <option [ngValue]="undefined">-- Select Department --</option>
+                @for (dept of departments(); track dept.id) {
+                  <option [ngValue]="dept.id">{{ dept.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Designation / Job Title</label>
+              <select class="form-select" [(ngModel)]="newUserForm.designationId">
+                <option [ngValue]="undefined">-- Select Designation --</option>
+                @for (desig of availableDesignations(); track desig.id) {
+                  <option [ngValue]="desig.id">{{ desig.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group full-span">
+              <label>Residential / Laboratory Mailing Address</label>
+              <input type="text" pInputText [(ngModel)]="newUserForm.address" placeholder="e.g. Unit 402, Al Quoz Industrial 3, Dubai, UAE" />
+            </div>
+          </div>
+
+          <!-- Section 3: System Roles & Permissions -->
+          <div class="form-section-header" style="margin-top: 1rem;">
+            <i class="pi pi-shield text-cyan"></i> Security Roles & Access Level
+          </div>
+          <div class="role-selection-grid">
+            @for (role of roles(); track role.id) {
+              <div class="role-check-card" [class.selected]="isRoleSelected(role.id)" (click)="toggleRole(role.id)">
+                <div class="role-check-header">
+                  <input type="checkbox" [checked]="isRoleSelected(role.id)" (click)="$event.stopPropagation(); toggleRole(role.id)" />
+                  <span class="role-card-title">{{ role.name }}</span>
+                </div>
+                @if (role.description) {
+                  <p class="role-card-desc">{{ role.description }}</p>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Section 4: Account Status -->
+          <div class="form-row status-toggle-row" style="margin-top: 0.85rem;">
+            <label class="toggle-container">
+              <input type="checkbox" [(ngModel)]="newUserForm.isActive" />
+              <span class="toggle-label">Account Active (Permitted to log in and sign records)</span>
+            </label>
+          </div>
         </div>
+
         <div class="modal-footer">
-          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
-          <button class="btn-primary" (click)="saveUser()">Save User</button>
+          <button class="btn-secondary" (click)="closeCreateModal()" [disabled]="isSavingUser()">
+            Cancel
+          </button>
+          <button class="btn-primary" (click)="saveUser()" [disabled]="isSavingUser()">
+            @if (isSavingUser()) {
+              <i class="pi pi-spin pi-spinner"></i> Saving Changes...
+            } @else {
+              <i class="pi" [ngClass]="isEditMode() ? 'pi-save' : 'pi-check'"></i>
+              {{ isEditMode() ? 'Update User' : 'Register User' }}
+            }
+          </button>
         </div>
       </div>
     </div>

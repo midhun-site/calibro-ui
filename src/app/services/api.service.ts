@@ -10,6 +10,7 @@ import { EnquiryRow, EnquiryQueryFilter, EnquiryListResponse } from '../models/e
 import { CountryLookup } from '../models/country.model';
 import { CurrencyLookup } from '../models/currency.model';
 import { DepartmentLookup, DesignationLookup } from '../models/department.model';
+import { UserRow, CreateUserPayload, CreateUserResponse, UpdateUserPayload, UpdateUserResponse, UserDetail, RoleLookup } from '../models/user.model';
 import { GridQueryParams, PagedGridResponse } from '../common/grid';
 
 import { environment } from '../../environments/environment';
@@ -22,6 +23,7 @@ export type { EnquiryRow, EnquiryQueryFilter, EnquiryListResponse } from '../mod
 export type { CountryLookup } from '../models/country.model';
 export type { CurrencyLookup } from '../models/currency.model';
 export type { DepartmentLookup, DesignationLookup } from '../models/department.model';
+export type { UserRow, CreateUserPayload, CreateUserResponse, UpdateUserPayload, UpdateUserResponse, UserDetail, RoleLookup } from '../models/user.model';
 export type { GridQueryParams, PagedGridResponse } from '../common/grid';
 
 /**
@@ -45,6 +47,7 @@ export class ApiService {
   public currencies = signal<CurrencyLookup[]>([]);
   public departments = signal<DepartmentLookup[]>([]);
   public designations = signal<DesignationLookup[]>([]);
+  public roles = signal<RoleLookup[]>([]);
 
   // -------------------------------------------------------------
   // Dashboard & Statistics
@@ -256,6 +259,20 @@ export class ApiService {
       tap(list => this.designations.set(list))
     );
   }
+
+  // -------------------------------------------------------------
+  // Security Roles Reference Endpoint
+  // -------------------------------------------------------------
+  /**
+   * Retrieves all system security roles for assignment.
+   */
+  getRoles(): Observable<RoleLookup[]> {
+    return this.http.get<RoleLookup[]>(`${this.baseUrl}/roles`).pipe(
+      tap(list => this.roles.set(list))
+    );
+  }
+
+
 
   // -------------------------------------------------------------
   // Calibration Enquiries (1-Million In-Memory Benchmark Store)

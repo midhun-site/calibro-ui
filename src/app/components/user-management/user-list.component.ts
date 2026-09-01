@@ -1,18 +1,17 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
+import { ApiService, DepartmentLookup, DesignationLookup, RoleLookup, Branch } from '../../services/api.service';
+import { UserService, UserRow, CreateUserPayload, UpdateUserPayload } from '../../services/user.service';
 import { ToastService } from '../../services/toast.service';
+import { DataGridState } from '../../common/grid';
 
-export interface UserItem {
-  userId: string;
-  fullName: string;
-  email: string;
-  role: string;
-  department: string;
-  status: string;
-}
-
+/**
+ * Component managing laboratory user accounts, metrology staff, and departmental signatories.
+ * Integrates server-side PostgreSQL pagination, filtering, sorting, CSV export, and full user creation & edit modal.
+ * Uses dedicated UserService for user management endpoints.
+ */
 @Component({
   selector: 'app-user-list',
   standalone: true,
@@ -20,165 +19,405 @@ export interface UserItem {
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css'
 })
-export class UserListComponent {
+export class UserListComponent implements OnInit {
+  private userService = inject(UserService);
+  private apiService = inject(ApiService);
   private toastService = inject(ToastService);
+
+  /**
+   * Universal data grid state managing server-side pagination, sorting, and per-column filtering.
+   */
+  public grid = new DataGridState<UserRow>({
+    fetchFn: (params) => this.userService.getUsers(params),
+    defaultPageSize: 10,
+    defaultSortColumn: 'id',
+    defaultSortDirection: 'desc'
+  });
+
   public showCreateModal = false;
+  public isEditMode = signal<boolean>(false);
+  public editingUserId = signal<number | null>(null);
+  public isSavingUser = signal<boolean>(false);
+  public showPassword = signal<boolean>(false);
   public Math = Math;
 
-  public users = signal<UserItem[]>([
-    { userId: 'USR-1001', fullName: 'Alex Rivera', email: 'alex.rivera@calibro.com', role: 'Senior Metrologist', department: 'Thermal & Pressure Lab', status: 'ACTIVE' },
-    { userId: 'USR-1002', fullName: 'Dr. Marcus Vance', email: 'marcus.vance@calibro.com', role: 'Technical Signatory', department: 'Quality Assurance', status: 'ACTIVE' },
-    { userId: 'USR-1003', fullName: 'Sarah Connor', email: 'sarah.connor@calibro.com', role: 'Calibration Engineer', department: 'Flow & Torque Lab', status: 'ACTIVE' },
-    { userId: 'USR-1004', fullName: 'Sarah Jenkins', email: 'sarah.jenkins@calibro.com', role: 'Metrology Technician', department: 'Electrical & RF Lab', status: 'ACTIVE' },
-    { userId: 'USR-1005', fullName: 'David Miller', email: 'david.miller@calibro.com', role: 'CRM Account Manager', department: 'Customer Success', status: 'ACTIVE' },
-    { userId: 'USR-1006', fullName: 'Rachel Adams', email: 'rachel.adams@calibro.com', role: 'Logistics Coordinator', department: 'Intake & Dispatch', status: 'ACTIVE' },
-    { userId: 'USR-1007', fullName: 'Michael Scott', email: 'michael.scott@calibro.com', role: 'Lab Director', department: 'Executive Management', status: 'ACTIVE' },
-    { userId: 'USR-1008', fullName: 'Jessica Pearson', email: 'jessica.pearson@calibro.com', role: 'Quality Manager', department: 'ISO 17025 Compliance', status: 'ACTIVE' }
-  ]);
+  // Dropdown reference signals
+  public branches = signal<Branch[]>([]);
+  public departments = signal<DepartmentLookup[]>([]);
+  public allDesignations = signal<DesignationLookup[]>([]);
+  public roles = signal<RoleLookup[]>([]);
 
-  public filters = signal<{ [key: string]: string }>({
-    userId: '', fullName: '', email: '', role: '', department: '', status: ''
+  // Selected department in modal to filter designations
+  public selectedDepartmentId = signal<number | null>(null);
+
+  /**
+   * Filtered designations based on the currently selected department in the registration form.
+   */
+  public availableDesignations = computed(() => {
+    const deptId = this.selectedDepartmentId();
+    const list = this.allDesignations();
+    if (!deptId || deptId <= 0) return list;
+    return list.filter(d => !d.departmentId || d.departmentId === deptId);
   });
 
-  public sortColumn = signal<string>('userId');
-  public sortDirection = signal<'asc' | 'desc'>('asc');
+  /**
+   * Form state for creating or editing a user / staff member.
+   */
+  public newUserForm: CreateUserPayload = this.getInitialUserForm();
 
-  public currentPage = signal<number>(1);
-  public pageSize = signal<number>(5);
+  ngOnInit(): void {
+    this.grid.load();
+    this.loadDropdownData();
+  }
 
-  public filteredData = computed(() => {
-    const data = this.users();
-    const f = this.filters();
-    return data.filter(item => {
-      return (
-        (!f['userId'] || item.userId.toLowerCase().includes(f['userId'].toLowerCase())) &&
-        (!f['fullName'] || item.fullName.toLowerCase().includes(f['fullName'].toLowerCase())) &&
-        (!f['email'] || item.email.toLowerCase().includes(f['email'].toLowerCase())) &&
-        (!f['role'] || item.role.toLowerCase().includes(f['role'].toLowerCase())) &&
-        (!f['department'] || item.department.toLowerCase().includes(f['department'].toLowerCase())) &&
-        (!f['status'] || item.status.toLowerCase().includes(f['status'].toLowerCase()))
-      );
+  /**
+   * Loads reference datasets on demand for registration dropdowns.
+   */
+  public loadDropdownData(): void {
+    this.apiService.getBranches().subscribe({
+      next: (res) => {
+        if (res && res.items) {
+          this.branches.set(res.items);
+        }
+      },
+      error: (err) => console.error('Failed to load branches', err)
     });
-  });
 
-  public sortedData = computed(() => {
-    const data = [...this.filteredData()];
-    const col = this.sortColumn();
-    const dir = this.sortDirection();
-    return data.sort((a, b) => {
-      const valA = (a as any)[col] ?? '';
-      const valB = (b as any)[col] ?? '';
-      if (valA < valB) return dir === 'asc' ? -1 : 1;
-      if (valA > valB) return dir === 'asc' ? 1 : -1;
-      return 0;
+    this.apiService.getDepartments().subscribe({
+      next: (data) => {
+        if (Array.isArray(data)) {
+          this.departments.set(data);
+        }
+      },
+      error: (err) => console.error('Failed to load departments', err)
     });
-  });
 
-  public totalPages = computed(() => Math.ceil(this.sortedData().length / this.pageSize()) || 1);
+    this.apiService.getDesignations().subscribe({
+      next: (data) => {
+        if (Array.isArray(data)) {
+          this.allDesignations.set(data);
+        }
+      },
+      error: (err) => console.error('Failed to load designations', err)
+    });
 
-  public paginatedData = computed(() => {
-    const page = this.currentPage();
-    const size = this.pageSize();
-    const start = (page - 1) * size;
-    return this.sortedData().slice(start, start + size);
-  });
+    this.apiService.getRoles().subscribe({
+      next: (data) => {
+        if (Array.isArray(data)) {
+          this.roles.set(data);
+        }
+      },
+      error: (err) => console.error('Failed to load roles', err)
+    });
+  }
 
-  public pageNumbers = computed(() => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: (number | string)[] = [];
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (current > 3) pages.push('...');
-      const start = Math.max(2, current - 1);
-      const end = Math.min(total - 1, current + 1);
-      for (let i = start; i <= end; i++) pages.push(i);
-      if (current < total - 2) pages.push('...');
-      pages.push(total);
+  /**
+   * Resets form to clean initial state.
+   */
+  private getInitialUserForm(): CreateUserPayload {
+    return {
+      firstName: '',
+      lastName: '',
+      username: '',
+      emailAddress: '',
+      password: '',
+      phoneNumber: '',
+      address: '',
+      passportNo: '',
+      nationalId: '',
+      employeeCode: '',
+      departmentId: undefined,
+      designationId: undefined,
+      branchId: undefined,
+      roleIds: [],
+      isActive: true
+    };
+  }
+
+  /**
+   * Handles department dropdown changes to dynamically filter designations.
+   */
+  public onDepartmentChange(deptId: number | string | undefined): void {
+    const id = deptId ? Number(deptId) : null;
+    this.selectedDepartmentId.set(id);
+    this.newUserForm.departmentId = id || undefined;
+    this.newUserForm.designationId = undefined; // reset designation when dept changes
+  }
+
+  /**
+   * Opens the user registration modal dialog in CREATE mode.
+   */
+  public openCreateModal(): void {
+    this.isEditMode.set(false);
+    this.editingUserId.set(null);
+    this.newUserForm = this.getInitialUserForm();
+    this.selectedDepartmentId.set(null);
+    this.showPassword.set(false);
+    this.loadDropdownData();
+    this.userService.getNextEmployeeCode().subscribe({
+      next: (res) => {
+        if (res && res.code) {
+          this.newUserForm.employeeCode = res.code;
+        }
+      },
+      error: () => {
+        this.newUserForm.employeeCode = 'EMP-0001';
+      }
+    });
+    this.showCreateModal = true;
+  }
+
+  /**
+   * Opens the user modal in EDIT mode and loads the full user profile.
+   * @param user Selected user row.
+   */
+  public openEditModal(user: UserRow): void {
+    this.isEditMode.set(true);
+    this.editingUserId.set(user.id);
+    this.showPassword.set(false);
+    this.loadDropdownData();
+
+    // Set initial quick values from grid row
+    this.newUserForm = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      emailAddress: user.emailAddress,
+      password: '', // Blank indicates password remains unchanged
+      phoneNumber: user.phoneNumber || '',
+      address: user.address || '',
+      passportNo: user.passportNo || '',
+      nationalId: user.nationalId || '',
+      employeeCode: user.employeeCode || '',
+      departmentId: user.departmentId || undefined,
+      designationId: user.designationId || undefined,
+      branchId: user.branchId || undefined,
+      roleIds: [],
+      isActive: user.isActive
+    };
+    this.selectedDepartmentId.set(user.departmentId || null);
+    this.showCreateModal = true;
+
+    // Fetch full user record including roles via UserService
+    this.userService.getUserById(user.id).subscribe({
+      next: (detail) => {
+        this.newUserForm = {
+          firstName: detail.firstName,
+          lastName: detail.lastName,
+          username: detail.username,
+          emailAddress: detail.emailAddress,
+          password: '',
+          phoneNumber: detail.phoneNumber || '',
+          address: detail.address || '',
+          passportNo: detail.passportNo || '',
+          nationalId: detail.nationalId || '',
+          employeeCode: detail.employeeCode || '',
+          departmentId: detail.departmentId || undefined,
+          designationId: detail.designationId || undefined,
+          branchId: detail.branchId || undefined,
+          roleIds: detail.roleIds || [],
+          isActive: detail.isActive
+        };
+        this.selectedDepartmentId.set(detail.departmentId || null);
+      },
+      error: (err) => {
+        console.error('Failed to load user details', err);
+      }
+    });
+  }
+
+  /**
+   * Closes the user registration / edit modal dialog.
+   */
+  public closeCreateModal(): void {
+    if (this.isSavingUser()) return;
+    this.showCreateModal = false;
+  }
+
+  /**
+   * Generates a strong, secure 12-character random password.
+   */
+  public generatePassword(): void {
+    const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijkmnpqrstuvwxyz';
+    const numbers = '23456789';
+    const symbols = '!@#$%&*';
+    const all = uppercase + lowercase + numbers + symbols;
+
+    let pwd = '';
+    pwd += uppercase[Math.floor(Math.random() * uppercase.length)];
+    pwd += lowercase[Math.floor(Math.random() * lowercase.length)];
+    pwd += numbers[Math.floor(Math.random() * numbers.length)];
+    pwd += symbols[Math.floor(Math.random() * symbols.length)];
+
+    for (let i = 4; i < 12; i++) {
+      pwd += all[Math.floor(Math.random() * all.length)];
     }
-    return pages;
-  });
 
-  public newUser = { fullName: '', email: '', role: 'Metrologist', department: '' };
-
-  updateFilter(col: string, val: string) {
-    this.filters.update(f => ({ ...f, [col]: val }));
-    this.currentPage.set(1);
+    // Shuffle characters
+    pwd = pwd.split('').sort(() => 0.5 - Math.random()).join('');
+    this.newUserForm.password = pwd;
+    this.showPassword.set(true);
+    this.toastService.showInfo('Password Generated', 'Auto-generated strong temporary password.');
   }
 
-  resetFilters() {
-    this.filters.set({ userId: '', fullName: '', email: '', role: '', department: '', status: '' });
-    this.currentPage.set(1);
+  /**
+   * Toggles password masking in input.
+   */
+  public togglePasswordVisibility(): void {
+    this.showPassword.update(v => !v);
   }
 
-  toggleSort(col: string) {
-    if (this.sortColumn() === col) {
-      this.sortDirection.update(d => d === 'asc' ? 'desc' : 'asc');
-    } else {
-      this.sortColumn.set(col);
-      this.sortDirection.set('asc');
+  /**
+   * Copies the current password to the system clipboard.
+   */
+  public copyPassword(): void {
+    if (this.newUserForm.password) {
+      navigator.clipboard.writeText(this.newUserForm.password);
+      this.toastService.showSuccess('Copied', 'Password copied to clipboard.');
     }
   }
 
-  getSortIcon(col: string): string {
-    if (this.sortColumn() !== col) return 'pi-sort-alt';
-    return this.sortDirection() === 'asc' ? 'pi-sort-amount-up-alt text-cyan' : 'pi-sort-amount-down text-cyan';
-  }
+  /**
+   * Validates and submits the user registration or update payload to the API.
+   */
+  public saveUser(): void {
+    const f = this.newUserForm;
+    const isEdit = this.isEditMode();
 
-  goToPage(p: number) {
-    if (p >= 1 && p <= this.totalPages()) this.currentPage.set(p);
-  }
-
-  prevPage() {
-    if (this.currentPage() > 1) this.currentPage.update(p => p - 1);
-  }
-
-  nextPage() {
-    if (this.currentPage() < this.totalPages()) this.currentPage.update(p => p + 1);
-  }
-
-  exportToCsv() {
-    const data = this.sortedData();
-    if (data.length === 0) {
-      this.toastService.showWarning('Export Error', 'No data available to export.');
+    if (!f.firstName?.trim() || !f.lastName?.trim()) {
+      this.toastService.showWarning('Required Fields', 'Please enter staff First Name and Last Name.');
       return;
     }
-    let csvContent = 'User ID,Full Name,Email,Role,Department,Status\n';
+
+    if (!f.username?.trim()) {
+      this.toastService.showWarning('Required Field', 'Please enter a unique Username.');
+      return;
+    }
+
+    if (!f.emailAddress?.trim()) {
+      this.toastService.showWarning('Required Field', 'Please enter an Email Address.');
+      return;
+    }
+
+    // Password required for new accounts; optional for editing existing accounts
+    if (!isEdit && (!f.password || f.password.length < 6)) {
+      this.toastService.showWarning('Weak Password', 'Password must be at least 6 characters.');
+      return;
+    }
+
+    if (isEdit && f.password && f.password.length > 0 && f.password.length < 6) {
+      this.toastService.showWarning('Weak Password', 'New password must be at least 6 characters.');
+      return;
+    }
+
+    this.isSavingUser.set(true);
+
+    if (isEdit) {
+      const updatePayload: UpdateUserPayload = {
+        id: this.editingUserId()!,
+        firstName: f.firstName.trim(),
+        lastName: f.lastName.trim(),
+        username: f.username.trim(),
+        emailAddress: f.emailAddress.trim(),
+        password: f.password?.trim() || undefined,
+        phoneNumber: f.phoneNumber?.trim() || undefined,
+        address: f.address?.trim() || undefined,
+        passportNo: f.passportNo?.trim() || undefined,
+        nationalId: f.nationalId?.trim() || undefined,
+        employeeCode: f.employeeCode?.trim() || undefined,
+        departmentId: f.departmentId ? Number(f.departmentId) : undefined,
+        designationId: f.designationId ? Number(f.designationId) : undefined,
+        branchId: f.branchId ? Number(f.branchId) : undefined,
+        roleIds: f.roleIds && f.roleIds.length > 0 ? f.roleIds.map(r => Number(r)) : undefined,
+        isActive: f.isActive ?? true
+      };
+
+      this.userService.updateUser(updatePayload.id, updatePayload).subscribe({
+        next: (res) => {
+          this.isSavingUser.set(false);
+          this.showCreateModal = false;
+          this.toastService.showSuccess('User Updated', `Staff member ${updatePayload.firstName} ${updatePayload.lastName} updated successfully.`);
+          this.grid.load();
+        },
+        error: (err) => {
+          this.isSavingUser.set(false);
+          const detail = err.error?.detail || err.error?.title || err.message || 'Failed to update user account.';
+          this.toastService.showError('Update Failed', detail);
+        }
+      });
+    } else {
+      const createPayload: CreateUserPayload = {
+        firstName: f.firstName.trim(),
+        lastName: f.lastName.trim(),
+        username: f.username.trim(),
+        emailAddress: f.emailAddress.trim(),
+        password: f.password.trim(),
+        phoneNumber: f.phoneNumber?.trim() || undefined,
+        address: f.address?.trim() || undefined,
+        passportNo: f.passportNo?.trim() || undefined,
+        nationalId: f.nationalId?.trim() || undefined,
+        employeeCode: f.employeeCode?.trim() || undefined,
+        departmentId: f.departmentId ? Number(f.departmentId) : undefined,
+        designationId: f.designationId ? Number(f.designationId) : undefined,
+        branchId: f.branchId ? Number(f.branchId) : undefined,
+        roleIds: f.roleIds && f.roleIds.length > 0 ? f.roleIds.map(r => Number(r)) : undefined,
+        isActive: f.isActive ?? true
+      };
+
+      this.userService.createUser(createPayload).subscribe({
+        next: (res) => {
+          this.isSavingUser.set(false);
+          this.showCreateModal = false;
+          this.toastService.showSuccess('User Created', `Staff user registered successfully (User ID: ${res.id}).`);
+          this.grid.load();
+        },
+        error: (err) => {
+          this.isSavingUser.set(false);
+          const detail = err.error?.detail || err.error?.title || err.message || 'Failed to create user account.';
+          this.toastService.showError('Registration Failed', detail);
+        }
+      });
+    }
+  }
+
+  /**
+   * Exports filtered grid rows to CSV.
+   */
+  public exportToCsv(): void {
+    const data = this.grid.items();
+    if (data.length === 0) {
+      this.toastService.showWarning('Export Error', 'No records available to export.');
+      return;
+    }
+    let csvContent = 'Employee Code,Username,Full Name,Email,Phone,Department,Designation,Branch,Roles,Status,Last Login\n';
     data.forEach(row => {
-      csvContent += `"${row.userId}","${row.fullName}","${row.email}","${row.role}","${row.department}","${row.status}"\n`;
+      csvContent += `"${row.employeeCode || ''}","${row.username}","${row.fullName}","${row.emailAddress}","${row.phoneNumber || ''}","${row.departmentName || ''}","${row.designationName || ''}","${row.branchName || ''}","${row.roleNames || ''}","${row.isActive ? 'ACTIVE' : 'INACTIVE'}","${row.lastLoginAt || 'Never'}"\n`;
     });
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `CaliBro_System_Users_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `CaliBro_Staff_Users_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    this.toastService.showSuccess('Export Successful', `Exported ${data.length} records to CSV.`);
+    this.toastService.showSuccess('Export Complete', `Exported ${data.length} staff records to CSV.`);
   }
 
-  saveUser() {
-    if (!this.newUser.fullName || !this.newUser.email) {
-      this.toastService.showWarning('Required Field', 'Please enter Full Name and Email Address.');
-      return;
+  /**
+   * Helper to toggle role selection.
+   */
+  public toggleRole(roleId: number): void {
+    const current = this.newUserForm.roleIds || [];
+    if (current.includes(roleId)) {
+      this.newUserForm.roleIds = current.filter(id => id !== roleId);
+    } else {
+      this.newUserForm.roleIds = [...current, roleId];
     }
-    const newId = `USR-${this.users().length + 1001}`;
-    this.users.update(list => [
-      {
-        userId: newId,
-        fullName: this.newUser.fullName,
-        email: this.newUser.email,
-        role: this.newUser.role || 'Metrologist',
-        department: this.newUser.department || 'Lab Operations',
-        status: 'ACTIVE'
-      },
-      ...list
-    ]);
-    this.showCreateModal = false;
-    this.toastService.showSuccess('User Account Created', `User ${this.newUser.fullName} registered.`);
-    this.newUser = { fullName: '', email: '', role: 'Metrologist', department: '' };
+  }
+
+  public isRoleSelected(roleId: number): boolean {
+    return (this.newUserForm.roleIds || []).includes(roleId);
   }
 }
