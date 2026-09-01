@@ -1,98 +1,229 @@
-<div class="page-container">
+<div class="procedures-container">
+  <!-- Page Header -->
   <div class="page-header">
-    <div>
-      <h2>Calibration Procedures & SOP Registry</h2>
-      <p class="subtitle">ISO/IEC 17025 Standard Operating Procedures & Technical Guidelines</p>
+    <div class="header-left">
+      <div class="title-with-badge">
+        <h1 class="page-title">QC Procedures & SOPs</h1>
+        <span class="record-badge">
+          <i class="pi pi-bolt"></i> {{ grid.totalCount() }} Procedures
+        </span>
+        @if (grid.executionTimeMs() > 0) {
+          <span class="execution-badge">
+            <i class="pi pi-clock"></i> {{ grid.executionTimeMs() }} ms
+          </span>
+        }
+      </div>
+      <p class="page-subtitle">
+        Standard Operating Procedures (SOPs), ISO/IEC 17025 Scope Accreditations & Calibration Work Instructions
+      </p>
     </div>
     <div class="header-actions">
-      <button class="btn-secondary" (click)="exportToCsv()" title="Export Grid Data to CSV">
-        <i class="pi pi-download text-cyan"></i> Export CSV
+      <button class="btn-secondary" (click)="exportCsv()" title="Export procedures to CSV">
+        <i class="pi pi-download"></i> Export CSV
       </button>
-      <button class="btn-primary" (click)="showCreateModal = true">
-        <i class="pi pi-plus"></i> Register SOP
+      <button class="btn-primary" (click)="openCreateModal()">
+        <i class="pi pi-plus"></i> Add Procedure
       </button>
     </div>
   </div>
 
-  <div class="glass-card table-card">
+  <!-- Data Grid Card -->
+  <div class="grid-card">
     <div class="table-responsive">
       <table class="data-table">
         <thead>
+          <!-- Column Headers -->
           <tr>
-            <th (click)="toggleSort('docNo')" class="sortable-header">
-              SOP Doc No. <i class="pi" [ngClass]="getSortIcon('docNo')"></i>
+            <th (click)="grid.toggleSort('procedureNumber')" class="sortable">
+              PROCEDURE NUMBER <i class="pi" [ngClass]="grid.getSortIcon('procedureNumber')"></i>
             </th>
-            <th (click)="toggleSort('title')" class="sortable-header">
-              Procedure Title <i class="pi" [ngClass]="getSortIcon('title')"></i>
+            <th (click)="grid.toggleSort('calibrationProcedure')" class="sortable">
+              CALIBRATION PROCEDURE <i class="pi" [ngClass]="grid.getSortIcon('calibrationProcedure')"></i>
             </th>
-            <th (click)="toggleSort('discipline')" class="sortable-header">
-              Discipline <i class="pi" [ngClass]="getSortIcon('discipline')"></i>
+            <th (click)="grid.toggleSort('lab')" class="sortable">
+              LAB <i class="pi" [ngClass]="grid.getSortIcon('lab')"></i>
             </th>
-            <th (click)="toggleSort('standardRef')" class="sortable-header">
-              Standard Reference <i class="pi" [ngClass]="getSortIcon('standardRef')"></i>
+            <th (click)="grid.toggleSort('procedureType')" class="sortable">
+              PROCEDURE TYPE <i class="pi" [ngClass]="grid.getSortIcon('procedureType')"></i>
             </th>
-            <th (click)="toggleSort('revNo')" class="sortable-header">
-              Revision <i class="pi" [ngClass]="getSortIcon('revNo')"></i>
+            <th (click)="grid.toggleSort('revision')" class="sortable">
+              REVISION <i class="pi" [ngClass]="grid.getSortIcon('revision')"></i>
             </th>
-            <th (click)="toggleSort('status')" class="sortable-header">
-              Status <i class="pi" [ngClass]="getSortIcon('status')"></i>
+            <th (click)="grid.toggleSort('branchName')" class="sortable">
+              BRANCH <i class="pi" [ngClass]="grid.getSortIcon('branchName')"></i>
             </th>
+            <th (click)="grid.toggleSort('isActive')" class="sortable text-center">
+              STATUS <i class="pi" [ngClass]="grid.getSortIcon('isActive')"></i>
+            </th>
+            <th class="text-center" style="width: 100px;">ACTIONS</th>
           </tr>
+
+          <!-- Per-Column Filters -->
           <tr class="filter-row">
             <td>
-              <input type="text" pInputText [ngModel]="filters()['docNo']" (ngModelChange)="updateFilter('docNo', $event)" placeholder="Search SOP..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="grid.columnFilters()['procedureNumber']"
+                (ngModelChange)="grid.setFilterValue('procedureNumber', $event)"
+                (keydown.enter)="grid.applyFilter()"
+                (blur)="grid.applyFilter()"
+                placeholder="Filter Number..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['title']" (ngModelChange)="updateFilter('title', $event)" placeholder="Filter Title..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="grid.columnFilters()['calibrationProcedure']"
+                (ngModelChange)="grid.setFilterValue('calibrationProcedure', $event)"
+                (keydown.enter)="grid.applyFilter()"
+                (blur)="grid.applyFilter()"
+                placeholder="Filter Procedure..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['discipline']" (ngModelChange)="updateFilter('discipline', $event)" placeholder="Filter Discipline..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="grid.columnFilters()['lab']"
+                (ngModelChange)="grid.setFilterValue('lab', $event)"
+                (keydown.enter)="grid.applyFilter()"
+                (blur)="grid.applyFilter()"
+                placeholder="Filter Lab..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['standardRef']" (ngModelChange)="updateFilter('standardRef', $event)" placeholder="Filter Standard..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="grid.columnFilters()['procedureType']"
+                (ngModelChange)="grid.setFilterValue('procedureType', $event)"
+                (keydown.enter)="grid.applyFilter()"
+                (blur)="grid.applyFilter()"
+                placeholder="Filter Type..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['revNo']" (ngModelChange)="updateFilter('revNo', $event)" placeholder="Filter Rev..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="grid.columnFilters()['revision']"
+                (ngModelChange)="grid.setFilterValue('revision', $event)"
+                (keydown.enter)="grid.applyFilter()"
+                (blur)="grid.applyFilter()"
+                placeholder="Filter Rev..."
+                class="filter-input"
+              />
             </td>
             <td>
-              <input type="text" pInputText [ngModel]="filters()['status']" (ngModelChange)="updateFilter('status', $event)" placeholder="Filter Status..." class="filter-input" />
+              <input
+                type="text"
+                pInputText
+                [ngModel]="grid.columnFilters()['branchName']"
+                (ngModelChange)="grid.setFilterValue('branchName', $event)"
+                (keydown.enter)="grid.applyFilter()"
+                (blur)="grid.applyFilter()"
+                placeholder="Filter Branch..."
+                class="filter-input"
+              />
             </td>
+            <td>
+              <select
+                class="form-select filter-select"
+                [ngModel]="grid.columnFilters()['isActive'] || ''"
+                (ngModelChange)="grid.updateFilter('isActive', $event)"
+              >
+                <option value="">All</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </td>
+            <td></td>
           </tr>
         </thead>
         <tbody>
-          @for (item of paginatedData(); track item.docNo) {
+          @if (grid.isLoading()) {
+            <!-- High-Tech Metrology Grid Loader -->
             <tr>
-              <td><span class="code-badge">{{ item.docNo }}</span></td>
-              <td><strong style="color: var(--text-main);">{{ item.title }}</strong></td>
-              <td><span class="code-badge" style="color: var(--accent-cyan);">{{ item.discipline }}</span></td>
-              <td>{{ item.standardRef }}</td>
-              <td>{{ item.revNo }}</td>
-              <td>
-                <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> ACTIVE</span>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="6" class="empty-state-cell">
-                <div class="empty-state-container">
-                  <div class="empty-icon-circle">
-                    <i class="pi pi-book"></i>
+              <td colspan="8" class="grid-loading-cell">
+                <div class="grid-loading-container">
+                  <div class="grid-loading-spinner-wrap">
+                    <i class="pi pi-spin pi-spinner grid-loading-spinner"></i>
                   </div>
-                  <h4 class="empty-state-title">No Procedures Found</h4>
-                  <p class="empty-state-subtitle">
-                    No calibration SOP procedures match your active search filters or no standard methods have been registered yet.
-                  </p>
-                  <div class="empty-state-actions">
-                    <button class="btn-secondary btn-sm" (click)="resetFilters()">
-                      <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
-                    </button>
-                    <button class="btn-primary btn-sm" (click)="showCreateModal = true">
-                      <i class="pi pi-plus"></i> Register SOP
-                    </button>
-                  </div>
+                  <span class="grid-loading-text">Loading QC calibration procedures & SOPs...</span>
                 </div>
               </td>
             </tr>
+          } @else {
+            @for (item of grid.items(); track item.id) {
+              <tr>
+                <td>
+                  <span class="code-badge">{{ item.procedureNumber }}</span>
+                </td>
+                <td>
+                  <strong class="procedure-title">{{ item.calibrationProcedure }}</strong>
+                </td>
+                <td>
+                  <span class="lab-badge">
+                    <i class="pi pi-compass"></i> {{ item.lab }}
+                  </span>
+                </td>
+                <td>
+                  <span class="type-badge">{{ item.procedureType }}</span>
+                </td>
+                <td>
+                  <span class="rev-badge">{{ item.revision }}</span>
+                </td>
+                <td>
+                  {{ item.branchName || '-' }}
+                </td>
+                <td class="text-center">
+                  @if (item.isActive) {
+                    <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> ACTIVE</span>
+                  } @else {
+                    <span class="p-tag p-tag-danger"><i class="pi pi-times-circle"></i> INACTIVE</span>
+                  }
+                </td>
+                <td class="text-center">
+                  <div class="action-buttons">
+                    <button class="btn-icon edit-btn" (click)="openEditModal(item)" title="Edit Procedure">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button class="btn-icon delete-btn" (click)="promptDelete(item)" title="Delete Procedure">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <!-- Universal Empty State Card -->
+              <tr>
+                <td colspan="8" class="empty-state-cell">
+                  <div class="empty-state-container">
+                    <div class="empty-icon-circle">
+                      <i class="pi pi-file-o"></i>
+                    </div>
+                    <h4 class="empty-state-title">No QC Procedures Found</h4>
+                    <p class="empty-state-subtitle">
+                      No calibration procedures match your active search filters or no records have been added yet.
+                    </p>
+                    <div class="empty-state-actions">
+                      <button class="btn-secondary btn-sm" (click)="grid.clearFilter()">
+                        <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                      </button>
+                      <button class="btn-primary btn-sm" (click)="openCreateModal()">
+                        <i class="pi pi-plus"></i> Add Procedure
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>
@@ -101,64 +232,154 @@
     <!-- Numbered Pagination Footer Controls Bar (1, 2, 3... 100) -->
     <div class="table-paginator">
       <div class="paginator-info">
-        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), sortedData().length) }} of {{ sortedData().length }} entries
+        Showing {{ grid.showingFrom() }} to {{ grid.showingTo() }} of {{ grid.totalCount() }} entries
       </div>
       <div class="paginator-controls">
-        <button class="paginator-btn" [disabled]="currentPage() === 1" (click)="prevPage()" title="Previous Page">
+        <select
+          class="page-size-select"
+          [ngModel]="grid.pageSize()"
+          (ngModelChange)="grid.onPageSizeChange($event)"
+          title="Rows per page"
+        >
+          @for (opt of grid.pageSizeOptions(); track opt) {
+            <option [value]="opt">{{ opt }} / page</option>
+          }
+        </select>
+
+        <button class="paginator-btn" [disabled]="grid.currentPage() === 1" (click)="grid.prevPage()" title="Previous Page">
           <i class="pi pi-chevron-left"></i>
         </button>
 
         <div class="page-numbers">
-          @for (p of pageNumbers(); track $index) {
+          @for (p of grid.pageNumbers(); track $index) {
             @if (p === '...') {
               <span class="ellipsis">...</span>
             } @else {
-              <button class="page-number-btn" [class.active]="p === currentPage()" (click)="goToPage(+p)">
+              <button class="page-number-btn" [class.active]="p === grid.currentPage()" (click)="grid.goToPage(p)">
                 {{ p }}
               </button>
             }
           }
         </div>
 
-        <button class="paginator-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()" title="Next Page">
+        <button class="paginator-btn" [disabled]="grid.currentPage() >= grid.totalPages()" (click)="grid.nextPage()" title="Next Page">
           <i class="pi pi-chevron-right"></i>
         </button>
       </div>
     </div>
   </div>
 
-  @if (showCreateModal) {
-    <div class="modal-overlay" (click)="showCreateModal = false">
-      <div class="modal-card" (click)="$event.stopPropagation()">
+  <!-- QC Procedure Edit / Add Form Modal (Standard CaliBro Modal Design) -->
+  @if (showModal) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-card procedure-modal" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
         <div class="modal-header">
-          <h3>Register SOP Calibration Procedure</h3>
-          <button class="modal-close-btn" (click)="showCreateModal = false">
+          <div class="modal-title-wrap">
+            <div class="modal-icon-badge">
+              <i class="pi" [ngClass]="isEditMode ? 'pi-file-edit text-cyan' : 'pi-file-plus text-cyan'"></i>
+            </div>
+            <div>
+              <h3>{{ isEditMode ? 'Edit QC Calibration Procedure' : 'Add QC Calibration Procedure' }}</h3>
+              <p class="modal-subtitle">
+                {{ isEditMode ? 'Update procedure specifications, standard references & operating branch' : 'Register new ISO/IEC 17025 standard operating procedure and scope' }}
+              </p>
+            </div>
+          </div>
+          <button class="modal-close-btn" (click)="closeModal()" [disabled]="isSaving()" title="Close">
             <i class="pi pi-times"></i>
           </button>
         </div>
+
+        <!-- Modal Body: Sectioned 2-Column Grid -->
         <div class="modal-body">
-          <div class="form-grid">
+          <div class="form-section-header">
+            <i class="pi pi-compass text-cyan"></i> Laboratory Scope & Standard Specification
+          </div>
+
+          <div class="form-grid grid-2">
             <div class="form-group">
-              <label>SOP Document Number</label>
-              <input type="text" pInputText [(ngModel)]="newProc.docNo" placeholder="e.g. SOP-CAL-P09" />
+              <label>Laboratory (Discipline) <span class="req">*</span></label>
+              <select class="form-select" [(ngModel)]="formData.lab">
+                <option value="" disabled>-- Select Laboratory --</option>
+                @for (lab of labOptions; track lab) {
+                  <option [value]="lab">{{ lab }}</option>
+                }
+              </select>
             </div>
+
             <div class="form-group">
-              <label>Procedure Title</label>
-              <input type="text" pInputText [(ngModel)]="newProc.title" placeholder="e.g. Calibration of Digital Pressure Transmitters" />
+              <label>Procedure Type <span class="req">*</span></label>
+              <select class="form-select" [(ngModel)]="formData.procedureType">
+                @for (type of procedureTypeOptions; track type) {
+                  <option [value]="type">{{ type }}</option>
+                }
+              </select>
             </div>
+
             <div class="form-group">
-              <label>Discipline</label>
-              <input type="text" pInputText [(ngModel)]="newProc.discipline" placeholder="Pressure / Temp / Electrical" />
+              <label>Procedure Number <span class="req">*</span></label>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="formData.procedureNumber"
+                placeholder="e.g. CI/05/O2 Rev.10 Based on ISO 3611:2023"
+              />
             </div>
+
             <div class="form-group">
-              <label>Standard Reference</label>
-              <input type="text" pInputText [(ngModel)]="newProc.standardRef" placeholder="e.g. EURAMET cg-17" />
+              <label>Calibration Procedure Title <span class="req">*</span></label>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="formData.calibrationProcedure"
+                placeholder="e.g. Outside Micrometer"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Revision <span class="req">*</span></label>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="formData.revision"
+                placeholder="e.g. 10 or Rev 4.0"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Operating Branch</label>
+              <select class="form-select" [(ngModel)]="formData.branchId">
+                <option [ngValue]="null">-- All / Main Branch --</option>
+                @for (b of branches(); track b.id) {
+                  <option [ngValue]="b.id">{{ b.name }} ({{ b.code }})</option>
+                }
+              </select>
             </div>
           </div>
+
+          <!-- Status Toggle Row -->
+          <div class="form-row status-toggle-row" style="margin-top: 1rem;">
+            <label class="toggle-container">
+              <input type="checkbox" [(ngModel)]="formData.isActive" />
+              <span class="toggle-label">Procedure Active (Authorized for calibration work instructions)</span>
+            </label>
+          </div>
         </div>
+
+        <!-- Modal Footer: Standard Action Buttons -->
         <div class="modal-footer">
-          <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
-          <button class="btn-primary" (click)="saveProc()">Save Procedure</button>
+          <button class="btn-secondary" (click)="closeModal()" [disabled]="isSaving()">
+            Cancel
+          </button>
+          <button class="btn-primary" (click)="saveProcedure()" [disabled]="isSaving()">
+            @if (isSaving()) {
+              <i class="pi pi-spin pi-spinner"></i> Saving Changes...
+            } @else {
+              <i class="pi" [ngClass]="isEditMode ? 'pi-save' : 'pi-check'"></i>
+              {{ isEditMode ? 'Update Procedure' : 'Save Procedure' }}
+            }
+          </button>
         </div>
       </div>
     </div>

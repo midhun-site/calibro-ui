@@ -755,33 +755,176 @@ h1, h2, h3, h4 {
   background: var(--table-row-hover) !important;
 }
 
-/* Grid Loading Row State */
+/* ==========================================================================
+   Universal Form Field Indicators & Required Red Asterisk Standards
+   ========================================================================== */
+.req,
+.required-star,
+.required-marker {
+  color: #ef4444 !important;
+  font-weight: 700 !important;
+  margin-left: 2px !important;
+  font-size: 0.88em !important;
+  display: inline-block;
+  line-height: 1;
+}
+
+.optional-tag {
+  color: var(--text-muted, #64748b) !important;
+  font-size: 0.72rem !important;
+  font-weight: 400 !important;
+  margin-left: 4px !important;
+}
+
+.auto-tag {
+  color: var(--accent-cyan, #00f2fe) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  margin-left: 4px !important;
+}
+
+/* ==========================================================================
+   High-Tech Metrology Grid Loader (Calibration Laboratory Standard)
+   ========================================================================== */
 .grid-loading-cell {
-  padding: 4.5rem 1rem !important;
+  padding: 4.5rem 1.5rem !important;
   text-align: center !important;
   background: transparent !important;
   border-bottom: none !important;
 }
 
 .grid-loading-container {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.25rem;
+  padding: 2.2rem 3.5rem;
+  background: radial-gradient(circle at center, rgba(0, 242, 254, 0.07) 0%, rgba(15, 23, 42, 0.75) 75%, rgba(11, 17, 32, 0.85) 100%);
+  border: 1px solid rgba(0, 242, 254, 0.25);
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 25px rgba(0, 242, 254, 0.12), inset 0 0 20px rgba(0, 242, 254, 0.04);
+  position: relative;
+  overflow: hidden;
+  margin: 0.5rem auto;
+  animation: loader-card-fade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.grid-loading-container::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  background: radial-gradient(circle at center, rgba(0, 242, 254, 0.12) 0%, transparent 60%);
+  animation: pulse-loader-aura 3.5s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes pulse-loader-aura {
+  0% { transform: scale(0.85); opacity: 0.4; }
+  100% { transform: scale(1.15); opacity: 0.9; }
+}
+
+@keyframes loader-card-fade {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Dual-Orbit Glowing Metrology Gyroscope Spinner */
+.grid-loading-spinner-wrap {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .grid-loading-spinner {
-  font-size: 2.2rem !important;
-  color: var(--accent-cyan, #00f2fe) !important;
-  filter: drop-shadow(0 0 14px rgba(0, 242, 254, 0.4));
+  font-size: 0 !important;
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  border: 3px solid rgba(0, 242, 254, 0.12) !important;
+  border-top: 3px solid #00f2fe !important;
+  border-right: 3px solid #38bdf8 !important;
+  animation: metrology-spin 1s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite !important;
+  filter: drop-shadow(0 0 16px rgba(0, 242, 254, 0.75));
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
 }
 
+.grid-loading-spinner::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  border-bottom: 2.5px solid #818cf8;
+  border-left: 2.5px solid #a855f7;
+  animation: metrology-spin-reverse 1.4s linear infinite;
+  box-sizing: border-box;
+}
+
+.grid-loading-spinner::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  margin-left: -4px;
+  background: #00f2fe;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00f2fe, 0 0 20px #00f2fe;
+  animation: pulse-metrology-core 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes metrology-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes metrology-spin-reverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes pulse-metrology-core {
+  0% { transform: scale(0.65); opacity: 0.5; }
+  100% { transform: scale(1.35); opacity: 1; }
+}
+
+/* Animated Flowing Gradient Text Shimmer */
 .grid-loading-text {
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  color: var(--text-muted, #94a3b8);
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
+  background: linear-gradient(90deg, #94a3b8 0%, #ffffff 25%, #00f2fe 50%, #38bdf8 75%, #94a3b8 100%);
+  background-size: 250% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: loader-text-shimmer 3s linear infinite;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes loader-text-shimmer {
+  0% { background-position: -250% center; }
+  100% { background-position: 250% center; }
 }
 
 /* Universal Empty State Card for Data Grids */
@@ -2389,30 +2532,59 @@ div[role="dialog"].p-datepicker {
 }
 
 /* ============================================================= */
-/* Universal Dropdown Caret Icon for all Selects in CaliBro      */
+/* Universal Dropdown Caret Icon for all Selects in CaliBro Standard */
 /* ============================================================= */
 select,
+select.form-select,
 .form-select,
+.form-group select,
 .branch-dropdown,
 .page-size-select,
-.p-select,
-.p-dropdown {
+.filter-select,
+.custom-template-select {
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
+  background-color: var(--input-bg, #141e33) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2300f2fe' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
   background-position: right 0.75rem center !important;
-  background-size: 14px 14px !important;
+  background-size: 13px 13px !important;
   padding-right: 2.2rem !important;
-  cursor: pointer;
+  cursor: pointer !important;
+}
+
+select:hover,
+select.form-select:hover,
+.form-select:hover,
+.form-group select:hover,
+.branch-dropdown:hover,
+.page-size-select:hover {
+  background-color: #18233a !important;
+  border-color: #3b4f70 !important;
+}
+
+select:focus,
+select.form-select:focus,
+.form-select:focus,
+.form-group select:focus,
+.branch-dropdown:focus,
+.page-size-select:focus {
+  background-color: #111a2e !important;
+  border-color: var(--accent-cyan, #00f2fe) !important;
+  box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.15) !important;
 }
 
 [data-theme="light"] select,
+[data-theme="light"] select.form-select,
 [data-theme="light"] .form-select,
+[data-theme="light"] .form-group select,
 [data-theme="light"] .branch-dropdown,
-[data-theme="light"] .page-size-select {
+[data-theme="light"] .page-size-select,
+[data-theme="light"] .filter-select {
+  background-color: #ffffff !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%230284c7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
 }
+
 
 

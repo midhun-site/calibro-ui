@@ -255,15 +255,15 @@
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group">
-              <label>Customer Name</label>
+              <label>Customer Name <span class="req">*</span></label>
               <input type="text" pInputText [(ngModel)]="editEnquiryData().customer" />
             </div>
             <div class="form-group">
-              <label>Instruments Count</label>
+              <label>Instruments Count <span class="req">*</span></label>
               <input type="text" pInputText [(ngModel)]="editEnquiryData().instrumentsCount" />
             </div>
             <div class="form-group">
-              <label>Service Type</label>
+              <label>Service Type <span class="req">*</span></label>
               <select class="form-select" [(ngModel)]="editEnquiryData().serviceType">
                 <option value="Calibration (CAL)">Calibration (CAL)</option>
                 <option value="In-House Lab">In-House Lab</option>
@@ -271,7 +271,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label>Status</label>
+              <label>Status <span class="req">*</span></label>
               <select class="form-select" [(ngModel)]="editEnquiryData().status">
                 <option value="OPEN">OPEN</option>
                 <option value="QUOTED">QUOTED</option>

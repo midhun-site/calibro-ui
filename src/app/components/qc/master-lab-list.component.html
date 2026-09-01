@@ -131,23 +131,31 @@
     <div class="modal-overlay" (click)="showCreateModal = false">
       <div class="modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Register Master Laboratory</h3>
-          <button class="modal-close-btn" (click)="showCreateModal = false">
+          <div class="modal-title-wrap">
+            <div class="modal-icon-badge">
+              <i class="pi pi-building text-cyan"></i>
+            </div>
+            <div>
+              <h3>Register Master Laboratory</h3>
+              <p class="modal-subtitle">Configure ISO 17025 accredited discipline laboratory facility</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" (click)="showCreateModal = false" title="Close Dialog">
             <i class="pi pi-times"></i>
           </button>
         </div>
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group">
-              <label>Lab Code</label>
+              <label>Lab Code <span class="req">*</span></label>
               <input type="text" pInputText [(ngModel)]="newLab.code" placeholder="e.g. LAB-TORQ-04" />
             </div>
             <div class="form-group">
-              <label>Laboratory Name</label>
+              <label>Laboratory Name <span class="req">*</span></label>
               <input type="text" pInputText [(ngModel)]="newLab.name" placeholder="e.g. Torque & Mass Lab" />
             </div>
             <div class="form-group">
-              <label>Discipline</label>
+              <label>Discipline <span class="req">*</span></label>
               <input type="text" pInputText [(ngModel)]="newLab.discipline" placeholder="Pressure / Temp / Torque" />
             </div>
             <div class="form-group">
@@ -158,7 +166,9 @@
         </div>
         <div class="modal-footer">
           <button class="btn-secondary" (click)="showCreateModal = false">Cancel</button>
-          <button class="btn-primary" (click)="saveLab()">Save Laboratory</button>
+          <button class="btn-primary" (click)="saveLab()">
+            <i class="pi pi-check"></i> Save Laboratory
+          </button>
         </div>
       </div>
     </div>

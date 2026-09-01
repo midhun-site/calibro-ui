@@ -101,9 +101,21 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of grid.items(); track item.id) {
+          @if (grid.isLoading()) {
             <tr>
-              <td><span class="code-badge">{{ item.employeeCode || ('USR-' + item.id) }}</span></td>
+              <td colspan="10" class="grid-loading-cell">
+                <div class="grid-loading-container">
+                  <div class="grid-loading-spinner-wrap">
+                    <i class="pi pi-spin pi-spinner grid-loading-spinner"></i>
+                  </div>
+                  <span class="grid-loading-text">Loading system users & metrology staff...</span>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (item of grid.items(); track item.id) {
+              <tr>
+                <td><span class="code-badge">{{ item.employeeCode || ('USR-' + item.id) }}</span></td>
               <td><strong style="color: var(--text-main);">{{ item.fullName }}</strong></td>
               <td><span class="user-handle"><i class="pi pi-user text-cyan"></i> {{ item.username }}</span></td>
               <td>{{ item.emailAddress }}</td>
@@ -171,6 +183,7 @@
               </td>
             </tr>
           }
+        }
         </tbody>
       </table>
     </div>

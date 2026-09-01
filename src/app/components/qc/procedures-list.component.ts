@@ -1,18 +1,17 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
+import { ProcedureService, ProcedureItem, SaveProcedurePayload } from '../../services/procedure.service';
+import { ApiService, Branch } from '../../services/api.service';
 import { ToastService } from '../../services/toast.service';
+import { DataGridState } from '../../common/grid';
 
-export interface ProcedureItem {
-  docNo: string;
-  title: string;
-  discipline: string;
-  standardRef: string;
-  revNo: string;
-  status: string;
-}
-
+/**
+ * Component managing Quality Control calibration procedures and ISO/IEC 17025 SOP records.
+ * Provides server-side paginated data grid, per-column filters, sorting, CSV export,
+ * and complete CRUD via a 2-column compact edit modal.
+ */
 @Component({
   selector: 'app-procedures-list',
   standalone: true,
@@ -20,164 +19,206 @@ export interface ProcedureItem {
   templateUrl: './procedures-list.component.html',
   styleUrl: './procedures-list.component.css'
 })
-export class ProceduresListComponent {
+export class ProceduresListComponent implements OnInit {
+  private procedureService = inject(ProcedureService);
+  private apiService = inject(ApiService);
   private toastService = inject(ToastService);
-  public showCreateModal = false;
+
   public Math = Math;
 
-  public procedures = signal<ProcedureItem[]>([
-    { docNo: 'SOP-CAL-P01', title: 'Calibration of Dial & Digital Pressure Gauges', discipline: 'Pressure', standardRef: 'DKD-R 6-1 / BS EN 837-1', revNo: 'Rev 4.0', status: 'ACTIVE' },
-    { docNo: 'SOP-CAL-T02', title: 'Calibration of Dry-Well Temp Calibrators & PRTs', discipline: 'Temperature', standardRef: 'EURAMET cg-13 / ITS-90', revNo: 'Rev 3.2', status: 'ACTIVE' },
-    { docNo: 'SOP-CAL-E03', title: 'Multimeter & Voltage Source Verification Procedure', discipline: 'Electrical', standardRef: 'EURAMET cg-15', revNo: 'Rev 5.0', status: 'ACTIVE' },
-    { docNo: 'SOP-CAL-M04', title: 'Calibration of Torque Tools & Transducers', discipline: 'Torque', standardRef: 'ISO 6789-2:2017', revNo: 'Rev 2.1', status: 'ACTIVE' },
-    { docNo: 'SOP-CAL-F05', title: 'Ultrasonic & Electromagnetic Flowmeter In-Situ Test', discipline: 'Flow', standardRef: 'ISO 4185 / OIML R49', revNo: 'Rev 1.5', status: 'ACTIVE' },
-    { docNo: 'SOP-CAL-W06', title: 'Calibration of Non-Automatic Weighing Instruments', discipline: 'Mass', standardRef: 'EURAMET cg-18 v4.0', revNo: 'Rev 6.0', status: 'ACTIVE' },
-    { docNo: 'SOP-CAL-D07', title: 'Calibration of Micrometers, Calipers & Gauges', discipline: 'Dimensional', standardRef: 'DIN 862 / ISO 13385', revNo: 'Rev 3.0', status: 'ACTIVE' },
-    { docNo: 'SOP-CAL-G08', title: 'Bump Test & Span Calibration of Portable Gas Detectors', discipline: 'Gas Safety', standardRef: 'IEC 60079-29-2', revNo: 'Rev 4.1', status: 'ACTIVE' }
-  ]);
-
-  public filters = signal<{ [key: string]: string }>({
-    docNo: '', title: '', discipline: '', standardRef: '', revNo: '', status: ''
+  /** Universal reactive data grid state controller */
+  public grid = new DataGridState<ProcedureItem>({
+    defaultSortColumn: 'id',
+    defaultSortDirection: 'desc',
+    defaultPageSize: 15,
+    pageSizeOptions: [10, 15, 25, 50, 100],
+    fetchFn: (params) => this.procedureService.getProcedures(params)
   });
 
-  public sortColumn = signal<string>('docNo');
-  public sortDirection = signal<'asc' | 'desc'>('asc');
+  // Modal Dialog State
+  public showModal = false;
+  public isEditMode = false;
+  public isSaving = signal<boolean>(false);
 
-  public currentPage = signal<number>(1);
-  public pageSize = signal<number>(5);
+  // Active form data
+  public formData: SaveProcedurePayload = {
+    id: 0,
+    lab: '',
+    procedureType: '17025-EIAC',
+    procedureNumber: '',
+    calibrationProcedure: '',
+    revision: '10',
+    branchId: null,
+    isActive: true
+  };
 
-  public filteredData = computed(() => {
-    const data = this.procedures();
-    const f = this.filters();
-    return data.filter(item => {
-      return (
-        (!f['docNo'] || item.docNo.toLowerCase().includes(f['docNo'].toLowerCase())) &&
-        (!f['title'] || item.title.toLowerCase().includes(f['title'].toLowerCase())) &&
-        (!f['discipline'] || item.discipline.toLowerCase().includes(f['discipline'].toLowerCase())) &&
-        (!f['standardRef'] || item.standardRef.toLowerCase().includes(f['standardRef'].toLowerCase())) &&
-        (!f['revNo'] || item.revNo.toLowerCase().includes(f['revNo'].toLowerCase())) &&
-        (!f['status'] || item.status.toLowerCase().includes(f['status'].toLowerCase()))
-      );
-    });
-  });
+  // Dropdown Lookups (loaded on demand)
+  public branches = signal<Branch[]>([]);
+  public labOptions: string[] = [
+    'Dimensional Laboratory',
+    'Thermal & Temperature Lab',
+    'Pressure & Vacuum Lab',
+    'Electrical Metrology Lab',
+    'Mass & Weighing Lab',
+    'Force, Torque & Hardness Lab',
+    'Flow & Volume Metrology',
+    'Optical & Photometry Lab',
+    'Gas Safety & Detection Lab'
+  ];
 
-  public sortedData = computed(() => {
-    const data = [...this.filteredData()];
-    const col = this.sortColumn();
-    const dir = this.sortDirection();
-    return data.sort((a, b) => {
-      const valA = (a as any)[col] ?? '';
-      const valB = (b as any)[col] ?? '';
-      if (valA < valB) return dir === 'asc' ? -1 : 1;
-      if (valA > valB) return dir === 'asc' ? 1 : -1;
-      return 0;
-    });
-  });
+  public procedureTypeOptions: string[] = [
+    '17025-EIAC',
+    '17025-ENAS',
+    '17025-NABL',
+    '17025-DAkkS',
+    '17025-UKAS',
+    'ISO/IEC 17025 Standard',
+    'Standard In-House SOP',
+    'Manufacturer Standard'
+  ];
 
-  public totalPages = computed(() => Math.ceil(this.sortedData().length / this.pageSize()) || 1);
-
-  public paginatedData = computed(() => {
-    const page = this.currentPage();
-    const size = this.pageSize();
-    const start = (page - 1) * size;
-    return this.sortedData().slice(start, start + size);
-  });
-
-  public pageNumbers = computed(() => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: (number | string)[] = [];
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (current > 3) pages.push('...');
-      const start = Math.max(2, current - 1);
-      const end = Math.min(total - 1, current + 1);
-      for (let i = start; i <= end; i++) pages.push(i);
-      if (current < total - 2) pages.push('...');
-      pages.push(total);
-    }
-    return pages;
-  });
-
-  public newProc = { docNo: '', title: '', discipline: '', standardRef: '' };
-
-  updateFilter(col: string, val: string) {
-    this.filters.update(f => ({ ...f, [col]: val }));
-    this.currentPage.set(1);
+  /**
+   * Initializes the procedure list component and triggers initial server-side query.
+   */
+  ngOnInit(): void {
+    this.grid.load();
+    this.loadDropdownData();
   }
 
-  resetFilters() {
-    this.filters.set({ docNo: '', title: '', discipline: '', standardRef: '', revNo: '', status: '' });
-    this.currentPage.set(1);
-  }
-
-  toggleSort(col: string) {
-    if (this.sortColumn() === col) {
-      this.sortDirection.update(d => d === 'asc' ? 'desc' : 'asc');
-    } else {
-      this.sortColumn.set(col);
-      this.sortDirection.set('asc');
-    }
-  }
-
-  getSortIcon(col: string): string {
-    if (this.sortColumn() !== col) return 'pi-sort-alt';
-    return this.sortDirection() === 'asc' ? 'pi-sort-amount-up-alt text-cyan' : 'pi-sort-amount-down text-cyan';
-  }
-
-  goToPage(p: number) {
-    if (p >= 1 && p <= this.totalPages()) this.currentPage.set(p);
-  }
-
-  prevPage() {
-    if (this.currentPage() > 1) this.currentPage.update(p => p - 1);
-  }
-
-  nextPage() {
-    if (this.currentPage() < this.totalPages()) this.currentPage.update(p => p + 1);
-  }
-
-  exportToCsv() {
-    const data = this.sortedData();
-    if (data.length === 0) {
-      this.toastService.showWarning('Export Error', 'No data available to export.');
-      return;
-    }
-    let csvContent = 'SOP Doc No,Procedure Title,Discipline,Standard Reference,Rev No,Status\n';
-    data.forEach(row => {
-      csvContent += `"${row.docNo}","${row.title}","${row.discipline}","${row.standardRef}","${row.revNo}","${row.status}"\n`;
-    });
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `CaliBro_SOP_Procedures_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    this.toastService.showSuccess('Export Successful', `Exported ${data.length} records to CSV.`);
-  }
-
-  saveProc() {
-    if (!this.newProc.title || !this.newProc.docNo) {
-      this.toastService.showWarning('Required Field', 'Please enter SOP Number and Title.');
-      return;
-    }
-    this.procedures.update(list => [
-      {
-        docNo: this.newProc.docNo,
-        title: this.newProc.title,
-        discipline: this.newProc.discipline || 'General Metrology',
-        standardRef: this.newProc.standardRef || 'ISO/IEC 17025 Standard',
-        revNo: 'Rev 1.0',
-        status: 'ACTIVE'
+  /**
+   * Loads branch lookup data for the modal form.
+   */
+  private loadDropdownData(): void {
+    this.apiService.getBranches({ pageNumber: 1, pageSize: 100 }).subscribe({
+      next: (res) => {
+        if (res && res.items) {
+          this.branches.set(res.items);
+        }
       },
-      ...list
+      error: (err) => {
+        console.error('Failed to load branches for procedures modal:', err);
+      }
+    });
+  }
+
+  /**
+   * Opens the modal dialog in Create mode.
+   */
+  public openCreateModal(): void {
+    this.isEditMode = false;
+    this.formData = {
+      id: 0,
+      lab: this.labOptions[0],
+      procedureType: '17025-EIAC',
+      procedureNumber: '',
+      calibrationProcedure: '',
+      revision: '10',
+      branchId: this.branches().length > 0 ? this.branches()[0].id : null,
+      isActive: true
+    };
+    this.showModal = true;
+  }
+
+  /**
+   * Opens the modal dialog in Edit mode populated with selected procedure row.
+   * @param item The selected procedure item.
+   */
+  public openEditModal(item: ProcedureItem): void {
+    this.isEditMode = true;
+    this.formData = {
+      id: item.id,
+      lab: item.lab,
+      procedureType: item.procedureType,
+      procedureNumber: item.procedureNumber,
+      calibrationProcedure: item.calibrationProcedure,
+      revision: item.revision,
+      branchId: item.branchId ?? null,
+      isActive: item.isActive
+    };
+    this.showModal = true;
+  }
+
+  /**
+   * Closes the edit/create modal dialog.
+   */
+  public closeModal(): void {
+    this.showModal = false;
+  }
+
+  /**
+   * Submits the procedure create/update form to the backend API.
+   */
+  public saveProcedure(): void {
+    if (!this.formData.lab?.trim()) {
+      this.toastService.showWarning('Validation Error', 'Please select a Laboratory.');
+      return;
+    }
+    if (!this.formData.procedureNumber?.trim()) {
+      this.toastService.showWarning('Validation Error', 'Please enter a Procedure Number.');
+      return;
+    }
+    if (!this.formData.calibrationProcedure?.trim()) {
+      this.toastService.showWarning('Validation Error', 'Please enter the Calibration Procedure title.');
+      return;
+    }
+    if (!this.formData.revision?.trim()) {
+      this.toastService.showWarning('Validation Error', 'Please enter the Revision.');
+      return;
+    }
+
+    this.isSaving.set(true);
+
+    this.procedureService.saveProcedure(this.formData).subscribe({
+      next: () => {
+        this.isSaving.set(false);
+        this.showModal = false;
+        this.toastService.showSuccess(
+          'Success',
+          this.isEditMode
+            ? `Procedure '${this.formData.procedureNumber}' updated successfully.`
+            : `Procedure '${this.formData.procedureNumber}' created successfully.`
+        );
+        this.grid.load();
+      },
+      error: (err) => {
+        this.isSaving.set(false);
+        const detail = err.error?.detail || err.error?.title || err.message || 'Failed to save procedure.';
+        this.toastService.showError('Save Error', detail);
+      }
+    });
+  }
+
+  /**
+   * Prompts user and deletes a calibration procedure.
+   * @param item The procedure row to delete.
+   */
+  public promptDelete(item: ProcedureItem): void {
+    if (confirm(`Are you sure you want to delete procedure "${item.procedureNumber}" (${item.calibrationProcedure})?`)) {
+      this.procedureService.deleteProcedure(item.id).subscribe({
+        next: () => {
+          this.toastService.showSuccess('Deleted', `Procedure '${item.procedureNumber}' deleted.`);
+          this.grid.load();
+        },
+        error: (err) => {
+          const detail = err.error?.detail || err.error?.title || err.message || 'Failed to delete procedure.';
+          this.toastService.showError('Delete Error', detail);
+        }
+      });
+    }
+  }
+
+  /**
+   * Exports the currently displayed or sorted dataset to a CSV spreadsheet file.
+   */
+  public exportCsv(): void {
+    this.grid.exportCsv(`CaliBro_QC_Procedures_${new Date().toISOString().split('T')[0]}`, [
+      { field: 'procedureNumber', header: 'Procedure Number' },
+      { field: 'calibrationProcedure', header: 'Calibration Procedure' },
+      { field: 'lab', header: 'Lab' },
+      { field: 'procedureType', header: 'Procedure Type' },
+      { field: 'revision', header: 'Revision' },
+      { field: 'branchName', header: 'Branch' },
+      { field: 'isActive', header: 'Status' }
     ]);
-    this.showCreateModal = false;
-    this.toastService.showSuccess('Procedure Saved', `SOP ${this.newProc.docNo} registered.`);
-    this.newProc = { docNo: '', title: '', discipline: '', standardRef: '' };
   }
 }
