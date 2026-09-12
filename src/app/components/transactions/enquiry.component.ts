@@ -70,9 +70,12 @@ export class EnquiryComponent implements OnInit {
   public activeActionMenu = signal<string | null>(null);
   public actionMenuDropUp = signal<boolean>(false);
 
-  // View / Edit Modals State
+  // View / Edit / Delete Modals State
   public showViewModal = signal<boolean>(false);
   public showEditModal = signal<boolean>(false);
+  public showDeleteModal = signal<boolean>(false);
+  public isDeleting = signal<boolean>(false);
+  public targetEnquiry = signal<EnquiryRow | null>(null);
   public selectedViewEnquiry = signal<EnquiryRow | null>(null);
   public editEnquiryData = signal<EnquiryRow>({ enquiryNo: '', customer: '', receivedDate: '', instrumentsCount: '', serviceType: '', status: 'OPEN' });
 
@@ -271,24 +274,35 @@ export class EnquiryComponent implements OnInit {
     this.toastService.showSuccess('Enquiry Updated', `${updated.enquiryNo} details saved successfully.`);
   }
 
-  deleteEnquiry(row: EnquiryRow) {
+  promptDelete(row: EnquiryRow) {
     this.closeActionMenu();
-    if (confirm(`Are you sure you want to delete Enquiry ${row.enquiryNo} for ${row.customer}?`)) {
-      if (row.id) {
-        this.enquiryService.deleteEnquiry(row.id).subscribe({
-          next: () => {
-            this.toastService.showSuccess('Enquiry Deleted', `Record ${row.enquiryNo} has been removed.`);
-            this.grid.load();
-          },
-          error: (err) => {
-            this.toastService.showError('Delete Failed', err?.error?.detail || `Could not delete enquiry ${row.enquiryNo}.`);
-          }
-        });
-      } else {
-        this.grid.items.update(list => list.filter(item => item.enquiryNo !== row.enquiryNo));
-        this.toastService.showSuccess('Enquiry Deleted', `Record ${row.enquiryNo} has been removed.`);
+    this.targetEnquiry.set(row);
+    this.showDeleteModal.set(true);
+  }
+
+  executeDelete() {
+    const target = this.targetEnquiry();
+    if (!target) return;
+
+    this.isDeleting.set(true);
+    const idToPass = target.id && target.id > 0 ? target.id : target.enquiryNo;
+
+    this.enquiryService.deleteEnquiry(idToPass).subscribe({
+      next: (res) => {
+        this.isDeleting.set(false);
+        this.showDeleteModal.set(false);
+        this.toastService.showSuccess('Enquiry Deleted', res?.message || `Record ${target.enquiryNo} has been removed.`);
+        this.grid.load();
+      },
+      error: (err) => {
+        this.isDeleting.set(false);
+        this.toastService.showError('Delete Failed', err?.error?.detail || err?.error?.message || `Could not delete enquiry ${target.enquiryNo}.`);
       }
-    }
+    });
+  }
+
+  deleteEnquiry(row: EnquiryRow) {
+    this.promptDelete(row);
   }
 
   closeHistory() {

@@ -170,7 +170,7 @@
         </div>
       </div>
 
-      <!-- Column 3: Revisions & Status -->
+      <!-- Column 3: Revisions, Protocol & Remarks -->
       <div class="form-col">
         <div class="form-group-horizontal">
           <label>Rev. No</label>
@@ -188,6 +188,19 @@
         <div class="form-group-horizontal">
           <label>Rev. Date</label>
           <input type="date" pInputText [(ngModel)]="enquiry.revDate" readonly class="code-input" />
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>For TCP</label>
+          <label class="custom-checkbox-label" title="Test & Calibration Protocol required">
+            <input type="checkbox" [(ngModel)]="enquiry.forTcp" class="form-checkbox" />
+            <span class="checkbox-text">Requires TCP</span>
+          </label>
+        </div>
+
+        <div class="form-group-horizontal">
+          <label>Remarks</label>
+          <textarea class="form-textarea" rows="2" [(ngModel)]="enquiry.remarks" placeholder="Technical scope / scope remarks..."></textarea>
         </div>
       </div>
     </div>

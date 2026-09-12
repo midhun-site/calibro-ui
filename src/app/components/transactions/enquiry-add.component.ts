@@ -152,12 +152,17 @@ export class EnquiryAddComponent implements OnInit {
         this.numericId = detail.id;
         this.enquiry.enqNo = detail.enquiryNo;
         this.enquiry.mode = detail.mode || 'Mail';
+        this.enquiry.modeId = detail.modeId || null;
         this.enquiry.nature = detail.nature || 'Calibration (CAL)';
+        this.enquiry.natureId = detail.natureId || null;
+        this.enquiry.status = detail.status || 'New Enquiry';
+        this.enquiry.statusId = detail.statusId || null;
         this.enquiry.customerId = detail.customerId || null;
         this.enquiry.customerCode = detail.customerCode || '';
         this.enquiry.client = detail.clientName || '';
         this.enquiry.address = detail.address || '';
         this.enquiry.poBox = detail.poBox || '';
+        this.enquiry.contactPersonId = detail.contactPersonId || null;
         this.enquiry.contactPerson = detail.contactPersonName || '';
         this.enquiry.email = detail.email || '';
         this.enquiry.telNo = detail.telNo || '';
@@ -166,7 +171,6 @@ export class EnquiryAddComponent implements OnInit {
         this.enquiry.department = detail.department || '';
         this.enquiry.reference = detail.reference || '';
         this.enquiry.forTcp = detail.forTcp || false;
-        this.enquiry.status = detail.status || 'Reviewed';
         this.enquiry.remarks = detail.remarks || '';
         this.enquiry.enqDate = detail.enqDate ? detail.enqDate.toString().split('T')[0] : today;
 
@@ -197,9 +201,13 @@ export class EnquiryAddComponent implements OnInit {
             next: (cust: CustomerDetails) => {
               if (cust?.contacts && cust.contacts.length > 0) {
                 this.customerContacts.set(cust.contacts);
-                const matching = cust.contacts.find(c => `${c.firstName} ${c.lastName}`.trim() === detail.contactPersonName);
-                if (matching && matching.id !== undefined) {
-                  this.selectedContactId.set(matching.id);
+                if (detail.contactPersonId) {
+                  this.selectedContactId.set(detail.contactPersonId);
+                } else if (detail.contactPersonName) {
+                  const matching = cust.contacts.find(c => `${c.firstName} ${c.lastName}`.trim().toLowerCase() === detail.contactPersonName?.trim().toLowerCase());
+                  if (matching && matching.id !== undefined) {
+                    this.selectedContactId.set(matching.id);
+                  }
                 }
               }
             }
@@ -384,9 +392,17 @@ export class EnquiryAddComponent implements OnInit {
 
     this.isSubmitting.set(true);
 
-    const selectedMode = this.enquiryModes().find(m => m.name === this.enquiry.mode);
-    const selectedNature = this.enquiryNatures().find(n => n.name === this.enquiry.nature);
-    const selectedStatus = this.pipelineStages().find(s => s.name === this.enquiry.status);
+    const selectedMode = this.enquiryModes().find(m => m.name.toLowerCase() === (this.enquiry.mode || '').toLowerCase());
+    const selectedNature = this.enquiryNatures().find(n => n.name.toLowerCase() === (this.enquiry.nature || '').toLowerCase());
+    const selectedStatus = this.pipelineStages().find(s => s.name.toLowerCase() === (this.enquiry.status || '').toLowerCase());
+
+    const custId = this.enquiry.customerId
+      ? (typeof this.enquiry.customerId === 'string' ? parseInt(this.enquiry.customerId, 10) : this.enquiry.customerId)
+      : null;
+
+    const contactId = this.selectedContactId()
+      ? (typeof this.selectedContactId() === 'string' ? parseInt(this.selectedContactId() as any, 10) : this.selectedContactId())
+      : null;
 
     const itemsPayload: EnquiryItemDetail[] = this.items.map((i, idx) => ({
       id: i.id,
@@ -403,9 +419,10 @@ export class EnquiryAddComponent implements OnInit {
       remarks: i.remarks
     }));
 
-    if (this.isEditMode && this.numericId) {
+    if (this.isEditMode) {
+      const idToUpdate = this.numericId || this.enquiry.enqNo;
       const updatePayload: UpdateEnquiryPayload = {
-        id: this.numericId,
+        id: this.numericId || 0,
         enquiryNo: this.enquiry.enqNo,
         revNo: this.enquiry.revNo,
         revDate: this.enquiry.revDate,
@@ -415,12 +432,12 @@ export class EnquiryAddComponent implements OnInit {
         nature: this.enquiry.nature,
         statusId: selectedStatus?.id || this.enquiry.statusId || null,
         status: this.enquiry.status,
-        customerId: this.enquiry.customerId,
+        customerId: custId,
         customerCode: this.enquiry.customerCode,
         clientName: this.enquiry.client,
         address: this.enquiry.address,
         poBox: this.enquiry.poBox,
-        contactPersonId: this.selectedContactId(),
+        contactPersonId: contactId,
         contactPersonName: this.enquiry.contactPerson,
         email: this.enquiry.email,
         telNo: this.enquiry.telNo,
@@ -433,7 +450,7 @@ export class EnquiryAddComponent implements OnInit {
         items: itemsPayload
       };
 
-      this.enquiryService.updateEnquiry(this.numericId, updatePayload).subscribe({
+      this.enquiryService.updateEnquiry(idToUpdate, updatePayload).subscribe({
         next: res => {
           this.isSubmitting.set(false);
           this.toastService.showSuccess(
@@ -444,7 +461,7 @@ export class EnquiryAddComponent implements OnInit {
         },
         error: err => {
           this.isSubmitting.set(false);
-          this.toastService.showError('Update Failed', err?.error?.detail || 'An error occurred while updating enquiry.');
+          this.toastService.showError('Update Failed', err?.error?.detail || err?.error?.message || 'An error occurred while updating enquiry.');
         }
       });
     } else {
@@ -456,12 +473,12 @@ export class EnquiryAddComponent implements OnInit {
         nature: this.enquiry.nature,
         statusId: selectedStatus?.id || null,
         status: this.enquiry.status,
-        customerId: this.enquiry.customerId,
+        customerId: custId,
         customerCode: this.enquiry.customerCode,
         clientName: this.enquiry.client,
         address: this.enquiry.address,
         poBox: this.enquiry.poBox,
-        contactPersonId: this.selectedContactId(),
+        contactPersonId: contactId,
         contactPersonName: this.enquiry.contactPerson,
         email: this.enquiry.email,
         telNo: this.enquiry.telNo,
@@ -485,7 +502,7 @@ export class EnquiryAddComponent implements OnInit {
         },
         error: err => {
           this.isSubmitting.set(false);
-          this.toastService.showError('Creation Failed', err?.error?.detail || 'An error occurred while saving enquiry.');
+          this.toastService.showError('Creation Failed', err?.error?.detail || err?.error?.message || 'An error occurred while saving enquiry.');
         }
       });
     }

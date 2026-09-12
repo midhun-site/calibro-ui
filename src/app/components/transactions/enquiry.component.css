@@ -70,7 +70,37 @@
   display: flex;
   flex-direction: column;
   overflow-x: auto;
-  padding-bottom: 2.5rem;
+}
+
+.data-table {
+  width: 100%;
+  height: 100%;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.data-table tbody {
+  height: 100%;
+}
+
+.empty-state-cell,
+.grid-loading-cell {
+  height: calc(100vh - 400px) !important;
+  min-height: 280px !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  padding: 2rem 1.5rem !important;
+  border-bottom: none !important;
+}
+
+.empty-state-container,
+.grid-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0 auto;
 }
 
 .table-paginator {
@@ -226,4 +256,73 @@
 :host-context([data-theme="light"]) .menu-divider,
 [data-theme="light"] .menu-divider {
   background: #e2e8f0 !important;
+}
+
+/* Delete Modal Styling */
+.delete-modal-card {
+  width: 460px !important;
+  max-width: 90vw !important;
+}
+
+.delete-header {
+  border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.modal-title-wrap h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-main, #f8fafc);
+  font-weight: 700;
+}
+
+.text-danger {
+  color: #ef4444 !important;
+}
+
+.delete-body {
+  font-size: 0.85rem;
+  color: var(--text-main, #f3f4f6);
+  line-height: 1.5;
+}
+
+.delete-warning {
+  font-size: 0.78rem;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 0.65rem;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  border-left: 3px solid #ef4444;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  padding: 0.5rem 1.15rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

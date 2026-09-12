@@ -398,4 +398,43 @@
       </div>
     </div>
   }
+
+  <!-- DELETE ENQUIRY CONFIRMATION MODAL -->
+  @if (showDeleteModal()) {
+    <div class="modal-overlay" (click)="showDeleteModal.set(false)">
+      <div class="modal-card delete-modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header delete-header">
+          <div class="modal-title-wrap">
+            <i class="pi pi-exclamation-triangle text-danger"></i>
+            <h3>Confirm Enquiry Deletion</h3>
+          </div>
+          <button class="modal-close-btn" (click)="showDeleteModal.set(false)">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body delete-body">
+          <p>
+            Are you sure you want to delete Calibration Enquiry
+            <strong><span class="code-badge">{{ targetEnquiry()?.enquiryNo }}</span></strong>
+            for <strong>{{ targetEnquiry()?.customer }}</strong>?
+          </p>
+          <p class="delete-warning">
+            This action will soft-delete the enquiry document and its child equipment specifications in compliance with ISO 17025 audit trail guidelines.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showDeleteModal.set(false)">Cancel</button>
+          <button class="btn-danger" [disabled]="isDeleting()" (click)="executeDelete()">
+            @if (isDeleting()) {
+              <i class="pi pi-spin pi-spinner"></i> Deleting...
+            } @else {
+              <i class="pi pi-trash"></i> Delete Enquiry
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

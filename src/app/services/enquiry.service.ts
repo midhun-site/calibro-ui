@@ -90,10 +90,13 @@ export class EnquiryService {
   }
 
   /**
-   * Soft-deletes a Calibration Enquiry by ID.
-   * @param id Enquiry numeric ID.
+   * Soft-deletes a Calibration Enquiry by numeric ID or alphanumeric enquiry number.
+   * @param idOrNumber Enquiry numeric ID or string code (e.g., ENQ-2026-0001).
    */
-  deleteEnquiry(id: number | string): Observable<DeleteEnquiryResponse> {
-    return this.http.delete<DeleteEnquiryResponse>(`${this.baseUrl}/${id}`);
+  deleteEnquiry(idOrNumber: number | string): Observable<DeleteEnquiryResponse> {
+    if (typeof idOrNumber === 'number' || (!isNaN(Number(idOrNumber)) && Number(idOrNumber) > 0)) {
+      return this.http.delete<DeleteEnquiryResponse>(`${this.baseUrl}/${idOrNumber}`);
+    }
+    return this.http.delete<DeleteEnquiryResponse>(`${this.baseUrl}/by-number/${encodeURIComponent(idOrNumber)}`);
   }
 }
