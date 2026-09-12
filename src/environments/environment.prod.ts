@@ -1,7 +1,7 @@
 /**
- * Application environment configuration for production.
+ * Application environment configuration for production (Azure Deployment).
  */
 export const environment = {
   production: true,
-  apiUrl: 'https://localhost:7124/api/v1.0'
+  apiUrl: 'https://app-calibro-api-f2bvdpfgamh7dkax.centralindia-01.azurewebsites.net/api/v1.0'
 };
