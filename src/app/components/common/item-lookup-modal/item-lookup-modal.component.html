@@ -1,0 +1,282 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-card lookup-modal-card" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge">
+            <i class="pi pi-box text-cyan"></i>
+          </div>
+          <div>
+            <h3>Select Equipment / Items</h3>
+            <p class="modal-subtitle">Choose multiple items from Item Master to add to enquiry specification</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModal()" title="Close Dialog">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Body / Grid -->
+      <div class="modal-body lookup-modal-body">
+        <!-- Global Search Bar & Actions -->
+        <div class="lookup-toolbar">
+          <div class="search-input-wrap">
+            <i class="pi pi-search search-icon"></i>
+            <input
+              type="text"
+              pInputText
+              [ngModel]="grid.searchTerm()"
+              (ngModelChange)="onSearchInput($event)"
+              placeholder="Search items by code, name, model, make, or description..."
+              class="lookup-search-input"
+            />
+            @if (grid.searchTerm()) {
+              <button class="clear-search-btn" (click)="onSearchInput('')" title="Clear Search">
+                <i class="pi pi-times"></i>
+              </button>
+            }
+          </div>
+          <button class="btn-secondary btn-sm" (click)="resetAllFilters()" title="Reset all search filters">
+            <i class="pi pi-filter-slash text-cyan"></i> Reset Filters
+          </button>
+        </div>
+
+        <!-- Server-side Item Data Table -->
+        <div class="table-responsive lookup-table-responsive">
+          <table class="data-table lookup-table">
+            <thead>
+              <tr>
+                <th style="width: 44px;" class="text-center">
+                  <input
+                    type="checkbox"
+                    class="item-checkbox"
+                    [checked]="isAllCurrentPageSelected()"
+                    (change)="toggleSelectAllCurrentPage()"
+                    title="Select / Deselect all on current page"
+                  />
+                </th>
+                <th (click)="grid.toggleSort('itemCode')" class="sortable-header" style="width: 120px;">
+                  Item Code <i class="pi" [ngClass]="grid.getSortIcon('itemCode')"></i>
+                </th>
+                <th (click)="grid.toggleSort('itemName')" class="sortable-header">
+                  Item Description / Name <i class="pi" [ngClass]="grid.getSortIcon('itemName')"></i>
+                </th>
+                <th (click)="grid.toggleSort('modelNo')" class="sortable-header" style="width: 130px;">
+                  Model No <i class="pi" [ngClass]="grid.getSortIcon('modelNo')"></i>
+                </th>
+                <th (click)="grid.toggleSort('supplier')" class="sortable-header" style="width: 130px;">
+                  Make / Supplier <i class="pi" [ngClass]="grid.getSortIcon('supplier')"></i>
+                </th>
+                <th (click)="grid.toggleSort('unit')" class="sortable-header" style="width: 90px;">
+                  Unit <i class="pi" [ngClass]="grid.getSortIcon('unit')"></i>
+                </th>
+                <th style="width: 90px;" class="text-center">Qty</th>
+              </tr>
+              <!-- Column Filter Inputs -->
+              <tr class="filter-row">
+                <td></td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['itemCode'] || ''"
+                    (ngModelChange)="grid.updateFilter('itemCode', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Search Code..."
+                    class="filter-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['itemName'] || ''"
+                    (ngModelChange)="grid.updateFilter('itemName', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Filter Name..."
+                    class="filter-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['modelNo'] || ''"
+                    (ngModelChange)="grid.updateFilter('modelNo', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Model..."
+                    class="filter-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['supplier'] || ''"
+                    (ngModelChange)="grid.updateFilter('supplier', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Make..."
+                    class="filter-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['unit'] || ''"
+                    (ngModelChange)="grid.updateFilter('unit', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Unit..."
+                    class="filter-input"
+                  />
+                </td>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              @if (grid.isLoading()) {
+                <tr>
+                  <td colspan="7" class="grid-loading-cell">
+                    <div class="grid-loading-container">
+                      <i class="pi pi-spin pi-spinner grid-loading-spinner"></i>
+                      <span class="grid-loading-text">Loading master items...</span>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (item of grid.items(); track item.id) {
+                  <tr
+                    [class.row-selected]="isItemSelected(item)"
+                    (click)="toggleItemSelection(item)"
+                    class="clickable-row"
+                  >
+                    <td class="text-center" (click)="$event.stopPropagation()">
+                      <input
+                        type="checkbox"
+                        class="item-checkbox"
+                        [checked]="isItemSelected(item)"
+                        (change)="toggleItemSelection(item)"
+                      />
+                    </td>
+                    <td><span class="code-badge">{{ item.itemCode }}</span></td>
+                    <td>
+                      <strong class="item-name-text">{{ item.itemName }}</strong>
+                      @if (item.remarks) {
+                        <div class="item-remarks-sub">{{ item.remarks }}</div>
+                      }
+                    </td>
+                    <td>{{ item.modelNo || '-' }}</td>
+                    <td>{{ item.supplier || '-' }}</td>
+                    <td>
+                      <span class="unit-pill">{{ item.unit || 'PCS' }}</span>
+                    </td>
+                    <td class="text-center" (click)="$event.stopPropagation()">
+                      <input
+                        type="number"
+                        min="1"
+                        [value]="getItemQty(item)"
+                        (input)="setItemQty(item, $any($event.target).value)"
+                        class="qty-field-input"
+                        title="Quantity"
+                      />
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty-state-cell">
+                      <div class="empty-state-container">
+                        <div class="empty-icon-circle">
+                          <i class="pi pi-box"></i>
+                        </div>
+                        <h4 class="empty-state-title">No Items Found</h4>
+                        <p class="empty-state-subtitle">
+                          No equipment or stock items match your search criteria.
+                        </p>
+                        <div class="empty-state-actions">
+                          <button class="btn-secondary btn-sm" (click)="resetAllFilters()">
+                            <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginator Footer -->
+        <div class="table-paginator lookup-paginator">
+          <div class="paginator-info">
+            Showing {{ grid.showingFrom() }} to {{ grid.showingTo() }} of {{ grid.totalCount() }} entries
+          </div>
+          <div class="paginator-controls">
+            <select
+              class="page-size-select"
+              [ngModel]="grid.pageSize()"
+              (ngModelChange)="grid.onPageSizeChange($event)"
+              title="Rows per page"
+            >
+              @for (opt of grid.pageSizeOptions(); track opt) {
+                <option [ngValue]="opt">{{ opt }} / page</option>
+              }
+            </select>
+
+            <button class="paginator-btn" [disabled]="grid.currentPage() === 1" (click)="grid.prevPage()" title="Previous Page">
+              <i class="pi pi-chevron-left"></i>
+            </button>
+
+            <div class="page-numbers">
+              @for (p of grid.pageNumbers(); track $index) {
+                @if (p === '...') {
+                  <span class="ellipsis">...</span>
+                } @else {
+                  <button class="page-number-btn" [class.active]="p === grid.currentPage()" (click)="grid.goToPage(p)">
+                    {{ p }}
+                  </button>
+                }
+              }
+            </div>
+
+            <button class="paginator-btn" [disabled]="grid.currentPage() >= grid.totalPages()" (click)="grid.nextPage()" title="Next Page">
+              <i class="pi pi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="modal-footer">
+        <div class="lookup-hint">
+          @if (selectedCount() > 0) {
+            <span class="selected-badge">
+              <i class="pi pi-check-circle"></i> {{ selectedCount() }} item(s) selected
+            </span>
+          } @else {
+            <span><i class="pi pi-info-circle text-cyan"></i> Select checkboxes and adjust quantities to add items.</span>
+          }
+        </div>
+        <div class="footer-buttons">
+          <button type="button" class="btn-secondary" (click)="closeModal()">
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            [disabled]="selectedCount() === 0"
+            (click)="confirmSelection()"
+          >
+            <i class="pi pi-plus"></i> Add Selected Items ({{ selectedCount() }})
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

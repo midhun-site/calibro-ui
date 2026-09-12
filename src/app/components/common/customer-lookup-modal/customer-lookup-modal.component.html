@@ -1,0 +1,279 @@
+@if (visible) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-card lookup-modal-card" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge">
+            <i class="pi pi-building text-cyan"></i>
+          </div>
+          <div>
+            <h3>Select Customer</h3>
+            <p class="modal-subtitle">Choose client account from Customer Master directory</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModal()" title="Close Dialog">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Body / Grid -->
+      <div class="modal-body lookup-modal-body">
+        <!-- Global Search Bar & Actions -->
+        <div class="lookup-toolbar">
+          <div class="search-input-wrap">
+            <i class="pi pi-search search-icon"></i>
+            <input
+              type="text"
+              pInputText
+              [ngModel]="grid.searchTerm()"
+              (ngModelChange)="onSearchInput($event)"
+              placeholder="Quick search by ID, company name, phone, or email..."
+              class="lookup-search-input"
+            />
+            @if (grid.searchTerm()) {
+              <button class="clear-search-btn" (click)="onSearchInput('')" title="Clear Search">
+                <i class="pi pi-times"></i>
+              </button>
+            }
+          </div>
+          <button class="btn-secondary btn-sm" (click)="resetAllFilters()" title="Reset all search filters">
+            <i class="pi pi-filter-slash text-cyan"></i> Reset Filters
+          </button>
+        </div>
+
+        <!-- Server-side Customer Data Table -->
+        <div class="table-responsive lookup-table-responsive">
+          <table class="data-table lookup-table">
+            <thead>
+              <tr>
+                <th (click)="grid.toggleSort('code')" class="sortable-header" style="width: 120px;">
+                  Customer ID <i class="pi" [ngClass]="grid.getSortIcon('code')"></i>
+                </th>
+                <th (click)="grid.toggleSort('companyName')" class="sortable-header">
+                  Company Name <i class="pi" [ngClass]="grid.getSortIcon('companyName')"></i>
+                </th>
+                <th (click)="grid.toggleSort('customerCategoryName')" class="sortable-header" style="width: 140px;">
+                  Category <i class="pi" [ngClass]="grid.getSortIcon('customerCategoryName')"></i>
+                </th>
+                <th (click)="grid.toggleSort('email')" class="sortable-header" style="width: 200px;">
+                  Contact Email <i class="pi" [ngClass]="grid.getSortIcon('email')"></i>
+                </th>
+                <th (click)="grid.toggleSort('phone')" class="sortable-header" style="width: 140px;">
+                  Phone <i class="pi" [ngClass]="grid.getSortIcon('phone')"></i>
+                </th>
+                <th (click)="grid.toggleSort('city')" class="sortable-header" style="width: 160px;">
+                  Location <i class="pi" [ngClass]="grid.getSortIcon('city')"></i>
+                </th>
+                <th class="text-center" style="width: 90px;">Action</th>
+              </tr>
+              <!-- Column Filter Inputs -->
+              <tr class="filter-row">
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['code'] || ''"
+                    (ngModelChange)="grid.updateFilter('code', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Search ID..."
+                    class="filter-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['companyName'] || ''"
+                    (ngModelChange)="grid.updateFilter('companyName', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Filter Company..."
+                    class="filter-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['customerCategoryName'] || ''"
+                    (ngModelChange)="grid.updateFilter('customerCategoryName', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Category..."
+                    class="filter-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['email'] || ''"
+                    (ngModelChange)="grid.updateFilter('email', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Email..."
+                    class="filter-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['phone'] || ''"
+                    (ngModelChange)="grid.updateFilter('phone', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Phone..."
+                    class="filter-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    pInputText
+                    [ngModel]="grid.columnFilters()['city'] || ''"
+                    (ngModelChange)="grid.updateFilter('city', $event)"
+                    (keydown.enter)="grid.applyFilter()"
+                    (blur)="grid.applyFilter()"
+                    placeholder="Location..."
+                    class="filter-input"
+                  />
+                </td>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              @if (grid.isLoading()) {
+                <tr>
+                  <td colspan="7" class="grid-loading-cell">
+                    <div class="grid-loading-container">
+                      <i class="pi pi-spin pi-spinner grid-loading-spinner"></i>
+                      <span class="grid-loading-text">Loading customers...</span>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (item of grid.items(); track item.id) {
+                  <tr
+                    [class.row-selected]="isRowSelected(item)"
+                    (click)="selectRow(item)"
+                    (dblclick)="onRowDoubleClick(item)"
+                    class="clickable-row"
+                  >
+                    <td><span class="code-badge">{{ item.code }}</span></td>
+                    <td>
+                      <div class="company-cell">
+                        <strong class="company-name">{{ item.companyName }}</strong>
+                        @if (item.taxNumber) {
+                          <span class="tax-badge"><i class="pi pi-id-card"></i> {{ item.taxNumber }}</span>
+                        }
+                      </div>
+                    </td>
+                    <td>
+                      <span class="p-tag p-tag-info">
+                        {{ item.customerCategoryName || 'Standard' }}
+                      </span>
+                    </td>
+                    <td>{{ item.email }}</td>
+                    <td>{{ item.phone }}</td>
+                    <td>{{ item.city ? item.city + ', ' + item.country : item.country }}</td>
+                    <td class="text-center">
+                      <button
+                        type="button"
+                        class="btn-primary btn-xs select-action-btn"
+                        (click)="confirmSelection(item); $event.stopPropagation()"
+                        title="Select this customer"
+                      >
+                        <i class="pi pi-check"></i> Select
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty-state-cell">
+                      <div class="empty-state-container">
+                        <div class="empty-icon-circle">
+                          <i class="pi pi-users"></i>
+                        </div>
+                        <h4 class="empty-state-title">No Customers Found</h4>
+                        <p class="empty-state-subtitle">
+                          No customer accounts match your active search filters.
+                        </p>
+                        <div class="empty-state-actions">
+                          <button class="btn-secondary btn-sm" (click)="resetAllFilters()">
+                            <i class="pi pi-filter-slash text-cyan"></i> Clear Filters
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginator Footer -->
+        <div class="table-paginator lookup-paginator">
+          <div class="paginator-info">
+            Showing {{ grid.showingFrom() }} to {{ grid.showingTo() }} of {{ grid.totalCount() }} entries
+          </div>
+          <div class="paginator-controls">
+            <select
+              class="page-size-select"
+              [ngModel]="grid.pageSize()"
+              (ngModelChange)="grid.onPageSizeChange($event)"
+              title="Rows per page"
+            >
+              @for (opt of grid.pageSizeOptions(); track opt) {
+                <option [ngValue]="opt">{{ opt }} / page</option>
+              }
+            </select>
+
+            <button class="paginator-btn" [disabled]="grid.currentPage() === 1" (click)="grid.prevPage()" title="Previous Page">
+              <i class="pi pi-chevron-left"></i>
+            </button>
+
+            <div class="page-numbers">
+              @for (p of grid.pageNumbers(); track $index) {
+                @if (p === '...') {
+                  <span class="ellipsis">...</span>
+                } @else {
+                  <button class="page-number-btn" [class.active]="p === grid.currentPage()" (click)="grid.goToPage(p)">
+                    {{ p }}
+                  </button>
+                }
+              }
+            </div>
+
+            <button class="paginator-btn" [disabled]="grid.currentPage() >= grid.totalPages()" (click)="grid.nextPage()" title="Next Page">
+              <i class="pi pi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="modal-footer">
+        <div class="lookup-hint">
+          <i class="pi pi-info-circle text-cyan"></i> Tip: Double-click any row to instantly select customer.
+        </div>
+        <div class="footer-buttons">
+          <button type="button" class="btn-secondary" (click)="closeModal()">
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            [disabled]="!activeSelection()"
+            (click)="confirmSelection()"
+          >
+            <i class="pi pi-check"></i> Select Customer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

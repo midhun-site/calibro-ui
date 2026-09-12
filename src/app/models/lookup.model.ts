@@ -5,7 +5,10 @@ export enum LookupType {
   UnitOfMeasure = 1,
   EquipmentCategory = 2,
   PriorityLevel = 3,
-  PaymentTerm = 4
+  PaymentTerm = 4,
+  PipelineStage = 5,
+  NatureOfEnquiry = 6,
+  EnquiryMode = 7
 }
 
 /**

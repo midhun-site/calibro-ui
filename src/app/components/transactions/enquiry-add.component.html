@@ -17,8 +17,8 @@
       <button class="btn-secondary" (click)="goBack()">
         <i class="pi pi-times"></i> Cancel
       </button>
-      <button class="btn-primary" (click)="saveEnquiry()">
-        <i class="pi pi-check"></i> {{ isEditMode ? 'Save Changes' : 'Save Enquiry' }}
+      <button class="btn-primary" [disabled]="isSubmitting()" (click)="saveEnquiry()">
+        <i class="pi" [ngClass]="isSubmitting() ? 'pi-spin pi-spinner' : 'pi-check'"></i> {{ isEditMode ? 'Save Changes' : 'Save Enquiry' }}
       </button>
     </div>
   </div>
@@ -36,50 +36,99 @@
         <div class="form-group-horizontal">
           <label>Mode</label>
           <select class="form-select" [(ngModel)]="enquiry.mode">
-            <option value="Mail">Mail</option>
-            <option value="Phone">Phone</option>
-            <option value="Portal">Customer Portal</option>
-            <option value="In-Person">In-Person Handover</option>
+            @for (mode of enquiryModes(); track mode.id || mode.name) {
+              <option [value]="mode.name">{{ mode.name }}</option>
+            }
           </select>
         </div>
 
         <div class="form-group-horizontal">
-          <label>Nature of Enquiry</label>
+          <label>Nature</label>
           <select class="form-select" [(ngModel)]="enquiry.nature">
-            <option value="Calibration (CAL)">Calibration (CAL)</option>
-            <option value="Repair & Cal">Repair & Calibration</option>
-            <option value="Inspection">Site Inspection</option>
-            <option value="Testing">Material Testing</option>
+            @for (nature of enquiryNatures(); track nature.id || nature.name) {
+              <option [value]="nature.name">{{ nature.name }}</option>
+            }
           </select>
         </div>
 
+        <!-- Customer Master Lookup Field -->
         <div class="form-group-horizontal">
-          <label>Client</label>
-          <div class="input-with-lookup">
-            <select class="form-select" [(ngModel)]="enquiry.client" (change)="onClientChange()">
-              <option value="" disabled selected>-- Select Client --</option>
-              <option value="EMARAT ALOULA CONTRACTING CO">EMARAT ALOULA CONTRACTING CO</option>
-              <option value="AeroSpace Tech LLC">AeroSpace Tech LLC</option>
-              <option value="BioPharm Solutions">BioPharm Solutions</option>
-              <option value="Global Energy Ltd">Global Energy Ltd</option>
-              <option value="Precision Eng Co">Precision Eng Co</option>
-            </select>
+          <label>Client <span class="req">*</span></label>
+          <div class="customer-picker-wrap">
+            @if (enquiry.client) {
+              <div class="selected-customer-pill" (click)="openCustomerLookup()">
+                <div class="pill-info">
+                  @if (enquiry.customerCode) {
+                    <span class="code-badge">{{ enquiry.customerCode }}</span>
+                  }
+                  <span class="company-text" [title]="enquiry.client">{{ enquiry.client }}</span>
+                </div>
+                <div class="pill-actions">
+                  <button
+                    type="button"
+                    class="btn-icon-pill change-btn"
+                    (click)="openCustomerLookup(); $event.stopPropagation()"
+                    title="Change Customer"
+                  >
+                    <i class="pi pi-search"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-icon-pill clear-btn"
+                    (click)="clearCustomer(); $event.stopPropagation()"
+                    title="Clear Customer Selection"
+                  >
+                    <i class="pi pi-times"></i>
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="customer-picker-input-group" (click)="openCustomerLookup()">
+                <input
+                  type="text"
+                  pInputText
+                  placeholder="Select Customer from Master..."
+                  readonly
+                  class="picker-readonly-input"
+                />
+                <button
+                  type="button"
+                  class="btn-browse-trigger"
+                  (click)="openCustomerLookup(); $event.stopPropagation()"
+                  title="Browse Customer Master"
+                >
+                  <i class="pi pi-search text-cyan"></i> Browse...
+                </button>
+              </div>
+            }
           </div>
         </div>
 
         <div class="form-group-horizontal">
           <label>Address 1</label>
-          <textarea class="form-textarea" rows="2" [(ngModel)]="enquiry.address" placeholder="Enter client address..."></textarea>
+          <textarea class="form-textarea" rows="2" [(ngModel)]="enquiry.address" placeholder="Client physical/facility address..."></textarea>
         </div>
 
         <div class="form-group-horizontal">
-          <label>P.O Box</label>
-          <input type="text" pInputText [(ngModel)]="enquiry.poBox" placeholder="e.g. 26831" />
+          <label>P.O Box / TRN</label>
+          <input type="text" pInputText [(ngModel)]="enquiry.poBox" placeholder="e.g. 26831 or TRN" />
         </div>
 
+        <!-- Registered Contact Person Selector Dropdown -->
         <div class="form-group-horizontal">
-          <label>Client Contact</label>
-          <input type="text" pInputText [(ngModel)]="enquiry.contactPerson" placeholder="Contact person name..." />
+          <label>Contact Person</label>
+          <select
+            class="form-select"
+            [ngModel]="selectedContactId()"
+            (ngModelChange)="onContactSelectionChange($event)"
+          >
+            <option [ngValue]="null">-- Select Registered Contact --</option>
+            @for (contact of customerContacts(); track contact.id) {
+              <option [ngValue]="contact.id">
+                {{ contact.firstName }} {{ contact.lastName }} {{ contact.position ? '(' + contact.position + ')' : '' }}
+              </option>
+            }
+          </select>
         </div>
 
         <div class="form-group-horizontal">
@@ -92,7 +141,7 @@
       <div class="form-col">
         <div class="form-group-horizontal">
           <label>ENQ Date</label>
-          <input type="date" pInputText [(ngModel)]="enquiry.enqDate" />
+          <input type="date" pInputText [(ngModel)]="enquiry.enqDate" readonly class="code-input" />
         </div>
 
         <div class="form-group-horizontal">
@@ -125,22 +174,20 @@
       <div class="form-col">
         <div class="form-group-horizontal">
           <label>Rev. No</label>
-          <input type="text" pInputText [(ngModel)]="enquiry.revNo" class="code-input" />
+          <input type="text" pInputText [(ngModel)]="enquiry.revNo" class="code-input" readonly />
         </div>
 
         <div class="form-group-horizontal">
           <label>Status</label>
-          <select class="form-select" [(ngModel)]="enquiry.status">
-            <option value="Draft">Draft</option>
-            <option value="Quotation Preparation">Quotation Preparation</option>
-            <option value="Pending Review">Pending Technical Review</option>
-            <option value="Approved">Approved</option>
-          </select>
+          <div class="status-pipeline-display" title="Automatically managed by calibration workflow pipeline">
+            <span class="status-pulse-dot"></span>
+            <span class="status-stage-label">{{ enquiry.status }}</span>
+          </div>
         </div>
 
         <div class="form-group-horizontal">
           <label>Rev. Date</label>
-          <input type="date" pInputText [(ngModel)]="enquiry.revDate" />
+          <input type="date" pInputText [(ngModel)]="enquiry.revDate" readonly class="code-input" />
         </div>
       </div>
     </div>
@@ -154,14 +201,11 @@
         <span class="badge-count">{{ items.length }} item(s)</span>
       </div>
       <div class="toolbar-actions">
-        <button class="btn-sm-secondary">
-          <i class="pi pi-folder-open"></i> Browse...
-        </button>
-        <button class="btn-sm-secondary">
+        <button type="button" class="btn-sm-secondary" (click)="importItems()" title="Import Items from Spreadsheet / CSV">
           <i class="pi pi-upload"></i> Import
         </button>
-        <button class="btn-sm-primary" (click)="addItemRow()">
-          <i class="pi pi-plus"></i> Add Item Row
+        <button type="button" class="btn-sm-primary" (click)="openItemLookup()" title="Select multiple equipment items from Item Master">
+          <i class="pi pi-box"></i> Add Item
         </button>
       </div>
     </div>
@@ -171,23 +215,25 @@
       <table class="items-table">
         <thead>
           <tr>
-            <th style="width: 50px;">SlNo</th>
-            <th style="width: 250px;">Item Name</th>
+            <th style="width: 50px;" class="text-center">SlNo</th>
+            <th style="width: 260px;">Item Name</th>
             <th style="width: 140px;">Serial No</th>
             <th style="width: 140px;">RO / Tag No</th>
             <th style="width: 130px;">Make</th>
             <th style="width: 130px;">Model</th>
-            <th style="width: 150px;">Range</th>
-            <th style="width: 80px;">Qty</th>
-            <th style="width: 60px;">Action</th>
+            <th style="width: 150px;">Range / Description</th>
+            <th style="width: 80px;" class="text-center">Qty</th>
+            <th style="width: 60px;" class="text-center">Action</th>
           </tr>
         </thead>
         <tbody>
           @for (item of items; track item.slNo; let i = $index) {
             <tr>
               <td class="text-center font-bold">{{ i + 1 }}</td>
-              <td>
-                <input type="text" pInputText [(ngModel)]="item.itemName" placeholder="e.g. Gas Detector / Pressure Gauge" class="table-input" />
+              <td class="item-name-cell">
+                <div class="item-name-display" [title]="item.itemName">
+                  <span class="item-name-text">{{ item.itemName }}</span>
+                </div>
               </td>
               <td>
                 <input type="text" pInputText [(ngModel)]="item.serialNo" placeholder="e.g. SN-99120" class="table-input" />
@@ -204,8 +250,8 @@
               <td>
                 <input type="text" pInputText [(ngModel)]="item.range" placeholder="e.g. 0 - 1000 PSI" class="table-input" />
               </td>
-              <td>
-                <input type="number" pInputText [(ngModel)]="item.qty" min="1" class="table-input text-center font-bold" />
+              <td class="text-center">
+                <input type="number" pInputText [(ngModel)]="item.qty" min="1" class="table-input text-center font-bold qty-col-input" />
               </td>
               <td class="text-center">
                 <button class="btn-icon-danger" (click)="removeItemRow(i)" title="Remove Item">
@@ -213,9 +259,41 @@
                 </button>
               </td>
             </tr>
+          } @empty {
+            <tr>
+              <td colspan="9" class="empty-items-cell">
+                <div class="empty-items-container">
+                  <div class="empty-items-icon-wrap">
+                    <i class="pi pi-box text-cyan"></i>
+                  </div>
+                  <h4 class="empty-items-title">No Items in Specification</h4>
+                  <p class="empty-items-subtitle">
+                    Click <strong>Add Item</strong> to select equipment from the Item Master directory.
+                  </p>
+                  <button type="button" class="btn-primary btn-sm" (click)="openItemLookup()">
+                    <i class="pi pi-box"></i> Add Item
+                  </button>
+                </div>
+              </td>
+            </tr>
           }
         </tbody>
       </table>
     </div>
   </div>
+
+  <!-- Reusable Customer Master Lookup Modal -->
+  <app-customer-lookup-modal
+    [visible]="showCustomerLookup()"
+    [selectedCustomerId]="enquiry.customerId"
+    (customerSelected)="onCustomerSelected($event)"
+    (close)="closeCustomerLookup()"
+  ></app-customer-lookup-modal>
+
+  <!-- Reusable Item Master Multi-Select Lookup Modal -->
+  <app-item-lookup-modal
+    [visible]="showItemLookup()"
+    (itemsSelected)="onItemsSelected($event)"
+    (close)="closeItemLookup()"
+  ></app-item-lookup-modal>
 </div>

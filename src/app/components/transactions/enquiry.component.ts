@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastService } from '../../services/toast.service';
-import { ApiService, EnquiryRow } from '../../services/api.service';
+import { EnquiryService } from '../../services/enquiry.service';
+import { EnquiryRow } from '../../models/enquiry.model';
 import { DataGridState } from '../../common/grid';
 
-export type { EnquiryRow } from '../../services/api.service';
+export type { EnquiryRow } from '../../models/enquiry.model';
 
 export interface AuditLogItem {
   id: string;
@@ -44,7 +45,7 @@ export interface TimelineStage {
 export class EnquiryComponent implements OnInit {
   private router = inject(Router);
   private toastService = inject(ToastService);
-  private apiService = inject(ApiService);
+  private enquiryService = inject(EnquiryService);
   protected Math = Math;
 
   public showCreateModal = false;
@@ -62,11 +63,12 @@ export class EnquiryComponent implements OnInit {
       { header: 'Service Type', field: 'serviceType' },
       { header: 'Status', field: 'status' }
     ],
-    fetchFn: (params) => this.apiService.getEnquiries(params as any)
+    fetchFn: (params) => this.enquiryService.getEnquiries(params)
   });
 
   // Actions Dropdown Menu State per Row
   public activeActionMenu = signal<string | null>(null);
+  public actionMenuDropUp = signal<boolean>(false);
 
   // View / Edit Modals State
   public showViewModal = signal<boolean>(false);
@@ -218,13 +220,24 @@ export class EnquiryComponent implements OnInit {
     event.stopPropagation();
     if (this.activeActionMenu() === enquiryNo) {
       this.activeActionMenu.set(null);
+      this.actionMenuDropUp.set(false);
     } else {
+      const target = event.currentTarget as HTMLElement | null;
+      if (target) {
+        const rect = target.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        // If less than 240px available below button, open upwards
+        this.actionMenuDropUp.set(spaceBelow < 240);
+      } else {
+        this.actionMenuDropUp.set(false);
+      }
       this.activeActionMenu.set(enquiryNo);
     }
   }
 
   closeActionMenu() {
     this.activeActionMenu.set(null);
+    this.actionMenuDropUp.set(false);
   }
 
   // Action Menu Handlers
@@ -261,8 +274,20 @@ export class EnquiryComponent implements OnInit {
   deleteEnquiry(row: EnquiryRow) {
     this.closeActionMenu();
     if (confirm(`Are you sure you want to delete Enquiry ${row.enquiryNo} for ${row.customer}?`)) {
-      this.grid.items.update(list => list.filter(item => item.enquiryNo !== row.enquiryNo));
-      this.toastService.showSuccess('Enquiry Deleted', `Record ${row.enquiryNo} has been removed.`);
+      if (row.id) {
+        this.enquiryService.deleteEnquiry(row.id).subscribe({
+          next: () => {
+            this.toastService.showSuccess('Enquiry Deleted', `Record ${row.enquiryNo} has been removed.`);
+            this.grid.load();
+          },
+          error: (err) => {
+            this.toastService.showError('Delete Failed', err?.error?.detail || `Could not delete enquiry ${row.enquiryNo}.`);
+          }
+        });
+      } else {
+        this.grid.items.update(list => list.filter(item => item.enquiryNo !== row.enquiryNo));
+        this.toastService.showSuccess('Enquiry Deleted', `Record ${row.enquiryNo} has been removed.`);
+      }
     }
   }
 

@@ -88,26 +88,30 @@
                 <td>{{ item.instrumentsCount }}</td>
                 <td>{{ item.serviceType }}</td>
                 <td>
-                  @if (item.status === 'OPEN') {
-                    <span class="p-tag p-tag-info"><i class="pi pi-clock"></i> OPEN</span>
-                  } @else if (item.status === 'QUOTED') {
-                    <span class="p-tag p-tag-warning"><i class="pi pi-file-edit"></i> QUOTED</span>
-                  } @else if (item.status === 'APPROVED') {
-                    <span class="p-tag p-tag-success"><i class="pi pi-check-circle"></i> APPROVED</span>
-                  } @else if (item.status === 'COMPLETED') {
-                    <span class="p-tag p-tag-success"><i class="pi pi-verified"></i> COMPLETED</span>
+                  @if (item.status === 'New Enquiry' || item.status === 'OPEN') {
+                    <span class="p-tag p-tag-info"><i class="pi pi-sparkles"></i> {{ item.status }}</span>
+                  } @else if (item.status === 'Reviewed') {
+                    <span class="p-tag p-tag-info"><i class="pi pi-check-square"></i> Reviewed</span>
+                  } @else if (item.status === 'Quotation Prepared' || item.status === 'Quotation Revised' || item.status === 'QUOTED') {
+                    <span class="p-tag p-tag-warning"><i class="pi pi-file-edit"></i> {{ item.status }}</span>
+                  } @else if (item.status === 'Quotation Sent' || item.status === 'Delivery In' || item.status === 'WorkOrder Created') {
+                    <span class="p-tag p-tag-info"><i class="pi pi-send"></i> {{ item.status }}</span>
+                  } @else if (item.status === 'Workorder Completed' || item.status === 'Delivery Ticket Prepared' || item.status === 'Invoice Prepared' || item.status === 'Dispatched' || item.status === 'Closed' || item.status === 'COMPLETED' || item.status === 'APPROVED') {
+                    <span class="p-tag p-tag-success"><i class="pi pi-verified"></i> {{ item.status }}</span>
                   } @else if (item.status === 'CANCELLED') {
                     <span class="p-tag p-tag-danger"><i class="pi pi-times-circle"></i> CANCELLED</span>
+                  } @else {
+                    <span class="p-tag p-tag-info">{{ item.status }}</span>
                   }
                 </td>
                 <td class="text-center action-col-cell">
-                  <div class="actions-dropdown-wrapper">
+                  <div class="actions-dropdown-wrapper" [class.is-open]="activeActionMenu() === item.enquiryNo" [class.drop-up]="actionMenuDropUp()">
                     <button class="action-dropdown-btn" (click)="toggleActionMenu(item.enquiryNo, $event)" title="Click for options">
                       <i class="pi pi-ellipsis-v"></i> Actions <i class="pi pi-chevron-down text-xs"></i>
                     </button>
 
                     @if (activeActionMenu() === item.enquiryNo) {
-                      <div class="action-popover-menu" (click)="$event.stopPropagation()">
+                      <div class="action-popover-menu" [class.drop-up]="actionMenuDropUp()" (click)="$event.stopPropagation()">
                         <button class="action-menu-item" (click)="viewEnquiry(item)">
                           <i class="pi pi-eye text-blue"></i> View Details
                         </button>
