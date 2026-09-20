@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, HostListener, ElementRef } from '@angular/core';
+import { Component, inject, signal, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,17 +6,10 @@ import { ThemeService } from '../../services/theme.service';
 import { LayoutService } from '../../services/layout.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { NotificationService, NotificationItem } from '../../services/notification.service';
 import { AiChatComponent } from './ai-chat.component';
 
-export interface NotificationItem {
-  id: number;
-  title: string;
-  message: string;
-  time: string;
-  icon: string;
-  severity: string;
-  unread: boolean;
-}
+export type { NotificationItem } from '../../services/notification.service';
 
 export interface ChatMessage {
   id: string;
@@ -26,6 +19,10 @@ export interface ChatMessage {
   quickAction?: { label: string; route: string };
 }
 
+/**
+ * Topbar header component displaying global search, AI drawer toggle, theme switcher,
+ * real-time SignalR notifications dropdown, and user authentication profile controls.
+ */
 @Component({
   selector: 'app-topbar',
   standalone: true,
@@ -38,6 +35,7 @@ export class TopbarComponent {
   public layoutService = inject(LayoutService);
   public authService = inject(AuthService);
   public toastService = inject(ToastService);
+  public notificationService = inject(NotificationService);
   private elementRef = inject(ElementRef);
   private router = inject(Router);
 
@@ -45,46 +43,9 @@ export class TopbarComponent {
   public isProfileMenuOpen = signal<boolean>(false);
   public isAiChatOpen = signal<boolean>(false);
 
-  public notifications = signal<NotificationItem[]>([
-    {
-      id: 1,
-      title: 'Calibration Overdue Alert',
-      message: 'Asset EQ-TEMP-002 (Precision Temp Calibrator) is 10 days overdue.',
-      time: '10m ago',
-      icon: 'pi-exclamation-triangle',
-      severity: 'danger',
-      unread: true
-    },
-    {
-      id: 2,
-      title: 'Work Order Assigned',
-      message: 'Work order WO-2026-001 assigned to Alex Rivera (Metrologist).',
-      time: '1h ago',
-      icon: 'pi-briefcase',
-      severity: 'info',
-      unread: true
-    },
-    {
-      id: 3,
-      title: 'Certificate Approved',
-      message: 'CERT-2026-8891 approved by Dr. Marcus Vance.',
-      time: '3h ago',
-      icon: 'pi-verified',
-      severity: 'success',
-      unread: false
-    },
-    {
-      id: 4,
-      title: 'New Account Created',
-      message: 'BioPharm Solutions customer account registered.',
-      time: '1d ago',
-      icon: 'pi-building',
-      severity: 'primary',
-      unread: false
-    }
-  ]);
-
-  public unreadCount = computed(() => this.notifications().filter(n => n.unread).length);
+  // Bind reactive signals directly from NotificationService
+  public notifications = this.notificationService.notifications;
+  public unreadCount = this.notificationService.unreadCount;
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
@@ -124,16 +85,29 @@ export class TopbarComponent {
     this.isAiChatOpen.set(!this.isAiChatOpen());
   }
 
-  markAsRead(id: number) {
-    this.notifications.update(items =>
-      items.map(n => (n.id === id ? { ...n, unread: false } : n))
-    );
+  markAsRead(id: string | number) {
+    this.notificationService.markAsRead(id);
   }
 
   markAllAsRead() {
-    this.notifications.update(items =>
-      items.map(n => ({ ...n, unread: false }))
-    );
+    this.notificationService.markAllAsRead();
+  }
+
+  /**
+   * Handles click on notification link button or item, marking as read and navigating to destination route.
+   * @param item The notification item payload.
+   * @param event Optional mouse event to stop propagation.
+   */
+  navigateTo(item: NotificationItem, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.notificationService.markAsRead(item.id);
+    this.isNotificationOpen.set(false);
+
+    if (item.actionUrl) {
+      this.router.navigateByUrl(item.actionUrl);
+    }
   }
 
   onProfileClick() {
